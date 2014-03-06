@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set +e
+
+$(which service) php-fpm stop
+
+exit 0

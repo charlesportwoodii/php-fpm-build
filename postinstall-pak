@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set +e
+
+if [ ! -f /etc/php/php.ini ]; then
+	$(which cp) /etc/php/php.ini-production /etc/php/php.ini
+	echo "date.timezone=$(which date) +'%Z'" >> /etc/php/php.ini
+fi
+
+if [ ! -f /etc/php/php-fpm.conf ]; then 
+	$(which cp) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
+fi
+
+$(which wget) http://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
+$(which php) /tmp/pear.phar
+$(which rm) -rf /tmp/pear.phar
+
+$(which mkdir) -p /etc/php/conf.d
+
+if [ -d /tmp/php-tmp/conf.d ]; then
+	$(which cp) /tmp/php-tmp/conf.d/* /etc/php/conf.d/
+fi
+
+
+$(which update-rc.d) php-fpm defaults
+$(which service) php-fpm start
+
+exit 0

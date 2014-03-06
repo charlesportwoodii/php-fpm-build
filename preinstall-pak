@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set +e
+echo "Stopping PHP and Backing Up conf.d"
+$(which service) php-fpm stop
+
+$(which mkdir) -p /tmp/php-tmp/conf.d
+$(which cp) -R /etc/php/conf.d/* /tmp/php-tmp/conf.d/
+
+$(which touch) /var/run/php-fpm.pid
+exit 0

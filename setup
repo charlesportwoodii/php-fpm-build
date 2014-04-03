@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# sudo checkinstall sh ./setup
+$(which make) install
+cp sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+chmod a+x /etc/init.d/php-fpm

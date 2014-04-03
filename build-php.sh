@@ -25,6 +25,6 @@ cp /tmp/php-$VERSION/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
 update-rc.d /etc/init.d/php-fpm defaults
 
 mkdir -p /etc/php/conf.d
-
+cp setup /tmp/php-$VERSION/setup
 make -j2
 make install

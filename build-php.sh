@@ -3,7 +3,7 @@
 
 # Get the current script path
 SCRIPTPATH=`pwd -P`
-
+RELEASE=$(lsb_release --codename | cut -f2)
 VERSION=$1
 
 # Build the package in tmp
@@ -33,3 +33,8 @@ $(which update-rc.d) /etc/init.d/php-fpm defaults
 mkdir -p /etc/php/conf.d
 make -j2
 make install
+
+cd /tmp/php-$VERSION
+sudo checkinstall -D -pkgname php-fpm  -pkglicense PHP -pkggroup PHP -maintainer charlesportwoodii@ethreal.net -provides "php-fpm, php-fpm-5.6"  -requires "libxml2, libxml2-dev, libcurl4-openssl-dev, libmcrypt-dev, libmcrypt4, libjpeg-turbo8, libjpeg-turbo8-dev, libpng12-dev, libltdl-dev, libreadline-dev" -replaces "php-fpm-5.5" -conflicts "php, php-common" -pakdir /tmp/ -y sh /tmp/php-$VERSION/setup
+
+mv /tmp/php-fpm_$VERSION-1_amd64.deb /tmp/php-fpm_$VERSION-1_amd64_$RELEASE.deb

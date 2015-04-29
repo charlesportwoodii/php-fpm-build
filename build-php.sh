@@ -65,7 +65,7 @@ cd /tmp/php-$VERSION
 cd /tmp/php-$VERSION
 cp $SCRIPTPATH/*-pak .
 
-./configure
+./configure \
 	--with-libdir=lib64 \
 	--with-config-file-path=/etc/php \
 	--with-config-file-scan-dir=/etc/php/conf.d \

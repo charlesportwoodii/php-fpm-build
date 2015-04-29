@@ -9,4 +9,4 @@ mkdir -p /etc/php/conf.d
 
 # Copy the initial configs over
 cp php.ini* /etc/php/
-cp sapi/fpm/php-fpm.conf /etc/php/php-fpm.conf-default
+cp sapi/fpm/php-fpm.conf.in /etc/php/php-fpm.conf-default

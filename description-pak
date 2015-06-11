@@ -1,0 +1,10 @@
+PHP (recursive acronym for PHP: Hypertext Preprocessor) is a widely-used
+open source general-purpose scripting language that is especially suited
+for web development and can be embedded into HTML.
+.
+Included with this package are common files for packages built from the
+php5 source treee
+.
+This package contains documentation
+.
+This package pre-buildes PCRE and OpenssL

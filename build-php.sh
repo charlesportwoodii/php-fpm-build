@@ -4,7 +4,7 @@
 # Get the current script path
 SCRIPTPATH=`pwd -P`
 PCREVERSION=8.37
-OPENSSLVERSION=1.0.2b
+OPENSSLVERSION=1.0.1o
 VERSION=$1
 CORES=$(grep -c ^processor /proc/cpuinfo)
 if [ -z "$2" ]
@@ -26,7 +26,8 @@ RELEASENAME="php-fpm"
 rm -rf /tmp/php*
 cd /tmp
 
-# Download and Extract the ARchive
+# Download and Extract the Archive
+#wget https://downloads.php.net/~ab/php-$VERSION.tar.gz
 wget http://us1.php.net/get/php-$VERSION.tar.gz/from/this/mirror -O php-$VERSION.tar.gz
 tar -xf php-$VERSION.tar.gz
 
@@ -40,13 +41,13 @@ cp setup /tmp/php-$VERSION/setup
 
 cd /tmp/php-$VERSION
 
-cd /tmp
-wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$PCREVERSION.tar.gz
-tar -xf pcre-$PCREVERSION.tar.gz
-cd pcre-$PCREVERSION
-./configure --enable-utf
-make -j$CORES
-cp pcre.h .libs/
+#cd /tmp
+#wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$PCREVERSION.tar.gz
+#tar -xf pcre-$PCREVERSION.tar.gz
+#cd pcre-$PCREVERSION
+#./configure --enable-utf
+#make -j$CORES
+#cp pcre.h .libs/
 
 # Install the latest version of OpenSSL rather than using the libaries provided with the host OS
 #cd /tmp/php-$VERSION
@@ -79,7 +80,7 @@ cp $SCRIPTPATH/*-pak .
 	--with-gettext \
 	--with-iconv \
 	--with-openssl \
-    --with-pcre-regex=/tmp/pcre-$PCREVERSION/.libs \
+    --with-pcre-regex \
 	--with-zlib \
 	--with-layout=GNU \
 	--enable-exif \
@@ -112,6 +113,7 @@ cp $SCRIPTPATH/*-pak .
 	--enable-opcache \
 	--enable-soap \
 	--with-jpeg-dir \
+	--with-freetype-dir \
 	--with-png-dir \
 	--enable-bcmath \
 	--disable-short-tags \

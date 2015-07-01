@@ -7,7 +7,8 @@ This package contains scripts necessary to automatically build PHP FPM on your s
 	cd ~
 	git clone https://github.com/charlesportwoodii/php-fpm-build
 	cd  php-fpm-build
-	sudo sh build-php.sh <version>
+	chmod +x build.sh
+	sudo ./build.sh <version>
 ```
 
 Where ```<version>``` corresponds to the php build version you want build

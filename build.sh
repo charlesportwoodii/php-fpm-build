@@ -7,6 +7,16 @@ PCREVERSION=8.37
 OPENSSLVERSION=1.0.1o
 VERSION=$1
 CORES=$(grep -c ^processor /proc/cpuinfo)
+
+# Get the OS libicu package for dependencies
+for i in $(apt-cache search 'libicu' | awk '{print $1}')
+do
+    if [[ ! "$i" =~ "dev" ]] && [[ ! "$i" =~ "java" ]] && [[ ! "$i" =~ "dbg" ]]
+    then
+        LIBICU=$i
+    fi
+done
+
 if [ -z "$2" ]
 then
     RELEASEVER=1;
@@ -139,7 +149,7 @@ checkinstall \
 	-pkggroup PHP \
 	-maintainer charlesportwoodii@ethreal.net \
 	-provides "php-fpm, php-fpm-"$major"."$minor \
-	-requires "libxml2, libmcrypt4, libjpeg-turbo8" \
+	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $LIBICU" \
 	-replaces "php-fpm-5.5" \
 	-conflicts "php5, php5-common" \
 	-pakdir /tmp \

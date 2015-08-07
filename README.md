@@ -4,7 +4,7 @@ This package contains scripts necessary to automatically build PHP FPM on your s
 
 ## APT dependencies
 ```
-	apt-get install make automake g++ autoconf checkinstall git build-essential libxml2-dev libcurl4-openssl-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev
+	apt-get install make automake g++ autoconf checkinstall git build-essential libxml2-dev libcurl4-openssl-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev
 ```
 
 ## Building

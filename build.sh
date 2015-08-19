@@ -1,6 +1,5 @@
 #!/bin/bash
 # Build PHP-FPM Package
-
 # Get the current script path
 SCRIPTPATH=`pwd -P`
 PCREVERSION=8.37
@@ -36,10 +35,10 @@ RELEASENAME="php-fpm"
 rm -rf /tmp/php*
 cd /tmp
 
-# Download and Extract the Archive
-#wget https://downloads.php.net/~ab/php-$VERSION.tar.gz
-wget http://us1.php.net/get/php-$VERSION.tar.gz/from/this/mirror -O php-$VERSION.tar.gz
-tar -xf php-$VERSION.tar.gz
+# Download from git
+git clone --depth 1 -b php-$VERSION https://github.com/php/php-src.git /tmp/php-$VERSION
+cd php-$VERSION
+git checkout tags/php-$VERSION
 
 cd $SCRIPTPATH
 
@@ -49,37 +48,12 @@ cp init-php-fpm /etc/init.d/php-fpm
 cp init-php-fpm /tmp/php-$VERSION/init-php-fpm
 cp setup /tmp/php-$VERSION/setup
 
-cd /tmp/php-$VERSION
-
-#cd /tmp
-#wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-$PCREVERSION.tar.gz
-#tar -xf pcre-$PCREVERSION.tar.gz
-#cd pcre-$PCREVERSION
-#./configure --enable-utf
-#make -j$CORES
-#cp pcre.h .libs/
-
-# Install the latest version of OpenSSL rather than using the libaries provided with the host OS
-#cd /tmp/php-$VERSION
-#wget https://www.openssl.org/source/openssl-$OPENSSLVERSION.tar.gz
-#tar -xf openssl-$OPENSSLVERSION.tar.gz
-
-# Apply Cloudflare Chacha20-Poly1305 patch to OpenSSL
-#cd openssl-$OPENSSLVERSION
-#git clone https://github.com/cloudflare/sslconfig
-#cp sslconfig/patches/openssl__chacha20_poly1305_cf.patch .
-#patch -p1 < openssl__chacha20_poly1305_cf.patch
-
-#./config --prefix=/tmp/php\-$VERSION/openssl\-$OPENSSLVERSION/.openssl shared enable-ec_nistp_64_gcc_128 enable-tlsext
-#make depend
-#make -j$CORES
-#make install
-#cd .openssl
-#ln -s lib lib64
-
 # Copy the Script Paths
 cd /tmp/php-$VERSION
-cp $SCRIPTPATH/*-pak .
+cp -R $SCRIPTPATH/*-pak .
+
+# Build conf for git
+./buildconf  --force
 
 ./configure \
 	--with-libdir=lib64 \
@@ -90,7 +64,7 @@ cp $SCRIPTPATH/*-pak .
 	--with-gettext \
 	--with-iconv \
 	--with-openssl \
-    --with-pcre-regex \
+	--with-pcre-regex \
 	--with-zlib \
 	--with-layout=GNU \
 	--enable-exif \

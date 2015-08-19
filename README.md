@@ -23,7 +23,7 @@ dpkg -i bison_2.7.1.dfsg-1_amd64.deb
 	git clone https://github.com/charlesportwoodii/php-fpm-build
 	cd php-fpm-build
 	chmod +x build.sh
-	sudo ./build.sh <version>
+	sudo /bin/bash build.sh <version>
 ```
 
 Where ```<version>``` corresponds to the php build version you want build

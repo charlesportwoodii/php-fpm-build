@@ -4,7 +4,7 @@ set +e
 
 if [ ! -f /etc/php/php.ini ]; then
 	$(which cp) /etc/php/php.ini-production /etc/php/php.ini
-	echo "date.timezone=UTC'" >> /etc/php/php.ini
+	echo "date.timezone=$(which date) +'%Z'" >> /etc/php/php.ini
 fi
 
 if [ ! -f /etc/php/php-fpm.conf ]; then 

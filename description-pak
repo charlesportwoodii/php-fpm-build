@@ -3,8 +3,8 @@ open source general-purpose scripting language that is especially suited
 for web development and can be embedded into HTML.
 .
 Included with this package are common files for packages built from the
-php5 source treee
+php source tree
 .
 This package contains documentation
 .
-This package pre-buildes PCRE and OpenssL
+This package is compiled with the following default options: fpm, pic, without-gdbm, gettext, iconv, openssl, pcre, zlib, exif, ftp, sockets, sysvsem, sysvshm, sysvmsg, kerberos, shmop, calendar, gd, mcrypt, pdo, mysqld-pdo, json, curl, mbstring, inline-optimizations, pcntl, mbregex, mhash, zip, mysqlid=>mysqlnd, sqlite3, readline, opcache, soap, jpeg, freetype, png, bcmath, intld, phpredis.

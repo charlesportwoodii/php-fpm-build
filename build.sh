@@ -48,6 +48,17 @@ cp init-php-fpm /etc/init.d/php-fpm
 cp init-php-fpm /tmp/php-$VERSION/init-php-fpm
 cp setup /tmp/php-$VERSION/setup
 
+cd /tmp/php-$VERSION/ext
+
+if [[ $VERSION == 7* ]]
+then
+    echo "Adding PHP7 compatible phpredis package"
+    git clone https://github.com/edtechd/phpredis redis
+else
+    echo "Adding phpredis package"
+    git clone https://github.com/phpredis/phpredis redis
+fi
+
 # Copy the Script Paths
 cd /tmp/php-$VERSION
 cp -R $SCRIPTPATH/*-pak .
@@ -76,11 +87,12 @@ cp -R $SCRIPTPATH/*-pak .
 	--with-kerberos \
 	--enable-shmop \
 	--enable-calendar \
-	--with-mysql \
 	--with-gd \
 	--with-mcrypt \
 	--enable-pdo \
 	--with-pdo-mysql=mysqlnd \
+	--with-mysqli=mysqlnd \
+	--with-mysql \
 	--enable-json \
 	--with-curl \
 	--enable-fpm \
@@ -91,7 +103,6 @@ cp -R $SCRIPTPATH/*-pak .
 	--with-mhash \
 	--with-fpm-user=www-data \
 	--enable-zip \
-	--with-mysqli=mysqlnd \
 	--with-sqlite3 \
 	--with-readline \
 	--enable-opcache \
@@ -101,12 +112,12 @@ cp -R $SCRIPTPATH/*-pak .
 	--with-png-dir \
 	--enable-bcmath \
 	--disable-short-tags \
-	--enable-intl
-
+	--enable-intl \
+	--enable-redis # Statically compile PHPRedis 
 	# --with-openssl=/tmp/php-$VERSION/openssl-$OPENSSLVERSION/.openssl \
 
 # Install the init script
-$(which update-rc.d) /etc/init.d/php-fpm defaults
+$(which update-rc.d) php-fpm defaults
 
 mkdir -p /etc/php/conf.d
 make -j$CORES

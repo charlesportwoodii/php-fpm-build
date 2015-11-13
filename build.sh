@@ -52,11 +52,13 @@ cd /tmp/php-$VERSION/ext
 
 if [[ $VERSION == 7* ]]
 then
-    echo "Adding PHP7 compatible phpredis package"
-    git clone https://github.com/edtechd/phpredis redis
+	git clone -b php7 https://github.com/phpredis/phpredis redis
+	PROVIDES="php-fpm-"$major
+	REPLACES="php-fpm-5.5, php-fpm-5.6, php-fpm"
 else
-    echo "Adding phpredis package"
-    git clone https://github.com/phpredis/phpredis redis
+	git clone https://github.com/phpredis/phpredis redis
+	PROVIDES="php-fpm, php-fpm-"$major"."$minor	
+	REPLACES="php-fpm-5.5"
 fi
 
 # Copy the Script Paths
@@ -133,9 +135,9 @@ checkinstall \
 	-pkglicense PHP \
 	-pkggroup PHP \
 	-maintainer charlesportwoodii@ethreal.net \
-	-provides "php-fpm, php-fpm-"$major"."$minor \
+	-provides "$PROVIDES" \
 	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $LIBICU" \
-	-replaces "php-fpm-5.5" \
+	-replaces "$REPLACES" \
 	-conflicts "php5, php5-common" \
 	-pakdir /tmp \
 	-y \

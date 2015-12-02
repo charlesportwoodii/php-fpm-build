@@ -19,6 +19,9 @@ $(which mkdir) -p /etc/php/conf.d
 
 if [ -d /tmp/php-tmp/conf.d ]; then
 	$(which cp) /tmp/php-tmp/conf.d/* /etc/php/conf.d/
+	# Remove the old tmp directory to a separate directory so new builds don't interfere with it.
+	$(which cp) -R /tmp/php-tmp /tmp/php-tmp-BAK
+	$(which rm) -rf /tmp/php-tm
 fi
 
 

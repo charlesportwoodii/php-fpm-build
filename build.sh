@@ -3,7 +3,7 @@
 # Get the current script path
 SCRIPTPATH=`pwd -P`
 PCREVERSION=8.37
-OPENSSLVERSION=1.0.1o
+OPENSSLVERSION=1.0.2d
 VERSION=$1
 CORES=$(grep -c ^processor /proc/cpuinfo)
 
@@ -39,6 +39,25 @@ cd /tmp
 git clone --depth 1 -b php-$VERSION https://github.com/php/php-src.git /tmp/php-$VERSION
 cd php-$VERSION
 git checkout tags/php-$VERSION
+
+# Install OpenSSL 1.0.2e to tmp path
+wget https://www.openssl.org/source/openssl-$OPENSSLVERSION.tar.gz
+tar -xf openssl-$OPENSSLVERSION.tar.gz
+
+# Apply Cloudflare Chacha20-Poly1305 patch to OpenSSL
+cd openssl-$OPENSSLVERSION
+git clone https://github.com/cloudflare/sslconfig
+cp sslconfig/patches/openssl__chacha20_poly1305_cf.patch .
+patch -p1 < openssl__chacha20_poly1305_cf.patch
+
+./config --prefix=/tmp/php\-$VERSION/openssl\-$OPENSSLVERSION/.openssl no-shared enable-ec_nistp_64_gcc_128 enable-tlsext
+make depend
+make -j$CORES
+make install
+
+# Symlink lib=>lib64 for PHP_LIB variable
+cd /tmp/php\-$VERSION/openssl\-$OPENSSLVERSION/.openssl
+ln -s lib lib64
 
 cd $SCRIPTPATH
 
@@ -115,8 +134,8 @@ cp -R $SCRIPTPATH/*-pak .
 	--enable-bcmath \
 	--disable-short-tags \
 	--enable-intl \
-	--enable-redis # Statically compile PHPRedis 
-	# --with-openssl=/tmp/php-$VERSION/openssl-$OPENSSLVERSION/.openssl \
+	--enable-redis \ # Statically compile PHPRedis 
+	--with-openssl=/tmp/php-$VERSION/openssl-$OPENSSLVERSION/.openssl
 
 # Install the init script
 $(which update-rc.d) php-fpm defaults

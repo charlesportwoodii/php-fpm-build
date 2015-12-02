@@ -134,8 +134,8 @@ cp -R $SCRIPTPATH/*-pak .
 	--enable-bcmath \
 	--disable-short-tags \
 	--enable-intl \
-	--enable-redis \ # Statically compile PHPRedis 
-	--with-openssl=/tmp/php-$VERSION/openssl-$OPENSSLVERSION/.openssl
+	--with-openssl=/tmp/php-$VERSION/openssl-$OPENSSLVERSION/.openssl \
+	--enable-redis
 
 # Install the init script
 $(which update-rc.d) php-fpm defaults

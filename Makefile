@@ -20,7 +20,6 @@ micro=$(shell echo $(VERSION) | cut -d. -f3)
 OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
-RELEASENAME=php-fpm
 
 # checkinstall dependencies
 ifeq ($(RELEASE),trusty)
@@ -29,11 +28,14 @@ else
 LIBICU=libicu48
 endif
 
-PROVIDES=php-fpm, php-fpm-$(major).$(minor)	
 ifeq ($(major), 7)
+RELEASENAME=php-fpm-7
 REPLACES=php-fpm-5.5, php-fpm-5.6, php-fpm
+PROVIDES=php-fpm-7, php-fpm-$(major).$(minor)	
 else
+RELEASENAME=php-fpm
 REPLACES=php-fpm-5.5
+PROVIDES=php-fpm, php-fpm-$(major).$(minor)	
 endif
  
 build: openssl nghttp2 curl php

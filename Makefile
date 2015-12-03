@@ -32,12 +32,12 @@ ifeq ($(major), 7)
 RELEASENAME=php-fpm-$(major).$(minor)
 REPLACES=php-fpm, php-fpm-5.5, php-fpm-5.6
 PROVIDES=php-fpm-$(major).$(minor)	
-CONFLICTS=php5, php5-common, php-fpm, php-fpm-5.6
+CONFLICTS=php$(major), php$(major)-common, php-fpm, php-fpm-5.6
 else
 RELEASENAME=php-fpm
 REPLACES=php-fpm-5.5
 PROVIDES=php-fpm, php-fpm-$(major).$(minor)
-CONFLICTS=php5, php5-common
+CONFLICTS=php$(major), php$(major)-common
 endif
  
 build: openssl nghttp2 curl php

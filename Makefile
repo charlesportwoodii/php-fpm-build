@@ -53,7 +53,7 @@ openssl:
 	make all && \
 	make install_sw && \
 	cd $(OPENSSL_PATH) && \
-	ln -s lib lib64
+	ln -fs lib lib64
 
 nghttp2:
 	echo $(NGHTTP_PREFIX)
@@ -69,7 +69,7 @@ nghttp2:
 	make -j$(CORES) && \
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
-	ln -s lib lib64
+	ln -fs lib lib64
 
 curl:
 	echo $(CURL_PREFIX)
@@ -88,7 +88,7 @@ curl:
 	make -j$(CORES) && \
 	make install && \
 	cd $(CURL_PREFIX) &&\
-	ln -s lib lib64
+	ln -fs lib lib64
 
 php:
 	rm -rf /tmp/php-$(VERSION)

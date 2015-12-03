@@ -20,12 +20,26 @@ sudo dpkg -i bison_2.7.1.dfsg-1_amd64.deb
 
 ## Building
 
+PHP can be built via ```make``` by running the following steps:
+
 ```
-	cd /tmp
-	git clone https://github.com/charlesportwoodii/php-fpm-build
-	cd php-fpm-build
-	chmod +x build.sh
-	sudo ./build.sh <version>
+make build VERSION=<PHP_VERSION>
 ```
 
-Where ```<version>``` corresponds to the tagged php build version you want build
+If you want to create a ```checkinstall``` debian package, run the following command
+
+```
+make package VERSION=<PHP_VERSION>
+```
+
+Several variables are exposed for you to modify if you wish to install PHP with a different set of depenencies. You may specify these as ```make``` arguements
+
+```
+PCREVERSION
+OPENSSLVERSION
+CURLVERSION
+NGHTTPVERSION
+RELEASEVER
+```
+
+> WARNING: running the make command will install PHP onto your system, and install several depenencies into ```/opt```. It is recommended to only run this package only on a build server rather than your personal machine. If you _just_ want to install PHP via apt, be sure to check out https://deb.erianna.com.

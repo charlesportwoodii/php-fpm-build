@@ -29,9 +29,9 @@ LIBICU=libicu48
 endif
 
 ifeq ($(major), 7)
-RELEASENAME=php-fpm-7
-REPLACES=php-fpm-5.5, php-fpm-5.6, php-fpm
-PROVIDES=php-fpm-7, php-fpm-$(major).$(minor)	
+RELEASENAME==php-fpm-$(major).$(minor)
+REPLACES=php-fpm, php-fpm-5.5, php-fpm-5.6
+PROVIDES=php-fpm-$(major).$(minor)	
 else
 RELEASENAME=php-fpm
 REPLACES=php-fpm-5.5

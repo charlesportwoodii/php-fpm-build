@@ -167,6 +167,9 @@ package:
 	cp $(SCRIPTPATH)/setup /tmp/php-$(VERSION)/setup
 	cp -R $(SCRIPTPATH)/*-pak /tmp/php-$(VERSION)
 	
+	# Mk /etc/php/conf.d so checkinstall doesn't freak out
+	mkdir -p /etc/php/conf.d
+	
 	# Copy the init.d script so checkinstall builds
 	cp $(SCRIPTPATH)/init-php-fpm /etc/init.d/php-fpm
 

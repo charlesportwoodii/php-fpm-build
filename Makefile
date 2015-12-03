@@ -20,6 +20,7 @@ micro=$(shell echo $(VERSION) | cut -d. -f3)
 OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
+RELEASENAME=php-fpm
 
 # checkinstall dependencies
 ifeq ($(RELEASE),trusty)

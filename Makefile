@@ -52,7 +52,7 @@ openssl:
 	git clone https://github.com/cloudflare/sslconfig && \
 	cp sslconfig/patches/openssl__chacha20_poly1305_cf.patch . && \
 	patch -p1 < openssl__chacha20_poly1305_cf.patch && \
-	./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext && \
+	./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-sslv2 no-sslv3 && \
 	make depend && \
 	make -j$(CORES) && \
 	make all && \
@@ -89,7 +89,9 @@ curl:
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \
-		--disable-shared && \
+		--disable-shared \
+		--disable-ldap \
+		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(CURL_PREFIX) &&\

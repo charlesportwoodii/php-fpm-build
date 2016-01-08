@@ -24,6 +24,10 @@ if [ -d /tmp/php-tmp/conf.d ]; then
 	$(which rm) -rf /tmp/php-tm
 fi
 
+if [ ! -f /opt/openssl/ssl ]; then
+	mkdir -p /opt/openssl
+	ln -s /usr/lib/ssl /opt/openssl/ssl
+fi
 
 $(which update-rc.d) php-fpm defaults
 $(which service) php-fpm start

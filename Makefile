@@ -164,6 +164,7 @@ endif
 		--disable-short-tags \
 		--enable-intl \
 		--with-openssl=$(OPENSSL_PATH) \
+		--with-pgsql \
 		--enable-redis && \
 	make -j$(CORES) && \
 	make install

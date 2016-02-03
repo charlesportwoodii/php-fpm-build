@@ -165,6 +165,7 @@ endif
 		--enable-intl \
 		--with-openssl=$(OPENSSL_PATH) \
 		--with-pgsql \
+		--with-pdo-pgsql \
 		--enable-redis && \
 	make -j$(CORES) && \
 	make install

@@ -24,6 +24,8 @@ CURL_PREFIX=/opt/curl
 # checkinstall dependencies
 ifeq ($(RELEASE),trusty)
 LIBICU=libicu52
+else ifeq ($(RELEASE),xenial)
+LIBICU=libicu55
 else
 LIBICU=libicu48
 endif

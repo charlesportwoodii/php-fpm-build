@@ -186,4 +186,4 @@ package:
 
 	cd /tmp/php-$(VERSION) && \
 	checkinstall -D --fstrans -pkgrelease "$(RELEASEVER)~$(RELEASE)" -pkgname "$(RELEASENAME)" -pkglicense "PHP" -pkggroup "PHP" -maintainer "charlesportwoodii@ethreal.net" \
-		-provides "$(PROVIDES)"	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $(LIBICU)" -replaces "$(REPLACES)" -conflicts "$(CONFLICTS)" -pakdir "/tmp" -y sh /tmp/php-$(VERSION)/setup
+		-provides "$(PROVIDES)"	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $(LIBICU), libpq5" -replaces "$(REPLACES)" -conflicts "$(CONFLICTS)" -pakdir "/tmp" -y sh /tmp/php-$(VERSION)/setup

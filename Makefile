@@ -109,6 +109,9 @@ php:
 	# Checkout PHP	
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
+	cd /tmp/php-$(VERSION)/ext && git clone https://github.com/charlesportwoodii/php-ed25519-ext ed25519
+	cd /tmp/php-$(VERSION)/ext && git clone https://github.com/charlesportwoodii/php-curve25519-ext curve25519
+
 ifeq ($(major),7)
 	echo "Using php7::phpredis"
 	cd /tmp/php-$(VERSION)/ext && git clone -b php7 https://github.com/phpredis/phpredis redis
@@ -168,7 +171,9 @@ endif
 		--with-openssl=$(OPENSSL_PATH) \
 		--with-pgsql \
 		--with-pdo-pgsql \
-		--enable-redis && \
+		--enable-redis \
+		--enable-curve25519 \
+		--enable-ed25519 && \
 	make -j$(CORES) && \
 	make install
 

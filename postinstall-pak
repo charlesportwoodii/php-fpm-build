@@ -16,6 +16,12 @@ if [ ! -d /etc/php/php-fpm.d ]; then
 	$(which cp) /etc/php/php-fpm-pool.conf-default /etc/php/php-fpm.d/default.conf
 fi
 
+if [ ! -f /var/log/php ]; then
+	$(which mkdir) -p /var/log/php
+	$(which touch) /var/log/php/slow.log
+	$(which chmod) -R 754 /var/log/php/slow.log
+fi
+
 $(which wget) https://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
 $(which php) /tmp/pear.phar
 $(which rm) -rf /tmp/pear.phar

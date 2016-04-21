@@ -12,6 +12,7 @@ if [ ! -f /etc/php/php-fpm.conf ]; then
 fi
 
 if [ ! -d /etc/php/php-fpm.d ]; then
+	$(which mkdir) -p /etc/php/php-fpm.d
 	$(which cp) /etc/php/php-fpm-pool.conf-default /etc/php/php-fpm.d/default.conf
 fi
 

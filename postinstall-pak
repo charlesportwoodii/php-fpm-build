@@ -34,7 +34,7 @@ if [ ! -f /opt/openssl/ssl ]; then
 fi
 
 CODENAME=$(lsb_release --codename | cut -f2)
-if [ $CODENAME = "xenial" ]
+if [ "$CODENAME" = "xenial" ]
 then
         systemctl enable php-fpm.service
         systemctl start php-fpm.service

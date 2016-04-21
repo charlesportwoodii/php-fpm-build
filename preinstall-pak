@@ -3,7 +3,7 @@
 set +e
 echo "Stopping PHP and Backing Up conf.d"
 CODENAME=$(lsb_release --codename | cut -f2)
-if [ $CODENAME = "xenial" ]
+if [ "$CODENAME" = "xenial" ]
 then
         systemctl stop php-fpm.service
         systemctl disable php-fpm.service

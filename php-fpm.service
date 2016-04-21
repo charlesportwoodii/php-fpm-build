@@ -6,8 +6,8 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 Type=forking
 PIDFile=/var/run/php-fpm.pid
 ExecStart=/usr/local/sbin/php-fpm --fpm-config /etc/php/php-fpm.conf
-ExecReload=/bin/kill USR2 $MAINPID
-ExecStop=/bin/kill QUIT $MAINPID
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/bin/kill -QUIT $MAINPID
 PrivateTmp=true
 
 [Install]

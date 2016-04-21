@@ -13,7 +13,7 @@ sudo dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb
 sudo dpkg -i bison_2.7.1.dfsg-1_amd64.deb
 ```
 
-# Add the Postgresql 9.2+ development libraries
+# Add the Postgresql 9.5+ development libraries
 ```
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -

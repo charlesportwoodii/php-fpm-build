@@ -175,9 +175,13 @@ endif
 package:
 	# Copy the fpm build packages
 	cp $(SCRIPTPATH)/init-php-fpm /tmp/php-$(VERSION)/init-php-fpm
+	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)/php-fpm.service
 	cp $(SCRIPTPATH)/setup /tmp/php-$(VERSION)/setup
 	cp -R $(SCRIPTPATH)/*-pak /tmp/php-$(VERSION)
 	
+	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)/php-fpm.conf.default
+	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)/pool.conf.default
+
 	# Mk /etc/php/conf.d so checkinstall doesn't freak out
 	mkdir -p /etc/php/conf.d
 	

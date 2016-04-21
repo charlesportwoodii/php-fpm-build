@@ -8,10 +8,21 @@ if [ ! -f /etc/php/php.ini ]; then
 fi
 
 if [ ! -f /etc/php/php-fpm.conf ]; then 
-	$(which cp) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
+	$(which cp) /etc/php/php-fpm.conf-default /etc/php/php-fpm.conf
 fi
 
-$(which wget) http://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
+if [ ! -d /etc/php/php-fpm.d ]; then
+	$(which mkdir) -p /etc/php/php-fpm.d
+	$(which cp) /etc/php/php-fpm-pool.conf-default /etc/php/php-fpm.d/default.conf
+fi
+
+if [ ! -f /var/log/php ]; then
+	$(which mkdir) -p /var/log/php
+	$(which touch) /var/log/php/slow.log
+	$(which chmod) -R 754 /var/log/php/slow.log
+fi
+
+$(which wget) https://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
 $(which php) /tmp/pear.phar
 $(which rm) -rf /tmp/pear.phar
 
@@ -21,7 +32,7 @@ if [ -d /tmp/php-tmp/conf.d ]; then
 	$(which cp) /tmp/php-tmp/conf.d/* /etc/php/conf.d/
 	# Remove the old tmp directory to a separate directory so new builds don't interfere with it.
 	$(which cp) -R /tmp/php-tmp /tmp/php-tmp-BAK
-	$(which rm) -rf /tmp/php-tm
+	$(which rm) -rf /tmp/php-tmp
 fi
 
 if [ ! -f /opt/openssl/ssl ]; then
@@ -29,7 +40,14 @@ if [ ! -f /opt/openssl/ssl ]; then
 	ln -s /usr/lib/ssl /opt/openssl/ssl
 fi
 
-$(which update-rc.d) php-fpm defaults
-$(which service) php-fpm start
+CODENAME=$(lsb_release --codename | cut -f2)
+if [ "$CODENAME" = "xenial" ]
+then
+        systemctl enable php-fpm.service
+        systemctl start php-fpm.service
+else
+	$(which update-rc.d) php-fpm defaults
+	$(which service) php-fpm start
+fi
 
 exit 0

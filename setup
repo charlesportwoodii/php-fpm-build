@@ -1,8 +1,14 @@
 #!/bin/bash
 $(which make) install
-# Copy the init.d file
-cp init-php-fpm /etc/init.d/php-fpm
-chmod a+x /etc/init.d/php-fpm
+CODENAME=$(lsb_release --codename | cut -f2)
+if [ $CODENAME = "xenial" ]
+then
+        cp php-fpm.service /lib/systemd/system/php-fpm.service
+        systemctl enable php-fpm.service
+else
+	cp init-php-fpm /etc/init.d/php-fpm
+	chmod a+x /etc/init.d/php-fpm
+fi
 
 # Make the PHP directories
 mkdir -p /etc/php/conf.d

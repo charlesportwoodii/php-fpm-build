@@ -2,6 +2,14 @@
 
 set +e
 
-$(which service) php-fpm stop
+CODENAME=$(lsb_release --codename | cut -f2)
+if [ $CODENAME = "xenial" ]
+then
+        systemctl stop php-fpm.service
+        systemctl disable php-fpm.service
+        rm -rf /lib/systemd/system/php-fpm.service
+else
+	$(which service) php-fpm stop
+fi
 
 exit 0

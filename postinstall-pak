@@ -21,7 +21,7 @@ if [ -d /tmp/php-tmp/conf.d ]; then
 	$(which cp) /tmp/php-tmp/conf.d/* /etc/php/conf.d/
 	# Remove the old tmp directory to a separate directory so new builds don't interfere with it.
 	$(which cp) -R /tmp/php-tmp /tmp/php-tmp-BAK
-	$(which rm) -rf /tmp/php-tm
+	$(which rm) -rf /tmp/php-tmp
 fi
 
 if [ ! -f /opt/openssl/ssl ]; then
@@ -29,7 +29,14 @@ if [ ! -f /opt/openssl/ssl ]; then
 	ln -s /usr/lib/ssl /opt/openssl/ssl
 fi
 
-$(which update-rc.d) php-fpm defaults
-$(which service) php-fpm start
+CODENAME=$(lsb_release --codename | cut -f2)
+if [ $CODENAME = "xenial" ]
+then
+        systemctl enable php-fpm.service
+        systemctl start php-fpm.service
+else
+	$(which update-rc.d) php-fpm defaults
+	$(which service) php-fpm start
+fi
 
 exit 0

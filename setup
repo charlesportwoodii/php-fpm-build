@@ -16,4 +16,4 @@ mkdir -p /etc/php/conf.d
 # Copy the initial configs over
 cp php.ini* /etc/php/
 cp php-fpm.conf /etc/php/php-fpm.conf-default
-cp default.conf /etc/php/php-fpm-pool.conf-default
+cp pool.conf.default /etc/php/php-fpm-pool.conf-default

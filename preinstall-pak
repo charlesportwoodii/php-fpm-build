@@ -11,8 +11,9 @@ else
         $(which service) php-fpm stop
 fi
 
-$(which mkdir) -p /tmp/php-tmp/conf.d
-$(which cp) -R /etc/php/conf.d/* /tmp/php-tmp/conf.d/
+if [ -d /tmp/php-tmp/conf.d ]; then
+	$(which cp) -R /etc/php/conf.d/* /tmp/php-tmp/conf.d/
+fi
 
 $(which touch) /var/run/php-fpm.pid
 exit 0

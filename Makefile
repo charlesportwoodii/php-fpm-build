@@ -10,7 +10,6 @@ RELEASEVER?=1
 # Bash data
 SCRIPTPATH=$(shell pwd -P)
 CORES=$(shell grep -c ^processor /proc/cpuinfo)
-RELEASE=$(shell lsb_release --codename | cut -f2)
 
 major=$(shell echo $(VERSION) | cut -d. -f1)
 minor=$(shell echo $(VERSION) | cut -d. -f2)
@@ -20,15 +19,6 @@ micro=$(shell echo $(VERSION) | cut -d. -f3)
 OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
-
-# checkinstall dependencies
-ifeq ($(RELEASE),trusty)
-LIBICU=libicu52
-else ifeq ($(RELEASE),xenial)
-LIBICU=libicu55
-else
-LIBICU=libicu48
-endif
 
 ifeq ($(major), 7)
 RELEASENAME=php-fpm-$(major).$(minor)
@@ -42,7 +32,7 @@ PROVIDES=php-fpm, php-fpm-$(major).$(minor)
 CONFLICTS=php$(major), php$(major)-common
 endif
  
-build: openssl nghttp2 curl php
+build: openssl curl php
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -169,25 +159,57 @@ endif
 		--with-pgsql \
 		--with-pdo-pgsql \
 		--enable-redis && \
-	make -j$(CORES) && \
-	make install
+	make -j$(CORES)
 
-package:
-	# Copy the fpm build packages
-	cp $(SCRIPTPATH)/init-php-fpm /tmp/php-$(VERSION)/init-php-fpm
-	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)/php-fpm.service
-	cp $(SCRIPTPATH)/setup /tmp/php-$(VERSION)/setup
-	cp -R $(SCRIPTPATH)/*-pak /tmp/php-$(VERSION)
-	
-	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)/php-fpm.conf.default
-	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)/pool.conf.default
+fpm_debian:
+	echo "Building native package for debian"
 
-	# Mk /etc/php/conf.d so checkinstall doesn't freak out
-	mkdir -p /etc/php/conf.d
-	
-	# Copy the init.d script so checkinstall builds
-	cp $(SCRIPTPATH)/init-php-fpm /etc/init.d/php-fpm
+	# Removing the work build directory
+	rm -rf /tmp/php-$(VERSION)-install
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d
 
+	# Export the timezone as UTC
+	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d/UTC-timezone.ini
+
+	# Copy the FPM configuration
+	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.conf.default
+	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d/pool.conf.default
+	mkdir -p /tmp/php-7.0.8-install/lib/systemd/system/
+	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm.service
+
+	# Copy the PHP.ini configuration
+	cp /tmp/php-$(VERSION)/php.ini* /tmp/php-$(VERSION)-install/usr/local/etc/php
+
+	# Remove useless items in /usr/lib/etc
+	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
+
+	# Copy init.d for non systemd systems
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
+	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm
+
+	rm -rf /tmp/php-$(VERSION)-install/.registry
+	rm -rf /tmp/php-$(VERSION)-install/.channels
+
+	# Install PHP FPM  to php-<version>-install for fpm
 	cd /tmp/php-$(VERSION) && \
-	checkinstall -D --fstrans -pkgrelease "$(RELEASEVER)~$(RELEASE)" -pkgname "$(RELEASENAME)" -pkglicense "PHP" -pkggroup "PHP" -maintainer "charlesportwoodii@ethreal.net" \
-		-provides "$(PROVIDES)"	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $(LIBICU), libpq5" -replaces "$(REPLACES)" -conflicts "$(CONFLICTS)" -pakdir "/tmp" -y sh /tmp/php-$(VERSION)/setup
+	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
+	fpm -s dir \
+		-t deb \
+		-n $(RELEASENAME) \
+		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
+		-C /tmp/php-$(VERSION)-install \
+		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2).deb \
+		-m "charlesportwoodii@erianna.com" \
+		--license BSD \
+		--url https://github.com/charlesportwoodii/php-fpm-build \
+		--description "PHP FPM, $(VERSION)" \
+		--vendor "Charles R. Portwood II" \
+		--deb-systemd-restart-after-upgrade \
+		--template-scripts \
+		--before-install $(SCRIPTPATH)/debian/preinstall-pak \
+		--after-install $(SCRIPTPATH)/debian/postinstall-pak \
+		--before-remove $(SCRIPTPATH)/debian/preremove-pak 
+		
+fpm_rpm:
+	echo "Building native package for rpm"

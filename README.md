@@ -1,6 +1,6 @@
 # Build Scripts for PHP FPM
-This package contains scripts necessary to automatically build PHP-FPM on your system.
 
+This package contains scripts necessary to automatically build PHP-FPM on your system.
 
 ## Debian Builds
 Tested on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04
@@ -28,7 +28,7 @@ sudo apt-get install postgresql-contrib-9.5 postgresql-server-dev-9.5
 3. Install all other APT repositories
 
 ```bash
-apt-get install make automake g++ autoconf checkinstall git build-essential libxml2-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev
+apt-get install make automake g++ autoconf checkinstall git build-essential libxml2-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev libtool
 ```
 
 ## RPM Builds
@@ -65,24 +65,16 @@ make build VERSION=<PHP_VERSION>
 
 ## Packaging
 
-### FPM
-
-### Checkinstall
-
-If you want to create a `make` debian package, run the following command
+Packaging is performed through [FPM](https://github.com/jordansissel/fpm) which should be installed
 
 ```bash
-make package VERSION=<PHP_VERSION>
+gem install fpm
 ```
 
-Several variables are exposed for you to modify if you wish to install PHP with a different set of depenencies. You may specify these as `make` arguements
+Once FPM is installed, you can package your application either for debian or rpm by running the following commands, respectively
 
-```bash
-PCREVERSION
-OPENSSLVERSION
-CURLVERSION
-NGHTTPVERSION
-RELEASEVER
+```
+make fpm_debian VERSION=<PHP_VERSION>
+make fpm_rpm VERSION=<PHP_VERSION>
 ```
 
-> WARNING: running the make command will install PHP onto your system, and install several depenencies into `/opt`. It is recommended to only run this package only on a build server rather than your personal machine. If you _just_ want to install PHP via apt, be sure to check out https://deb.erianna.com.

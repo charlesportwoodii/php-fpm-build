@@ -17,7 +17,7 @@ then
 else
         systemctl stop php-fpm.service
         systemctl disable php-fpm.service
-        rm -rf /lib/systemd/system/php-fpm.servic
+        rm -rf /lib/systemd/system/php-fpm.service
 fi
 
 exit 0

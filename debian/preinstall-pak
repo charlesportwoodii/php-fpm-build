@@ -1,9 +1,7 @@
 #!/bin/bash
 
 set +e
-echo "Stopping PHP and Backing Up conf.d"
-CODENAME=$(lsb_release --codename | cut -f2)
-
+echo "Stopping PHP"
 
 which lsb_release
 if [ "$?" == 0 ]
@@ -19,10 +17,6 @@ then
 else
         systemctl stop php-fpm.service
         systemctl disable php-fpm.service
-fi
-
-if [ -d /tmp/php-tmp/conf.d ]; then
-	$(which cp) -R /etc/php/conf.d/* /tmp/php-tmp/conf.d/
 fi
 
 $(which touch) /var/run/php-fpm.pid

@@ -2,18 +2,12 @@
 
 set +e
 
-if [ ! -f /etc/php/php.ini ]; then
-	$(which cp) /etc/php/php.ini-production /etc/php/php.ini
-	echo "date.timezone=UTC" >> /etc/php/php.ini
-fi
-
-if [ ! -f /etc/php/php-fpm.conf ]; then 
-	$(which cp) /etc/php/php-fpm.conf-default /etc/php/php-fpm.conf
-fi
-
-if [ ! -d /etc/php/php-fpm.d ]; then
-	$(which mkdir) -p /etc/php/php-fpm.d
-	$(which cp) /etc/php/php-fpm-pool.conf-default /etc/php/php-fpm.d/default.conf
+if [ ! -f /etc/php ]; then
+	$(which mkdir) -p /etc/php
+	$(which cp) -R /usr/local/etc/php/* /etc/php
+	$(which mv) /etc/php/php.ini-production /etc/php/php.ini
+	$(which mv) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
+	$(which mv) /etc/php/php-fpm.d/pool.conf.default /etc/php/php-fpm.d/pool.conf
 fi
 
 if [ ! -f /var/log/php ]; then
@@ -26,18 +20,8 @@ $(which wget) https://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
 $(which php) /tmp/pear.phar
 $(which rm) -rf /tmp/pear.phar
 
-$(which mkdir) -p /etc/php/conf.d
-
-if [ -d /tmp/php-tmp/conf.d ]; then
-	$(which cp) /tmp/php-tmp/conf.d/* /etc/php/conf.d/
-	# Remove the old tmp directory to a separate directory so new builds don't interfere with it.
-	$(which cp) -R /tmp/php-tmp /tmp/php-tmp-BAK
-	$(which rm) -rf /tmp/php-tmp
-fi
-
-if [ ! -f /opt/openssl/ssl ]; then
-	mkdir -p /opt/openssl
-	ln -s /usr/lib/ssl /opt/openssl/ssl
+if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
+	echo "openssl.capath=$(shell openssl version -d | awk '{ print $2 }' | sed 's/"//g')/certs" > /etc/php/conf.d/openssl-default.ini 
 fi
 
 which lsb_release
@@ -46,6 +30,10 @@ then
         CODENAME=$(lsb_release --codename | cut -f2)
         if [ "$CODENAME" = "precise" ]
         then
+			if [ ! -f /etc/init.d/php-fpm ]; then
+				$(which cp) /usr/local/etc/init.d/php-fpm /etc/init.d/php-fpm
+			fi
+
             $(which update-rc.d) php-fpm defaults
 			$(which service) php-fpm start
         else

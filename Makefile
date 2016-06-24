@@ -42,7 +42,7 @@ PROVIDES=php-fpm, php-fpm-$(major).$(minor)
 CONFLICTS=php$(major), php$(major)-common
 endif
  
-build: openssl nghttp2 curl php
+build: openssl curl php
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -172,7 +172,7 @@ endif
 	make -j$(CORES) && \
 	make install
 
-package:
+checkinstall:
 	# Copy the fpm build packages
 	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)/init-php-fpm
 	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)/php-fpm.service
@@ -182,7 +182,7 @@ package:
 	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)/php-fpm.conf.default
 	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)/pool.conf.default
 
-	# Mk /etc/php/conf.d so checkinstall doesn't freak out
+	# Make /etc/php/conf.d so checkinstall doesn't freak out
 	mkdir -p /etc/php/conf.d
 	
 	# Copy the init.d script so checkinstall builds

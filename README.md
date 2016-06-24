@@ -14,7 +14,6 @@ wget http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb
 sudo dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb
 sudo dpkg -i bison_2.7.1.dfsg-1_amd64.deb
 ```
-
 2. Add the Postgresql 9.5+ development libraries
 ```
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
@@ -22,7 +21,6 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-
 sudo apt-get update
 sudo apt-get install postgresql-contrib-9.5 postgresql-server-dev-9.5
 ```
-
 3. Install all other APT repositories
 ```
 	apt-get install make automake g++ autoconf checkinstall git build-essential libxml2-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev
@@ -32,6 +30,7 @@ sudo apt-get install postgresql-contrib-9.5 postgresql-server-dev-9.5
 Untested on CentOS7.2
 
 ### Dependencies
+
 1. Install Repo dependencies for CentOS7 (http://repoforge.org/use/)
 ```
 sudo yum install wget
@@ -42,7 +41,6 @@ sudo yum install epel-release-latest-7.noarch.rpm
 sudo yum update
 sudo yum upgrade
 ```
-
 2. Install PHP FPM library dependencies
 ```
 sudo yum install make automake autoconf g++ build-essential glib2-devel.x86_64 glibc-devel.x86_64 git libmcrypt-devel.x86_64 libmcrypt.x86_64 gcc libtool.x86_64 bison.x86_64 libxml2-devel.x86_64 libicu-devel.x86_64 gcc-c++.x86_64

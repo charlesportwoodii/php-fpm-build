@@ -174,10 +174,10 @@ endif
 
 package:
 	# Copy the fpm build packages
-	cp $(SCRIPTPATH)/init-php-fpm /tmp/php-$(VERSION)/init-php-fpm
+	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)/init-php-fpm
 	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)/php-fpm.service
-	cp $(SCRIPTPATH)/setup /tmp/php-$(VERSION)/setup
-	cp -R $(SCRIPTPATH)/*-pak /tmp/php-$(VERSION)
+	cp $(SCRIPTPATH)/debian/setup /tmp/php-$(VERSION)/setup
+	cp -R $(SCRIPTPATH)/debian/*-pak /tmp/php-$(VERSION)
 	
 	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)/php-fpm.conf.default
 	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)/pool.conf.default
@@ -189,5 +189,5 @@ package:
 	cp $(SCRIPTPATH)/init-php-fpm /etc/init.d/php-fpm
 
 	cd /tmp/php-$(VERSION) && \
-	checkinstall -D --fstrans -pkgrelease "$(RELEASEVER)~$(RELEASE)" -pkgname "$(RELEASENAME)" -pkglicense "PHP" -pkggroup "PHP" -maintainer "charlesportwoodii@ethreal.net" \
+	checkinstall -D --fstrans -pkgrelease "$(RELEASEVER)~$(RELEASE)" -pkgname "$(RELEASENAME)" -pkglicense "PHP" -pkggroup "PHP" -maintainer "charlesportwoodii@erianna.com" \
 		-provides "$(PROVIDES)"	-requires "libxml2, libmcrypt4, libjpeg-turbo8, $(LIBICU), libpq5" -replaces "$(REPLACES)" -conflicts "$(CONFLICTS)" -pakdir "/tmp" -y sh /tmp/php-$(VERSION)/setup

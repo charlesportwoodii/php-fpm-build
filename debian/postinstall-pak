@@ -40,14 +40,21 @@ if [ ! -f /opt/openssl/ssl ]; then
 	ln -s /usr/lib/ssl /opt/openssl/ssl
 fi
 
-CODENAME=$(lsb_release --codename | cut -f2)
-if [ "$CODENAME" = "xenial" ]
+which lsb_release
+if [ "$?" == 0 ]
 then
+        CODENAME=$(lsb_release --codename | cut -f2)
+        if [ "$CODENAME" = "precise" ]
+        then
+            $(which update-rc.d) php-fpm defaults
+			$(which service) php-fpm start
+        else
+            systemctl enable php-fpm.service
+        	systemctl start php-fpm.service
+        fi
+else
         systemctl enable php-fpm.service
         systemctl start php-fpm.service
-else
-	$(which update-rc.d) php-fpm defaults
-	$(which service) php-fpm start
 fi
 
 exit 0

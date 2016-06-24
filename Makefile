@@ -20,6 +20,15 @@ OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
+# Ubuntu dependencies
+ifeq ($(shell lsb_release --codename | cut -f2),trusty)
+LIBICU=libicu52
+else ifeq ($(shell lsb_release --codename | cut -f2),xenial)
+LIBICU=libicu55
+else
+LIBICU=libicu48
+endif
+
 ifeq ($(major), 7)
 RELEASENAME=php-fpm-$(major).$(minor)
 REPLACES=php-fpm, php-fpm-5.5, php-fpm-5.6
@@ -205,6 +214,11 @@ fpm_debian:
 		--url https://github.com/charlesportwoodii/php-fpm-build \
 		--description "PHP FPM, $(VERSION)" \
 		--vendor "Charles R. Portwood II" \
+		--depends "libxml2 > 0" \
+		--depends "libmcrypt4 > 0" \
+		--depends "libjpeg-turbo8 > 0" \
+		--depends "$(LIBICU) > 0" \
+		--depends "libpq5 > 0" \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--before-install $(SCRIPTPATH)/debian/preinstall-pak \

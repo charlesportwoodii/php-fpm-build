@@ -16,12 +16,9 @@ if [ ! -f /var/log/php ]; then
 	$(which chmod) -R 754 /var/log/php/slow.log
 fi
 
-$(which wget) https://pear.php.net/install-pear-nozlib.phar -O /tmp/pear.phar
-$(which php) /tmp/pear.phar
-$(which rm) -rf /tmp/pear.phar
-
 if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
-	echo "openssl.capath=$(shell openssl version -d | awk '{ print $2 }' | sed 's/"//g')/certs" > /etc/php/conf.d/openssl-default.ini 
+	OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
+	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
 fi
 
 which lsb_release

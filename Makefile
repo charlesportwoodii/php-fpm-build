@@ -197,7 +197,7 @@ fpm_debian:
 	fpm -s dir \
 		-t deb \
 		-n $(RELEASENAME) \
-		-v $(VERSION) \
+		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
 		-C /tmp/php-$(VERSION)-install \
 		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2).deb \
 		-m "charlesportwoodii@erianna.com" \

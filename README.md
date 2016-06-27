@@ -1,6 +1,6 @@
 # Build Scripts for PHP FPM
 
-This package contains scripts necessary to automatically build PHP-FPM on your system.
+This packages helps you quick and easily build any modern version of PHP (5.5, 5.6, 7.0, etc...) on your system. This package provides many common and vital packages for running modern PHP on your system. If this package doesn't help you, there's a bug in this package. 
 
 ## Debian Builds
 Tested on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04

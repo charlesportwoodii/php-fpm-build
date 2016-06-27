@@ -272,6 +272,7 @@ fpm_rpm:
 		--depends "libjpeg-turbo > 0" \
 		--depends "libicu > 0" \
 		--depends "postgresql-devel > 0" \
+		--depends "libpng12 > 0" \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \

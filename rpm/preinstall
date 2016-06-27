@@ -7,4 +7,11 @@ systemctl stop php-fpm.service
 systemctl disable php-fpm.service
 
 $(which touch) /var/run/php-fpm.pid
+
+WWWDATAUSER=$(id www-data)
+if [ $? -eq 1 ]; then
+    echo "Creating www-data user"
+    useradd www-data
+fi
+
 exit 0

@@ -212,7 +212,7 @@ fpm_debian:
 		-C /tmp/php-$(VERSION)-install \
 		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2).deb \
 		-m "charlesportwoodii@erianna.com" \
-		--license BSD \
+		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \
 		--description "PHP FPM, $(VERSION)" \
 		--vendor "Charles R. Portwood II" \
@@ -263,7 +263,7 @@ fpm_rpm:
 		-C /tmp/php-$(VERSION)-install \
 		-p php-fpm-$(VERSION)_$(RELEASEVER).$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
-		--license BSD \
+		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \
 		--description "PHP FPM, $(VERSION)" \
 		--vendor "Charles R. Portwood II" \

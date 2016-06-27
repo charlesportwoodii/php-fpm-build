@@ -197,12 +197,14 @@ fpm_debian:
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
 	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm
 
-	rm -rf /tmp/php-$(VERSION)-install/.registry
-	rm -rf /tmp/php-$(VERSION)-install/.channels
 
 	# Install PHP FPM  to php-<version>-install for fpm
 	cd /tmp/php-$(VERSION) && \
 	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
+
+	rm -rf /tmp/php-$(VERSION)-install/.registry
+	rm -rf /tmp/php-$(VERSION)-install/.channels
+
 	fpm -s dir \
 		-t deb \
 		-n $(RELEASENAME) \
@@ -248,17 +250,18 @@ fpm_rpm:
 	# Remove useless items in /usr/lib/etc
 	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
 
+	cd /tmp/php-$(VERSION) && \
+	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
+
 	rm -rf /tmp/php-$(VERSION)-install/.registry
 	rm -rf /tmp/php-$(VERSION)-install/.channels
 
-	cd /tmp/php-$(VERSION) && \
-	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
 	fpm -s dir \
 		-t rpm \
 		-n $(RELEASENAME) \
-		-v $(VERSION)_$(RELEASEVER).$(shell arch) \
+		-v $(VERSION)_$(RELEASEVER) \
 		-C /tmp/php-$(VERSION)-install \
-		-p $(RELEASENAME).$(micro)_$(RELEASEVER).$(shell arch).rpm \
+		-p php-fpm-$(VERSION)_$(RELEASEVER).$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
 		--license BSD \
 		--url https://github.com/charlesportwoodii/php-fpm-build \

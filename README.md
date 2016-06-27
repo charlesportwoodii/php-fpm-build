@@ -32,7 +32,7 @@ apt-get install make automake g++ autoconf checkinstall git build-essential libx
 ```
 
 ## RPM Builds
-Untested on CentOS7.2
+Tested on CentOS7.2
 
 ### Dependencies
 

@@ -270,4 +270,8 @@ fpm_rpm:
 		--depends "libicu > 0" \
 		--depends "postgresql-devel > 0" \
 		--rpm-digest sha384 \
-		--rpm-compression gzip
+		--rpm-compression gzip \
+		--template-scripts \
+		--before-install $(SCRIPTPATH)/rpm/preinstall \
+		--after-install $(SCRIPTPATH)/rpm/postinstall \
+		--before-remove $(SCRIPTPATH)/rpm/preremove 

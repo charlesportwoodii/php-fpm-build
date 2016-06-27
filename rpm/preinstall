@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set +e
+echo "Stopping PHP"
+
+systemctl stop php-fpm.service
+systemctl disable php-fpm.service
+
+$(which touch) /var/run/php-fpm.pid
+exit 0

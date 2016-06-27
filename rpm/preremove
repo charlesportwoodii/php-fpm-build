@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set +e
+
+systemctl stop php-fpm.service
+systemctl disable php-fpm.service
+
+exit 0

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set +e
+
+if [ ! -f /etc/php ]; then
+	$(which mkdir) -p /etc/php
+	$(which cp) -R /usr/local/etc/php/* /etc/php
+	$(which mv) /etc/php/php.ini-production /etc/php/php.ini
+	$(which mv) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
+	$(which mv) /etc/php/php-fpm.d/pool.conf.default /etc/php/php-fpm.d/pool.conf
+fi
+
+if [ ! -f /var/log/php ]; then
+	$(which mkdir) -p /var/log/php
+	$(which touch) /var/log/php/slow.log
+	$(which chmod) -R 754 /var/log/php/slow.log
+fi
+
+if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
+	OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
+	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
+fi
+
+systemctl enable php-fpm.service
+systemctl start php-fpm.service
+
+exit 0

@@ -256,9 +256,9 @@ fpm_rpm:
 	fpm -s dir \
 		-t rpm \
 		-n $(RELEASENAME) \
-		-v $(VERSION)-$(RELEASEVER).$(shell arch) \
+		-v $(VERSION)_$(RELEASEVER).$(shell arch) \
 		-C /tmp/php-$(VERSION)-install \
-		-p $(RELEASENAME).$(micro)_$(RELEASEVER).$(shell arch).deb \
+		-p $(RELEASENAME).$(micro)_$(RELEASEVER).$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
 		--license BSD \
 		--url https://github.com/charlesportwoodii/php-fpm-build \

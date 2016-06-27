@@ -16,10 +16,9 @@ if [ ! -f /var/log/php ]; then
 	$(which chmod) -R 754 /var/log/php/slow.log
 fi
 
-if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
-	OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
-	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
-fi
+OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
+echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
+echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/conf.d/openssl-default.ini
 
 systemctl enable php-fpm.service
 systemctl start php-fpm.service

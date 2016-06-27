@@ -11,7 +11,7 @@ $(which touch) /var/run/php-fpm.pid
 WWWDATAUSER=$(id www-data)
 if [ $? -eq 1 ]; then
     echo "Creating www-data user"
-    useradd www-data
+    useradd -Mr www-data
 fi
 
 exit 0

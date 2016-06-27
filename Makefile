@@ -227,3 +227,47 @@ fpm_debian:
 		
 fpm_rpm:
 	echo "Building native package for rpm"
+
+	# Removing the work build directory
+	rm -rf /tmp/php-$(VERSION)-install
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d
+
+	# Export the timezone as UTC
+	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d/UTC-timezone.ini
+
+	# Copy the FPM configuration
+	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.conf.default
+	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d/pool.conf.default
+	mkdir -p /tmp/php-7.0.8-install/lib/systemd/system/
+	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm.service
+
+	# Copy the PHP.ini configuration
+	cp /tmp/php-$(VERSION)/php.ini* /tmp/php-$(VERSION)-install/usr/local/etc/php
+
+	# Remove useless items in /usr/lib/etc
+	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
+
+	rm -rf /tmp/php-$(VERSION)-install/.registry
+	rm -rf /tmp/php-$(VERSION)-install/.channels
+
+	cd /tmp/php-$(VERSION) && \
+	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
+	fpm -s dir \
+		-t rpm \
+		-n $(RELEASENAME) \
+		-v $(VERSION)-$(RELEASEVER).$(shell arch) \
+		-C /tmp/php-$(VERSION)-install \
+		-p $(RELEASENAME).$(micro)_$(RELEASEVER).$(shell arch).deb \
+		-m "charlesportwoodii@erianna.com" \
+		--license BSD \
+		--url https://github.com/charlesportwoodii/php-fpm-build \
+		--description "PHP FPM, $(VERSION)" \
+		--vendor "Charles R. Portwood II" \
+		--depends "libxml2 > 0" \
+		--depends "libmcrypt > 0" \
+		--depends "libjpeg-turbo > 0" \
+		--depends "libicu > 0" \
+		--depends "postgresql-devel > 0" \
+		--rpm-digest sha384 \
+		--rpm-compression gzip

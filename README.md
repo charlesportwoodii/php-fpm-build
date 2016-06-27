@@ -48,10 +48,17 @@ sudo yum update
 sudo yum upgrade
 ```
 
+2. Install PostgreSQL dependencies
+
+```bash
+wget https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-7-x86_64/pgdg-centos95-9.5-2.noarch.rpm
+sudo yum install pgdg-centos95-9.5-2.noarch.rpm
+```
+
 2. Install PHP FPM library dependencies
 
 ```bash
-sudo yum install make automake autoconf g++ build-essential glib2-devel.x86_64 glibc-devel.x86_64 git libmcrypt-devel.x86_64 libmcrypt.x86_64 gcc libtool.x86_64 bison.x86_64 libxml2-devel.x86_64 libicu-devel.x86_64 gcc-c++.x86_64
+sudo yum install make automake autoconf g++ build-essential glib2-devel glibc-devel git libmcrypt-devel libmcrypt gcc libtool libxml2-devel libicu-devel gcc-c++ bison libpng12-devel libjpeg-turbo readline-devel postgresql95-devel freetype-devel libjpeg-turbo-devel postgresql-devel
 sudo yum group install "Development Tools"
 ```
 
@@ -60,12 +67,17 @@ sudo yum group install "Development Tools"
 PHP can be built via `make` by running the following steps:
 
 ```bash
+# Build OpenSSL and cURL with sudo so they can be installed to their runtime directories
+sudo make openssl
+sudo make curl
+
+# Do not build PHP with sudo
 make build VERSION=<PHP_VERSION>
 ```
 
 ## Packaging
 
-Packaging is performed through [FPM](https://github.com/jordansissel/fpm) which should be installed
+Packaging is performed through [FPM](https://github.com/jordansissel/fpm)
 
 ```bash
 gem install fpm
@@ -73,8 +85,7 @@ gem install fpm
 
 Once FPM is installed, you can package your application either for debian or rpm by running the following commands, respectively
 
-```
+```bash
 make fpm_debian VERSION=<PHP_VERSION>
 make fpm_rpm VERSION=<PHP_VERSION>
 ```
-

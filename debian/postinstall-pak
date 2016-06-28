@@ -2,7 +2,7 @@
 
 set +e
 
-if [ ! -f /etc/php ]; then
+if [ ! -d /etc/php ]; then
 	$(which mkdir) -p /etc/php
 	$(which cp) -R /usr/local/etc/php/* /etc/php
 	$(which mv) /etc/php/php.ini-production /etc/php/php.ini

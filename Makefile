@@ -212,7 +212,7 @@ fpm_debian:
 		-n $(RELEASENAME) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
 		-C /tmp/php-$(VERSION)-install \
-		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2).deb \
+		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \

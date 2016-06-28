@@ -170,11 +170,14 @@ endif
 		--enable-redis && \
 	make -j$(CORES)
 
-fpm_debian:
-	echo "Building native package for debian"
-
+pre_package:
 	# Removing the work build directory
 	rm -rf /tmp/php-$(VERSION)-install
+
+	# Install PHP FPM  to php-<version>-install for fpm
+	cd /tmp/php-$(VERSION) && \
+	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
+
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d
 
@@ -193,19 +196,18 @@ fpm_debian:
 	# Remove useless items in /usr/lib/etc
 	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
 
-	# Copy init.d for non systemd systems
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
-	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm
-
 	# Copy the license file
 	cp /tmp/php-$(VERSION)/LICENSE /tmp/php-$(VERSION)-install/usr/local/etc/php/
 	
-	# Install PHP FPM  to php-<version>-install for fpm
-	cd /tmp/php-$(VERSION) && \
-	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
-
 	rm -rf /tmp/php-$(VERSION)-install/.registry
 	rm -rf /tmp/php-$(VERSION)-install/.channels
+
+fpm_debian: pre_package
+	echo "Building native package for debian"
+
+	# Copy init.d for non systemd systems
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
+	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm	
 
 	fpm -s dir \
 		-t deb \
@@ -229,37 +231,8 @@ fpm_debian:
 		--after-install $(SCRIPTPATH)/debian/postinstall-pak \
 		--before-remove $(SCRIPTPATH)/debian/preremove-pak 
 		
-fpm_rpm:
+fpm_rpm: pre_package
 	echo "Building native package for rpm"
-
-	# Removing the work build directory
-	rm -rf /tmp/php-$(VERSION)-install
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d
-
-	# Export the timezone as UTC
-	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d/UTC-timezone.ini
-
-	# Copy the FPM configuration
-	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.conf.default
-	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d/pool.conf.default
-	mkdir -p /tmp/php-7.0.8-install/lib/systemd/system/
-	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm.service
-
-	# Copy the PHP.ini configuration
-	cp /tmp/php-$(VERSION)/php.ini* /tmp/php-$(VERSION)-install/usr/local/etc/php
-
-	# Copy the license file
-	cp /tmp/php-$(VERSION)/LICENSE /tmp/php-$(VERSION)-install/usr/local/etc/php/
-
-	# Remove useless items in /usr/lib/etc
-	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
-
-	cd /tmp/php-$(VERSION) && \
-	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
-
-	rm -rf /tmp/php-$(VERSION)-install/.registry
-	rm -rf /tmp/php-$(VERSION)-install/.channels
 
 	fpm -s dir \
 		-t rpm \

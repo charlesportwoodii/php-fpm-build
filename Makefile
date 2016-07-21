@@ -187,7 +187,7 @@ pre_package:
 	# Copy the FPM configuration
 	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.conf.default
 	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d/pool.conf.default
-	mkdir -p /tmp/php-7.0.8-install/lib/systemd/system/
+	mkdir -p /tmp/php-$(VERSION)-install/lib/systemd/system
 	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm.service
 
 	# Copy the PHP.ini configuration

@@ -3,20 +3,13 @@
 set +e
 echo "Stopping PHP"
 
-which lsb_release
+which systemctl
 if [ "$?" == 0 ]
 then
-        CODENAME=$(lsb_release --codename | cut -f2)
-        if [ "$CODENAME" = "precise" ]
-        then
-                $(which service) php-fpm stop
-        else
-                systemctl stop php-fpm.service
-                systemctl disable php-fpm.service
-        fi
+    $(which service) php-fpm stop
 else
-        systemctl stop php-fpm.service
-        systemctl disable php-fpm.service
+    $(which systemctl) stop php-fpm.service
+    $(which systemctl) disable php-fpm.service
 fi
 
 $(which touch) /var/run/php-fpm.pid

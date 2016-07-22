@@ -2,22 +2,15 @@
 
 set +e
 
-which lsb_release
+which systemctl
 if [ "$?" == 0 ]
 then
-        CODENAME=$(lsb_release --codename | cut -f2)
-        if [ "$CODENAME" = "precise" ]
-        then
-                $(which service) php-fpm stop
-        else
-                systemctl stop php-fpm.service
-                systemctl disable php-fpm.service
-                rm -rf /lib/systemd/system/php-fpm.service
-        fi
+    $(which service) php-fpm stop
+    rm -rf /etc/init.d/php-fpm
 else
-        systemctl stop php-fpm.service
-        systemctl disable php-fpm.service
-        rm -rf /lib/systemd/system/php-fpm.service
+    $(which systemctl) stop php-fpm.service
+    $(which systemctl) disable php-fpm.service
+    rm -rf /lib/systemd/system/php-fpm.service
 fi
 
 exit 0

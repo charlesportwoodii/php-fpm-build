@@ -5,6 +5,7 @@ set +e
 if [ ! -d /etc/php ]; then
 	$(which mkdir) -p /etc/php
 	$(which cp) -R /usr/local/etc/php/* /etc/php
+	$(which rm) /etc/php/LICENSE*
 	$(which mv) /etc/php/php.ini-production /etc/php/php.ini
 	$(which mv) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
 	$(which mv) /etc/php/php-fpm.d/pool.conf.default /etc/php/php-fpm.d/pool.conf
@@ -21,25 +22,16 @@ if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
 	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
 fi
 
-which lsb_release
+which systemctl
 if [ "$?" == 0 ]
 then
-        CODENAME=$(lsb_release --codename | cut -f2)
-        if [ "$CODENAME" = "precise" ]
-        then
-			if [ ! -f /etc/init.d/php-fpm ]; then
-				$(which cp) /usr/local/etc/init.d/php-fpm /etc/init.d/php-fpm
-			fi
+	$(which cp) /usr/local/etc/init.d/php-fpm /etc/init.d/php-fpm
 
-            $(which update-rc.d) php-fpm defaults
-			$(which service) php-fpm start
-        else
-            systemctl enable php-fpm.service
-        	systemctl start php-fpm.service
-        fi
+	$(which update-rc.d) php-fpm defaults
+	$(which service) php-fpm start
 else
-        systemctl enable php-fpm.service
-        systemctl start php-fpm.service
+	$(which systemctl) enable php-fpm.service
+	$(which systemctl) start php-fpm.service
 fi
 
 exit 0

@@ -15,5 +15,9 @@ else
 fi
 
 update-alternatives --remove php $(which php$VERSION)
+update-alternatives --remove php-config $(which php-config$VERSION)
+update-alternatives --remove phpize $(which phpize$VERSION)
+update-alternatives --remove php-cgi $(which php-cgi$VERSION)
+update-alternatives --remove phpdbg $(which phpdbg$VERSION)
 
 exit 0

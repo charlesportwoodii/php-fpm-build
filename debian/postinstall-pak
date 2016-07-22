@@ -13,6 +13,8 @@ if [ ! -d /etc/php/$VERSION ]; then
 	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
 
+$(which mv) /usr/local/etc/php/$VERSION/mods-available /etc/php/$VERSION/mods-available
+
 if [ ! -f /var/log/php/$VERSION/ ]; then
 	$(which mkdir) -p /var/log/php/$VERSION/
 	$(which touch) /var/log/php/$VERSION/slow.log
@@ -39,4 +41,8 @@ else
 fi
 
 update-alternatives --install /usr/bin/php php $(which php$VERSION) 1
+update-alternatives --install /usr/bin/php-config php-config $(which php-config$VERSION) 1
+update-alternatives --install /usr/bin/phpize phpize $(which phpize$VERSION) 1
+update-alternatives --install /usr/bin/php-cgi php-cgi $(which php-cgi$VERSION) 1
+update-alternatives --install /usr/bin/phpdbg phpdbg $(which phpdbg$VERSION) 1
 exit 0

@@ -258,6 +258,10 @@ pre_package:
 	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar
 	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar.phar
 
+	# Make log and runtime directory
+	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
+	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
+
 fpm_debian: pre_package
 	echo "Building native package for debian"
 

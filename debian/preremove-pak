@@ -2,15 +2,18 @@
 
 set +e
 
+VERSION=
 which systemctl
 if [ "$?" == 1 ]
 then
     $(which service) php-fpm stop
     rm -rf /etc/init.d/php-fpm
 else
-    $(which systemctl) stop php-fpm.service
-    $(which systemctl) disable php-fpm.service
-    rm -rf /lib/systemd/system/php-fpm.service
+    $(which systemctl) stop php-fpm-$VERSION.service
+    $(which systemctl) disable php-fpm-$VERSION.service
+    rm -rf /lib/systemd/system/php-fpm-$VERSION.service
 fi
+
+update-alternatives --remove php $(which php$VERSION)
 
 exit 0

@@ -2,36 +2,41 @@
 
 set +e
 
-if [ ! -d /etc/php ]; then
-	$(which mkdir) -p /etc/php
-	$(which cp) -R /usr/local/etc/php/* /etc/php
-	$(which rm) /etc/php/LICENSE*
-	$(which mv) /etc/php/php.ini-production /etc/php/php.ini
-	$(which mv) /etc/php/php-fpm.conf.default /etc/php/php-fpm.conf
-	$(which mv) /etc/php/php-fpm.d/pool.conf.default /etc/php/php-fpm.d/pool.conf
+VERSION=
+
+if [ ! -d /etc/php/$VERSION ]; then
+	$(which mkdir) -p /etc/php/$VERSION
+	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
+	$(which rm) /etc/php/$VERSION/LICENSE*
+	$(which mv) /etc/php/$VERSION/php.ini-production /etc/php/$VERSION/php.ini
+	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
+	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
 
-if [ ! -f /var/log/php ]; then
-	$(which mkdir) -p /var/log/php
-	$(which touch) /var/log/php/slow.log
-	$(which chmod) -R 754 /var/log/php/slow.log
+if [ ! -f /var/log/php/$VERSION/ ]; then
+	$(which mkdir) -p /var/log/php/$VERSION/
+	$(which touch) /var/log/php/$VERSION/slow.log
+	$(which chmod) -R 754 /var/log/php/$VERSION/slow.log
 fi
 
-if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
+$(which mkdir) -p /var/run/php/$VERSION
+
+if [ ! -f /etc/php/$VERSION/conf.d/openssl-default.ini ]; then
 	OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
-	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
+	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/$VERSION/conf.d/openssl-default.ini 
 fi
 
 which systemctl
 if [ "$?" == 1 ]
 then
-	$(which cp) /usr/local/etc/init.d/php-fpm /etc/init.d/php-fpm
+	$(which cp) /usr/local/etc/init.d/php-fpm-$VERSION /etc/init.d/php-fpm-$VERSION
 
-	$(which update-rc.d) php-fpm defaults
-	$(which service) php-fpm start
+	$(which update-rc.d) php-fpm-$VERSION defaults
+	$(which service) php-fpm-$VERSION start
 else
-	$(which systemctl) enable php-fpm.service
-	$(which systemctl) start php-fpm.service
+	$(which systemctl) enable php-fpm-$VERSION.service
+	$(which systemctl) start php-fpm-$VERSION.service
 fi
 
+update-alternatives --install /usr/bin/php php $(which php$VERSION) 1
 exit 0

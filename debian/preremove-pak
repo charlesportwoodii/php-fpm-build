@@ -3,7 +3,7 @@
 set +e
 
 which systemctl
-if [ "$?" == 0 ]
+if [ "$?" == 1 ]
 then
     $(which service) php-fpm stop
     rm -rf /etc/init.d/php-fpm

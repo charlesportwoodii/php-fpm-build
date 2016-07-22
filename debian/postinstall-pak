@@ -23,7 +23,7 @@ if [ ! -f /etc/php/conf.d/openssl-default.ini ]; then
 fi
 
 which systemctl
-if [ "$?" == 0 ]
+if [ "$?" == 1 ]
 then
 	$(which cp) /usr/local/etc/init.d/php-fpm /etc/init.d/php-fpm
 

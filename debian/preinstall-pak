@@ -4,7 +4,7 @@ set +e
 echo "Stopping PHP"
 
 which systemctl
-if [ "$?" == 0 ]
+if [ "$?" == 1 ]
 then
     $(which service) php-fpm stop
 else

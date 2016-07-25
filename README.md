@@ -86,6 +86,12 @@ sudo make curl
 make build VERSION=<PHP_VERSION>
 ```
 
+PEAR & PECL extensions can be built (and packaged) by running:
+
+```
+ make INSTALL_ROOT=/tmp/php-pear-install pear VERSION=<PHP_VERSION>
+```
+
 ## Packaging
 
 Packaging is performed through [FPM](https://github.com/jordansissel/fpm)

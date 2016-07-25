@@ -46,5 +46,4 @@ update-alternatives --install /usr/bin/phpize phpize $(which phpize$VERSION) 1
 update-alternatives --install /usr/bin/php-cgi php-cgi $(which php-cgi$VERSION) 1
 update-alternatives --install /usr/bin/phpdbg phpdbg $(which phpdbg$VERSION) 1
 
-$(which wget) -O- -q https://pear.php.net/install-pear-nozlib.phar | $(which php)
 exit 0

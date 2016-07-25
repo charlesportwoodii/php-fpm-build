@@ -187,6 +187,30 @@ endif
 		--enable-intl=static && \
 	make -j$(CORES)
 
+pear:
+	rm -rf /tmp/php-pear
+	rm -rf /tmp/php-pear-install
+	mkdir -p /tmp/php-pear
+	mkdir -p /tmp/php-pear-install
+	wget -q https://pear.php.net/install-pear-nozlib.phar -O /tmp/php-pear/install-pear-nozlib.phar
+	php /tmp/php-pear/install-pear-nozlib.phar
+	rm -rf /tmp/php-pear-install/etc
+	mkdir -p /tmp/php-pear-install/usr/share/php/pear
+	mv /tmp/php-pear-install/lib/php/$(major).$(minor)/pear/.[!.]* /tmp/php-pear-install/usr/share/php/pear/
+	mv /tmp/php-pear-install/lib/php/$(major).$(minor)/pear/* /tmp/php-pear-install/usr/share/php/pear/
+	rm -rf /tmp/php-pear-install/lib
+
+	fpm -s dir \
+		-t deb \
+		-n php-pear \
+		-C /tmp/php-pear-install \
+		-p php-pear~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
+		-m "charlesportwoodii@erianna.com" \
+		--license "PHP License" \
+		--url https://github.com/charlesportwoodii/php-fpm-build \
+		--description "PHP PEAR" \
+		--vendor "Charles R. Portwood II"
+
 pre_package:
 	# Removing the work build directory
 	rm -rf /tmp/php-$(VERSION)-install

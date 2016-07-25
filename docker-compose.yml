@@ -1,0 +1,9 @@
+# docker-compose.yml
+
+'1604': 
+    build: .
+    dockerfile: Dockerfile.ubuntu_16.04
+    command: bash -lc 'source .vs && make openssl && make curl && make php VERISON=$VERSION RELEASEVER=$RELEASEVER&& make pear VERISON=$VERSION'
+    volumes: 
+        - .:/data
+    working_dir: /data

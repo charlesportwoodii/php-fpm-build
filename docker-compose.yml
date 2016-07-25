@@ -2,8 +2,8 @@
 
 '1604': 
     build: .
-    dockerfile: Dockerfile.ubuntu_16.04
-    command: bash -lc 'source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER make fpm_debian VERSION=$VERSION && make pear VERISON=$VERSION'
+    dockerfile: .docker/ubuntu_16.04
+    command: bash -lc "make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_debian VERSION=$VERSION"
     volumes: 
         - .:/data
     working_dir: /data

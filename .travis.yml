@@ -34,3 +34,6 @@ deploy:
   acl: public_read
   region: us-west-2
   local_dir: build
+  on:
+    all_branches: true
+    repo: charlesportwoodii/nginx-build

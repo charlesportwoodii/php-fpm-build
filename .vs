@@ -1,2 +1,2 @@
-export VERSION=7.1.0beta1
+export VERSION=5.6.24
 export RELEASEVER=1

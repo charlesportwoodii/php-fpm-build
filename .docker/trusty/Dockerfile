@@ -1,9 +1,6 @@
 FROM ubuntu:14.04
 ENV DEBIAN_FRONTEND noninteractive
 
-# Expose the version flag
-ARG VERSION
-
 # Install pre-dependencies
 RUN apt-get update
 RUN apt-get install wget m4 -y

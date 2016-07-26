@@ -11,7 +11,7 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 
 # Install build tools
 RUN apt-get update
-RUN apt-get install postgresql-contrib-9.5 postgresql-server-dev-9.5 make automake g++ autoconf checkinstall git build-essential libxml2-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev libtool build-essential git ruby ruby-dev -y
+RUN apt-get install postgresql-contrib-9.5 postgresql-server-dev-9.5 make automake g++ autoconf checkinstall git build-essential libxml2-dev pkg-config libjpeg-turbo8-dev libpng12-dev libfreetype6-dev libicu-dev libmcrypt4 libmcrypt-dev libreadline6-dev libtool build-essential git ruby ruby-dev lsb-release -y
 
 # Install Bison
 RUN wget http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb

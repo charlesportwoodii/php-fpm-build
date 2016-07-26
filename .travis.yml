@@ -15,7 +15,6 @@ before_install:
 
 script:
   - source .vs
-  - echo "Building Application for: $VERSION - $RELEASEVER"
   - docker-compose build
   - docker-compose run 1604
   - docker-compose run 1404

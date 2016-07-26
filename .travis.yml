@@ -20,7 +20,7 @@ script:
   - docker-compose run 1404
   - mv *xenial*.deb build/deb/xenial
   - mv *trusty*.deb build/deb/trusty
-  - mv *.rpm build/rpm/CentOS/7/x86_64
+#  - mv *.rpm build/rpm/CentOS/7/x86_64
 
 deploy:
   provider: s3

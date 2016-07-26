@@ -11,7 +11,7 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - mkdir -p build/deb/trusty build/deb/xenial rpm/CentOS/7/x86_64
+  - mkdir -p build/deb/trusty build/deb/xenial build/rpm/CentOS/7/x86_64
 
 script:
   - source .vs

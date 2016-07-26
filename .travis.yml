@@ -34,5 +34,3 @@ deploy:
   acl: public_read
   region: us-west-2
   local_dir: build
-  on:
-    repo: charlesportwoodii/php-fpm-build

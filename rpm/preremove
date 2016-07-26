@@ -2,7 +2,8 @@
 
 set +e
 
-systemctl stop php-fpm.service
-systemctl disable php-fpm.service
+VERSION=
+systemctl stop php-fpm-$VERSION.service
+systemctl disable php-fpm-$VERSION.service
 
 exit 0

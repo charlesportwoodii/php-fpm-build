@@ -4,9 +4,9 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-PIDFile=/var/run/php-fpm.pid
-ExecStartPre=/usr/local/sbin/php-fpm --fpm-config /etc/php/php-fpm.conf -t
-ExecStart=/usr/local/sbin/php-fpm --fpm-config /etc/php/php-fpm.conf
+PIDFile=/var/run/php/VERSION/php-fpm.pid
+ExecStartPre=/usr/sbin/php-fpmVERSION --fpm-config /etc/php/VERSION/php-fpm.conf -t
+ExecStart=/usr/sbin/php-fpmVERSION --fpm-config /etc/php/VERSION/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStop=/bin/kill -QUIT $MAINPID
 PrivateTmp=true

@@ -2,15 +2,15 @@
 
 set +e
 echo "Stopping PHP"
-
+VERSION=
 which systemctl
 if [ "$?" == 1 ]
 then
     $(which service) php-fpm stop
 else
-    $(which systemctl) stop php-fpm.service
-    $(which systemctl) disable php-fpm.service
+    $(which systemctl) stop php-fpm-$VERSION.service
+    $(which systemctl) disable php-fpm-$VERSION.service
 fi
 
-$(which touch) /var/run/php-fpm.pid
+$(which touch) /var/run/php/$VERSION/php-fpm.pid
 exit 0

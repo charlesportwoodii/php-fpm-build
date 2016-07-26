@@ -1,6 +1,17 @@
 # Build Scripts for PHP FPM
 
-This packages helps you quick and easily build any modern version of PHP (5.5, 5.6, 7.0, etc...) on your system. This package provides many common and vital packages for running modern PHP on your system. If this package doesn't help you, there's a bug in this package. 
+This repository provides an opinionated build of PHP FPM, and enables you to quickly build and package modern versions of PHP.
+
+### Why should I use this package?
+
+This package provides a opinionated build for PHP FPM. The primary differentiators between this package and other PPA's are:
+
+- Almost every module is statically compiled to reduce external dependencies
+- The latest versions of OpenSSL and libcurl are preferred over system distributions
+- Common modules not distributed with `php-src`, such as Redis, are bundled
+- Certain modules, such as mcrypt, are not enabled by default, but must be manually enabled via ini file
+
+If you're looking to _just_ use PHP FPM, and want a single binary compiled with the most common extensions, compiled with the latest versions of OpenSSL and cURL, this package is for you. If you'd prefer to have a more modular build, ppa:ondrej/php might be preferable.
 
 ## Debian Builds
 Tested on Ubuntu 12.04, Ubuntu 14.04, Ubuntu 16.04
@@ -73,6 +84,12 @@ sudo make curl
 
 # Do not build PHP with sudo
 make build VERSION=<PHP_VERSION>
+```
+
+PEAR & PECL extensions can be built (and packaged) by running:
+
+```
+ make INSTALL_ROOT=/tmp/php-pear-install pear VERSION=<PHP_VERSION>
 ```
 
 ## Packaging

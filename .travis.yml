@@ -1,0 +1,38 @@
+sudo: required
+
+language: ruby
+
+services:
+  - docker
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+  -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - mkdir -p build/deb/trusty build/deb/xenial rpm/CentOS/7/x86_64
+
+script:
+  - source .vs
+  - echo "Building Application for: $VERSION - $RELEASEVER"
+  - docker-compose build
+  - docker-compose run 1604
+  - docker-compose run 1404
+  - mv *xenial*.deb build/deb/xenial
+  - mv *trusty*.deb build/deb/trusty
+  - mv *.rpm build/rpm/CentOS/7/x86_64
+
+deploy:
+  provider: s3
+  access_key_id: AKIAJ5QCEUQ2WVNY7GDA
+  secret_access_key:
+    secure: ARfuwOF+VJB+L9h9bbAvsXdO5PLsvzKnhvwGmnmIYI5FDAhhv5apq0ytFPVDLuHho74AkWK5wJP5YGQ2JnGOAj8Sq/Zg+wcHbt9FZ3p0otNaUl4pririIUt/Cz3B7vLR2lEd6ZUn3ekQzJWkEO9/SQTKkUUq+kxRhHZsr2KUdCk=
+  bucket: travis-packages.erianna.com
+  detect_encoding: true
+  skip_cleanup: true
+  acl: public_read
+  region: us-west-2
+  local_dir: build
+  on:
+    repo: charlesportwoodii/php-fpm-build

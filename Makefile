@@ -29,17 +29,8 @@ else
 LIBICU=libicu48
 endif
 
-ifeq ($(major), 7)
-RELEASENAME=php-fpm-$(major).$(minor)
-REPLACES=php-fpm, php-fpm-5.5, php-fpm-5.6
-PROVIDES=php-fpm-$(major).$(minor)	
-CONFLICTS=php$(major), php$(major)-common, php-fpm, php-fpm-5.6
-else
-RELEASENAME=php-fpm
-REPLACES=php-fpm-5.5
-PROVIDES=php-fpm, php-fpm-$(major).$(minor)
-CONFLICTS=php$(major), php$(major)-common
-endif
+RELEASENAME=php$(major).$(minor)-fpm
+PROVIDES=php$(major).$(minor)-fpm
  
 build: openssl curl php
 
@@ -120,55 +111,105 @@ endif
 	./buildconf  --force && \
 	./configure \
 		--with-libdir=lib64 \
-		--with-config-file-path=/etc/php \
-		--with-config-file-scan-dir=/etc/php/conf.d \
-		--with-pic \
+		--build=x86_64-linux-gnu \
+		--host=x86_64-linux-gnu \
+		--prefix=/usr \
+		--includedir=${prefix}/include/php/$(major).$(minor) \
+		--mandir=${prefix}/share/man/php/$(major).$(minor) \
+		--infodir=${prefix}/share/info/php/$(major).$(minor) \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		--program-suffix=$(major).$(minor) \
+		--libdir=${prefix}/lib/php/$(major).$(minor) \
+		--libexecdir=${prefix}/lib/php/$(major).$(minor) \
+		--datadir=${prefix}/share/php/$(major).$(minor) \
+		--libdir=${prefix}/lib/php/$(major).$(minor) \
+		--libexecdir=${prefix}/lib/php/$(major).$(minor) \
+		--with-config-file-path=/etc/php/$(major).$(minor) \
+		--with-config-file-scan-dir=/etc/php/$(major).$(minor)/conf.d \
+		--with-fpm-user=www-data \
+		--disable-debug \
+		--without-pear \
 		--without-gdbm \
+		--disable-short-tags \
+		--with-curl=$(CURL_PREFIX) \
+		--with-openssl=$(OPENSSL_PATH) \
+		--with-sqlite3 \
+		--with-pdo-sqlite \
+		--with-pdo-mysql=mysqlnd \
+		--with-mysqli=mysqlnd \
+		--enable-mysqlnd \
+		--with-pgsql \
+		--with-pdo-pgsql \
+		--with-readline \
+		--with-jpeg-dir \
+		--with-freetype-dir \
+		--with-png-dir \
+		--with-pic \
 		--with-gettext \
 		--with-iconv \
 		--with-pcre-regex \
 		--with-zlib \
 		--with-layout=GNU \
+		--with-gd \
+		--with-mcrypt=shared \
+		--enable-redis=shared \
+		--with-mhash \
+		--with-argon2 \
+		--with-kerberos \
 		--enable-exif \
 		--enable-ftp \
 		--enable-sockets \
 		--enable-sysvsem \
 		--enable-sysvshm \
 		--enable-sysvmsg \
-		--with-kerberos \
+		--enable-hash \
+		--enable-filter \
 		--enable-shmop \
 		--enable-calendar \
-		--with-gd \
-		--with-mcrypt \
 		--enable-pdo \
-		--with-pdo-mysql=mysqlnd \
-		--with-mysqli=mysqlnd \
-		--with-mysql \
+		--enable-xml=static \
+		--enable-xmlreader=static \
 		--enable-json \
-		--with-curl=$(CURL_PREFIX) \
 		--enable-fpm \
 		--enable-mbstring \
 		--enable-inline-optimization \
 		--enable-pcntl \
 		--enable-mbregex \
-		--with-mhash \
-		--with-fpm-user=www-data \
+		--enable-mbregex-backtrack \
 		--enable-zip \
-		--with-sqlite3 \
-		--with-readline \
 		--enable-opcache \
+		--enable-opcache-file \
+		--enable-huge-code-pages \
 		--enable-soap \
-		--with-jpeg-dir \
-		--with-freetype-dir \
-		--with-png-dir \
 		--enable-bcmath \
-		--disable-short-tags \
-		--enable-intl \
-		--with-openssl=$(OPENSSL_PATH) \
-		--with-pgsql \
-		--with-pdo-pgsql \
-		--enable-redis && \
+		--enable-phar=static \
+		--enable-intl=static && \
 	make -j$(CORES)
+
+pear:
+	rm -rf /tmp/php-pear
+	rm -rf /tmp/php-pear-install
+	mkdir -p /tmp/php-pear
+	mkdir -p /tmp/php-pear-install
+	wget -q https://pear.php.net/install-pear-nozlib.phar -O /tmp/php-pear/install-pear-nozlib.phar
+	php /tmp/php-pear/install-pear-nozlib.phar
+	rm -rf /tmp/php-pear-install/etc
+	mkdir -p /tmp/php-pear-install/usr/share/php/pear
+	mv /tmp/php-pear-install/lib/php/$(major).$(minor)/pear/.[!.]* /tmp/php-pear-install/usr/share/php/pear/
+	mv /tmp/php-pear-install/lib/php/$(major).$(minor)/pear/* /tmp/php-pear-install/usr/share/php/pear/
+	rm -rf /tmp/php-pear-install/lib
+
+	fpm -s dir \
+		-t deb \
+		-n php-pear \
+		-C /tmp/php-pear-install \
+		-p php-pear~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
+		-m "charlesportwoodii@erianna.com" \
+		--license "PHP License" \
+		--url https://github.com/charlesportwoodii/php-fpm-build \
+		--description "PHP PEAR" \
+		--vendor "Charles R. Portwood II"
 
 pre_package:
 	# Removing the work build directory
@@ -178,43 +219,82 @@ pre_package:
 	cd /tmp/php-$(VERSION) && \
 	make install INSTALL_ROOT=/tmp/php-$(VERSION)-install
 
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d
 
-	# Export the timezone as UTC
-	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/conf.d/UTC-timezone.ini
+	# Export the timezone as UTC 
+	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d/UTC-timezone.ini
+
+	# Output modules that are available as shared extensions
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available
+	echo "extension=redis.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/redis.ini
+	echo "extension=mcrypt.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/mcrypt.ini
+	echo "zend_extension=opcache.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/opache.ini
 
 	# Copy the FPM configuration
-	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.conf.default
-	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/php-fpm.d/pool.conf.default
+	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
+	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
+	
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
+	sed -i s/VERSION/$(major)$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
+
 	mkdir -p /tmp/php-$(VERSION)-install/lib/systemd/system
-	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm.service
+	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm-$(major).$(minor).service
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm-$(major).$(minor).service
 
 	# Copy the PHP.ini configuration
-	cp /tmp/php-$(VERSION)/php.ini* /tmp/php-$(VERSION)-install/usr/local/etc/php
+	cp /tmp/php-$(VERSION)/php.ini* /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)
 
 	# Remove useless items in /usr/lib/etc
 	rm -rf /tmp/php-$(VERSION)-install/usr/local/etc/php-fpm.conf.default
+	rm -rf /tmp/php-$(VERSION)-install/etc
 
 	# Copy the license file
-	cp /tmp/php-$(VERSION)/LICENSE /tmp/php-$(VERSION)-install/usr/local/etc/php/
+	cp /tmp/php-$(VERSION)/LICENSE /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)
 	
+	# Copy init.d for non systemd systems
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
+	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(VERSION)
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(VERSION)
+
+	# Copy the local configuration files
+	mkdir -p /tmp/php-$(VERSION)/debian
+	mkdir -p /tmp/php-$(VERSION)/rpm
+	cp $(SCRIPTPATH)/debian/* /tmp/php-$(VERSION)/debian
+	cp $(SCRIPTPATH)/rpm/* /tmp/php-$(VERSION)/rpm
+
+	# Edit packaging files for the right version
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/postinstall-pak
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/postinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/preinstall-pak
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/preinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/preremove-pak
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/preremove
+
+	# Remove phar to be packaged in a separate repository
+	rm -rf /tmp/php-$(VERSION)-install/etc/pear.conf
 	rm -rf /tmp/php-$(VERSION)-install/.registry
 	rm -rf /tmp/php-$(VERSION)-install/.channels
+	rm -rf /tmp/php-$(VERSION)-install/.depdblock
+	rm -rf /tmp/php-$(VERSION)-install/.filemap
+	rm -rf /tmp/php-$(VERSION)-install/.depdb
+	rm -rf /tmp/php-$(VERSION)-install/.lock
+	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar
+	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar.phar
+
+	# Make log and runtime directory
+	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
+	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
 fpm_debian: pre_package
 	echo "Building native package for debian"
-
-	# Copy init.d for non systemd systems
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
-	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm	
 
 	fpm -s dir \
 		-t deb \
 		-n $(RELEASENAME) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
 		-C /tmp/php-$(VERSION)-install \
-		-p $(RELEASENAME).$(micro)_$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
+		-p $(RELEASENAME)_$(micro)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \
@@ -227,9 +307,10 @@ fpm_debian: pre_package
 		--depends "libpq5 > 0" \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
-		--before-install $(SCRIPTPATH)/debian/preinstall-pak \
-		--after-install $(SCRIPTPATH)/debian/postinstall-pak \
-		--before-remove $(SCRIPTPATH)/debian/preremove-pak 
+		--force \
+		--before-install /tmp/php-$(VERSION)/debian/preinstall-pak \
+		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
+		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak 
 		
 fpm_rpm: pre_package
 	echo "Building native package for rpm"
@@ -239,7 +320,7 @@ fpm_rpm: pre_package
 		-n $(RELEASENAME) \
 		-v $(VERSION)_$(RELEASEVER) \
 		-C /tmp/php-$(VERSION)-install \
-		-p php-fpm-$(VERSION)_$(RELEASEVER).$(shell arch).rpm \
+		-p php-fpm-$(VERSION)_$(micro)-$(RELEASEVER).$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \
@@ -254,6 +335,7 @@ fpm_rpm: pre_package
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \
-		--before-install $(SCRIPTPATH)/rpm/preinstall \
-		--after-install $(SCRIPTPATH)/rpm/postinstall \
-		--before-remove $(SCRIPTPATH)/rpm/preremove 
+		--force \
+		--before-install /tmp/php-$(VERSION)/rpm/preinstall \
+		--after-install /tmp/php-$(VERSION)/rpm/postinstall \
+		--before-remove /tmp/php-$(VERSION)/rpm/preremove 

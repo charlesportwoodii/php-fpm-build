@@ -1,2 +1,2 @@
 export VERSION=5.6.24
-export RELEASEVER=2
+export RELEASEVER=3

@@ -103,7 +103,7 @@ ifeq ($(major),7)
 	echo "Using php7::phpredis"
 	cd /tmp/php-$(VERSION)/ext && git clone -b php7 https://github.com/phpredis/phpredis redis
 else
-	cd /tmp/php-$(VERSION)/ext && git clone https://github.com/phpredis/phpredis redis
+	cd /tmp/php-$(VERSION)/ext && git clone --branch 3.0.0 https://github.com/phpredis/phpredis redis
 endif
 
 	# Build

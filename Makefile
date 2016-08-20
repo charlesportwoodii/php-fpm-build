@@ -7,6 +7,9 @@ CURLVERSION?=7_46_0
 NGHTTPVERSION?=v1.5.0
 RELEASEVER?=1
 
+# Argon2 reference library implementation
+ARGON2_DIR=/tmp/libargon2
+
 # Bash data
 SCRIPTPATH=$(shell pwd -P)
 CORES=$(shell grep -c ^processor /proc/cpuinfo)
@@ -89,12 +92,26 @@ curl:
 	cd $(CURL_PREFIX) &&\
 	ln -fs lib lib64
 
-php:
+libargon2:
+	rm -rf $(ARGON2_DIR)
+	
+	cd /tmp && \
+	git clone https://github.com/P-H-C/phc-winner-argon2 libargon2 && \
+	cd $(ARGON2_DIR) && \
+	CFLAGS="-fPIC" make
+
+	cd $(ARGON2_DIR) && \
+	ln -s . lib && \
+	ln -s . libs
+
+	rm -rf $(ARGON2_DIR)/libargon2.so*
+
+php: libargon2
 	rm -rf /tmp/php-$(VERSION)
 	echo Building for PHP $(VERSION)
 
 	cd /tmp && \
-	git clone --depth 1 -b php-$(VERSION) https://github.com/php/php-src.git /tmp/php-$(VERSION)
+	git clone --depth 15 -b php-$(VERSION) https://github.com/php/php-src.git /tmp/php-$(VERSION)
 
 	# Checkout PHP	
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
@@ -103,7 +120,7 @@ ifeq ($(major),7)
 	echo "Using php7::phpredis"
 	cd /tmp/php-$(VERSION)/ext && git clone -b php7 https://github.com/phpredis/phpredis redis
 else
-	cd /tmp/php-$(VERSION)/ext && git clone --branch 2.2.8 https://github.com/phpredis/phpredis redis
+	cd /tmp/php-$(VERSION)/ext && git clone -b 2.2.8  https://github.com/phpredis/phpredis redis
 endif
 
 	# Build
@@ -155,7 +172,7 @@ endif
 		--with-mcrypt=shared \
 		--enable-redis=shared \
 		--with-mhash \
-		--with-argon2 \
+		--with-password-argon2=$(ARGON2_DIR) \
 		--with-kerberos \
 		--enable-exif \
 		--enable-ftp \
@@ -236,7 +253,7 @@ pre_package:
 	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
 	
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
-	sed -i s/VERSION/$(major)$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
 
 	mkdir -p /tmp/php-$(VERSION)-install/lib/systemd/system
 	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm-$(major).$(minor).service

@@ -15,11 +15,9 @@ fi
 
 $(which mv) /usr/local/etc/php/$VERSION/mods-available /etc/php/$VERSION/mods-available
 
-if [ ! -f /var/log/php/$VERSION/ ]; then
-	$(which mkdir) -p /var/log/php/$VERSION/
-	$(which touch) /var/log/php/$VERSION/slow.log
-	$(which chmod) -R 754 /var/log/php/$VERSION/slow.log
-fi
+$(which mkdir) -p /var/log/php/$VERSION/
+$(which touch) /var/log/php/$VERSION/slow.log
+$(which chmod) -R 754 /var/log/php/$VERSION/slow.log
 
 $(which mkdir) -p /var/run/php/$VERSION
 

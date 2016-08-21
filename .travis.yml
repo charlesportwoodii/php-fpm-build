@@ -20,7 +20,7 @@ before_install:
 
 script:
   - if [ -n "$TRAVIS_TAG" ]; then export VERSION=$( cut -d '-' -f 1 <<< "$TRAVIS_TAG" ) export RELEASEVER=$( cut -d '-' -f 2 <<< "$TRAVIS_TAG" ); echo "Setting versions via TravisCI Tag"; fi
-  - echo -e "export VERSION=$VERSION\nexport RELEASEVER=$RELESAEVER\n" > .vs
+  - echo -e "export VERSION=$VERSION\nexport RELEASEVER=$RELEASEVER\n" > .vs
   - cat .vs
   - docker-compose run $BUILD_IMAGE
   - mv *xenial*.deb build/deb/xenial || true

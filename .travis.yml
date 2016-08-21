@@ -5,8 +5,8 @@ dist: trusty
 language: generic
 
 env:
-  - BUILD_IMAGE=1604
-  - BUILD_IMAGE=1404
+  - BUILD_IMAGE=xenial
+  - BUILD_IMAGE=trusty
 
 services:
   - docker
@@ -17,8 +17,6 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - mkdir -p build/deb/trusty build/deb/xenial build/rpm/CentOS/7/x86_64
-  - source .vs
-  - docker-compose build $BUILD_IMAGE
 
 script:
   - source .vs

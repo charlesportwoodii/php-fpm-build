@@ -1,2 +1,0 @@
-export VERSION=5.6.25
-export RELEASEVER=4

@@ -19,7 +19,9 @@ before_install:
   - mkdir -p build/deb/trusty build/deb/xenial build/rpm/CentOS/7/x86_64
 
 script:
-  - source .vs
+  - if [ -n "$TRAVIS_TAG" ]; then export VERSION=$( cut -d '-' -f 1 <<< "$TRAVIS_TAG" ) export RELEASEVER=$( cut -d '-' -f 2 <<< "$TRAVIS_TAG" ); echo "Setting versions via TravisCI Tag"; fi
+  - echo "export VERSION=$VERSION\nexport RELEASEVER=$RELESAEVER\n > .vs"
+  - cat .vs
   - docker-compose run $BUILD_IMAGE
   - mv *xenial*.deb build/deb/xenial || true
   - mv *trusty*.deb build/deb/trusty || true
@@ -37,5 +39,6 @@ deploy:
   region: us-west-2
   local_dir: build 
   on:
-    all_branches: true
+    tags: true
+    all_branches: false
     repo: charlesportwoodii/php-fpm-build

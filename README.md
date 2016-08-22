@@ -1,6 +1,6 @@
 # Build Scripts for PHP FPM
 
-[![TravisCI](https://img.shields.io/travis/charlesportwoodii/php-fpm-build.svg?style=flat-square&branch=master-5.6 "TravisCI")](https://travis-ci.org/charlesportwoodii/php-fpm-build)
+[![TravisCI](https://img.shields.io/travis/charlesportwoodii/php-fpm-build.svg?style=flat-square&branch=master "TravisCI")](https://travis-ci.org/charlesportwoodii/php-fpm-build)
 
 This repository provides an opinionated build of PHP FPM, and enables you to quickly build and package modern versions of PHP.
 

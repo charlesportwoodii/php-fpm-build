@@ -1,10 +1,10 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-PCREVERSION?=8.37
+PCREVERSION?=8.39
 OPENSSLVERSION?=1.0.2h
-CURLVERSION?=7_46_0
-NGHTTPVERSION?=v1.5.0
+CURLVERSION?=7_50_1
+NGHTTPVERSION?=v1.14.0
 RELEASEVER?=1
 
 # Argon2 reference library implementation
@@ -65,13 +65,13 @@ nghttp2:
 	autoreconf -i && \
 	automake && \
 	autoconf && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) && \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) --enable-static=yes --enable-shared=no && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
 	ln -fs lib lib64
 
-curl:
+curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
@@ -86,13 +86,16 @@ curl:
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
+		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(CURL_PREFIX) &&\
 	ln -fs lib lib64
 
+# Only build libargon2 for PHP 7.2+
 libargon2:
+ifeq ($(shell test $(minor) -ge 2; echo $?),0)
 	rm -rf $(ARGON2_DIR)
 	
 	cd /tmp && \
@@ -105,6 +108,7 @@ libargon2:
 	ln -s . libs
 
 	rm -rf $(ARGON2_DIR)/libargon2.so*
+endif
 
 php: libargon2
 	rm -rf /tmp/php-$(VERSION)
@@ -126,7 +130,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf  --force && \
-	./configure \
+	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib"\
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

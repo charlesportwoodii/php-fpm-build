@@ -258,6 +258,7 @@ pre_package:
 	
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
+	sed -i s/PORT/$(major)$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
 
 	mkdir -p /tmp/php-$(VERSION)-install/lib/systemd/system
 	cp $(SCRIPTPATH)/php-fpm.service /tmp/php-$(VERSION)-install/lib/systemd/system/php-fpm-$(major).$(minor).service

@@ -10,6 +10,9 @@ RELEASEVER?=1
 # Argon2 reference library implementation
 ARGON2_DIR=/tmp/libargon2
 
+# Current Build Time
+BUILDTIME=$(shell date +%s)
+
 # Bash data
 SCRIPTPATH=$(shell pwd -P)
 CORES=$(shell grep -c ^processor /proc/cpuinfo)
@@ -224,8 +227,9 @@ pear:
 	fpm -s dir \
 		-t deb \
 		-n php-pear \
+		-v 2:01~all \
 		-C /tmp/php-pear-install \
-		-p php-pear~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb \
+		-p php-pear_2-01~all.deb \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \

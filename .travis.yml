@@ -25,7 +25,7 @@ script:
   - cat .vs
   - docker-compose run $BUILD_IMAGE
   - if [ "$BUILD_IMAGE" == "trusty" ] || [ "$BUILD_IMAGE" == "trusty" ]; then mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE; fi
-  - if [ "$BUILD_IMAGE" == "centos7" ]]; then mv *.rpm build/rpm/CentOS/7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "centos7" ]; then mv *.rpm build/rpm/CentOS/7/x86_64; fi
 
 deploy:
   provider: s3

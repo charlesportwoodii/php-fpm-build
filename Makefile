@@ -344,9 +344,9 @@ fpm_rpm: pre_package
 	fpm -s dir \
 		-t rpm \
 		-n $(RELEASENAME) \
-		-v $(VERSION)_$(RELEASEVER) \
+		-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
 		-C /tmp/php-$(VERSION)-install \
-		-p php-fpm-$(VERSION)_$(micro)-$(RELEASEVER).$(shell arch).rpm \
+		-p $(RELEASENAME)_$(micro)-$(RELEASEVER)~$(shell arch).rpm \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \

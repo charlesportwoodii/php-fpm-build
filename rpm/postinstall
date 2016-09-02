@@ -22,8 +22,8 @@ fi
 $(which mkdir) -p /var/run/php/$VERSION
 
 OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
-echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/conf.d/openssl-default.ini 
-echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/conf.d/openssl-default.ini
+echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/$VERSION/conf.d/openssl-default.ini 
+echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/$VERSION/conf.d/openssl-default.ini
 
 systemctl enable php-fpm-$VERSION.service
 systemctl start php-fpm-$VERSION.service

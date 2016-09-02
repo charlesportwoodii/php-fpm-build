@@ -7,7 +7,7 @@ VERSION=
 if [ ! -d /etc/php/$VERSION ]; then
 	$(which mkdir) -p /etc/php/$VERSION
 	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
-	$(which rm) /etc/php/$VERSIONLICENSE*
+	$(which rm) /etc/php/$VERSION/LICENSE*
 	$(which mv) /etc/php/$VERSION/php.ini-production /etc/php/$VERSION/php.ini
 	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
 	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf

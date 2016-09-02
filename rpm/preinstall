@@ -7,6 +7,7 @@ echo "Stopping PHP"
 systemctl stop php-fpm-$VERSION.service
 systemctl disable php-fpm-$VERSION.service
 
+$(which mkdir -p) /var/run/php/$VERSION
 $(which touch) /var/run/php/$VERSION/php-fpm.pid
 
 WWWDATAUSER=$(id www-data)

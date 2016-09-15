@@ -7,6 +7,7 @@ language: generic
 env:
   - BUILD_IMAGE=xenial
   - BUILD_IMAGE=trusty
+  - BUILD_IMAGE=centos7
 
 services:
   - docker
@@ -23,9 +24,8 @@ script:
   - echo -e "export VERSION=$VERSION\nexport RELEASEVER=$RELEASEVER\n" > .vs
   - cat .vs
   - docker-compose run $BUILD_IMAGE
-  - mv *xenial*.deb build/deb/xenial || true
-  - mv *trusty*.deb build/deb/trusty || true
-#  - mv *.rpm build/rpm/CentOS/7/x86_64
+  - if [ "$BUILD_IMAGE" == "trusty" ] || [ "$BUILD_IMAGE" == "xenial" ]; then mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE; fi
+  - if [ "$BUILD_IMAGE" == "centos7" ]; then mv *.rpm build/rpm/CentOS/7/x86_64; fi
 
 deploy:
   provider: s3
@@ -37,7 +37,7 @@ deploy:
   skip_cleanup: true
   acl: public_read
   region: us-west-2
-  local_dir: build
+  local_dir: build 
   on:
     tags: true
     all_branches: false

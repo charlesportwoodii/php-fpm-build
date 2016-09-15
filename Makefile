@@ -248,6 +248,8 @@ fpm_debian: pre_package
 		--depends "libpq5 > 0" \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
+		--force \
+		--no-deb-auto-config-files \
 		--before-install $(SCRIPTPATH)/debian/preinstall-pak \
 		--after-install $(SCRIPTPATH)/debian/postinstall-pak \
 		--before-remove $(SCRIPTPATH)/debian/preremove-pak 
@@ -275,6 +277,7 @@ fpm_rpm: pre_package
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \
+		--force \
 		--before-install $(SCRIPTPATH)/rpm/preinstall \
 		--after-install $(SCRIPTPATH)/rpm/postinstall \
 		--before-remove $(SCRIPTPATH)/rpm/preremove 

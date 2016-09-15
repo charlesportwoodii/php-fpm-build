@@ -334,6 +334,7 @@ fpm_debian: pre_package
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
+		--no-deb-auto-config-files \
 		--before-install /tmp/php-$(VERSION)/debian/preinstall-pak \
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak 

@@ -16,6 +16,7 @@ BUILDTIME=$(shell date +%s)
 # Bash data
 SCRIPTPATH=$(shell pwd -P)
 CORES=$(shell grep -c ^processor /proc/cpuinfo)
+ARCH=$(shell arch)
 
 major=$(shell echo $(VERSION) | cut -d. -f1)
 minor=$(shell echo $(VERSION) | cut -d. -f2)
@@ -45,12 +46,18 @@ openssl:
 	rm -rf /tmp/openssl*
 	cd /tmp && \
 	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
-	tar -xf openssl-$(OPENSSLVERSION).tar.gz && \
-	cd openssl-$(OPENSSLVERSION) && \
-	git clone https://github.com/cloudflare/sslconfig && \
-	cp sslconfig/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch . && \
-	patch -p1 < openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch 2>/dev/null; true && \
-	./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3 && \
+	tar -xf openssl-$(OPENSSLVERSION).tar.gz
+
+	if [[ "$(ARCH)" == "arm"* ]]; then \
+		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3; \
+	else \
+		cd /tmp/openssl-$(OPENSSLVERSION) && git clone https://github.com/cloudflare/sslconfig && \
+		cp sslconfig/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch . && \
+		patch -p1 < openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch 2>/dev/null; true && \
+		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
+	fi 
+
+	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	make depend && \
 	make -j$(CORES) && \
 	make all && \

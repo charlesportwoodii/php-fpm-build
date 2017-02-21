@@ -340,6 +340,8 @@ fpm_debian: pre_package
 		--depends "libjpeg-turbo8 > 0" \
 		--depends "$(LIBICU) > 0" \
 		--depends "libpq5 > 0" \
+		--depends "libfreetype6 > 0" \
+		--depends "libpng12-0 > 0" \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \

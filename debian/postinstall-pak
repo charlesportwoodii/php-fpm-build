@@ -38,10 +38,11 @@ else
 	$(which systemctl) start php-fpm-$VERSION.service
 fi
 
-update-alternatives --install /usr/bin/php php $(which php$VERSION) 1
-update-alternatives --install /usr/bin/php-config php-config $(which php-config$VERSION) 1
-update-alternatives --install /usr/bin/phpize phpize $(which phpize$VERSION) 1
-update-alternatives --install /usr/bin/php-cgi php-cgi $(which php-cgi$VERSION) 1
-update-alternatives --install /usr/bin/phpdbg phpdbg $(which phpdbg$VERSION) 1
+priority=$(echo $VERSION | tr -d '.')
+update-alternatives --install /usr/bin/php php $(which php$VERSION) $priority
+update-alternatives --install /usr/bin/php-config php-config $(which php-config$VERSION) $priority
+update-alternatives --install /usr/bin/phpize phpize $(which phpize$VERSION) $priority
+update-alternatives --install /usr/bin/php-cgi php-cgi $(which php-cgi$VERSION) $priority
+update-alternatives --install /usr/bin/phpdbg phpdbg $(which phpdbg$VERSION) $priority
 
 exit 0

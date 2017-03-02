@@ -264,6 +264,16 @@ pre_package:
 	echo "extension=redis.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/redis.ini
 	echo "extension=mcrypt.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/mcrypt.ini
 	echo "zend_extension=opcache.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/opache.ini
+	
+	# Secure Sessions defaults
+	echo "session.use_cookies = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.cookie_secure = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.use_only_cookies = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.cookie_httponly = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.entropy_length = 32" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.entropy_file = /dev/urandom" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.hash_function = sha256" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
+	echo "session.hash_bits_per_character = 5" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
 
 	# Copy the FPM configuration
 	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default

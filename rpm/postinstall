@@ -23,4 +23,6 @@ echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/conf.d/openssl-default.in
 systemctl enable php-fpm.service
 systemctl start php-fpm.service
 
+echo "This package is being deprecated on May 1 2017. Please upgrade to the new package format then. For more information see notice at: https://github.com/charlesportwoodii/php-fpm-build/tree/stable"
+
 exit 0

@@ -1,3 +1,14 @@
+# NOTICE
+
+Support for old `php-fpm` packages is bring dropped in favor of the new `phpx.y-fpm` packages provided by the master branch. This branch will be removed on May 1 2017 and support for the old package format will be removed at that time. Pleae update to the new package version
+
+```
+# If using apt source
+apt-get install php7.1-fpm php7.0-fpm php5.6-fpm
+```
+
+-----
+
 # Build Scripts for PHP FPM
 
 [![TravisCI](https://img.shields.io/travis/charlesportwoodii/php-fpm-build.svg?style=flat-square&branch=stable "TravisCI")](https://travis-ci.org/charlesportwoodii/php-fpm-build)

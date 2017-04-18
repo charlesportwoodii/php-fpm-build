@@ -299,8 +299,8 @@ pre_package:
 	
 	# Copy init.d for non systemd systems
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/init.d
-	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(VERSION)
-	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(VERSION)
+	cp $(SCRIPTPATH)/debian/init-php-fpm /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(major)$(minor)
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install/usr/local/etc/init.d/php-fpm-$(major)$(minor)
 
 	# Copy the local configuration files
 	mkdir -p /tmp/php-$(VERSION)/debian

@@ -7,8 +7,21 @@ CURLVERSION?=7_52_1
 NGHTTPVERSION?=v1.14.0
 RELEASEVER?=1
 
-# Argon2 reference library implementation
+# Library versions
+ARGON2VERSION?=20161029
+LIBSODIUMVERSION?=stable
+
+# External extension versions
+REDISEXTVERSION?=3.1.2
+ARGON2EXTVERSION?=1.2.1
+LIBSODIUMEXTVERSION?=1.0.6
+
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_sqlite mysqlnd sqlite3 xml mbstring zip intl redis mcrypt xsl argon2 libsodium
+SHARED_ZEND_EXTENSIONS := opcache
+
+# Reference library implementations
 ARGON2_DIR=/tmp/libargon2
+LIBSODIUM_DIR=/tmp/libsodium
 
 # Current Build Time
 BUILDTIME=$(shell date +%s)
@@ -39,7 +52,14 @@ endif
 RELEASENAME=php$(major).$(minor)-fpm
 PROVIDES=php$(major).$(minor)-fpm
  
-build: openssl curl php
+build: openssl curl libraries php
+
+apt:
+	apt-get update
+	apt-get install libxslt-dev
+	
+yum:
+	yum install libxslt
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -107,11 +127,10 @@ curl: nghttp2
 
 # Only build libargon2 for PHP 7.2+
 libargon2:
-ifeq ($(shell test $(minor) -ge 2; echo $?),0)
 	rm -rf $(ARGON2_DIR)
 	
 	cd /tmp && \
-	git clone https://github.com/P-H-C/phc-winner-argon2 libargon2 && \
+	git clone https://github.com/P-H-C/phc-winner-argon2 -b $(ARGON2VERSION) libargon2 && \
 	cd $(ARGON2_DIR) && \
 	CFLAGS="-fPIC" make
 
@@ -120,9 +139,21 @@ ifeq ($(shell test $(minor) -ge 2; echo $?),0)
 	ln -s . libs
 
 	rm -rf $(ARGON2_DIR)/libargon2.so*
-endif
 
-php: libargon2
+libsodium:
+	rm -rf $(LIBSODIUM_DIR)
+
+	cd /tmp && \
+	git clone -b $(LIBSODIUMVERSION) https://github.com/jedisct1/libsodium.git && \
+	cd /tmp/libsodium && \
+	rm -rf /tmp/libsodium/lib && \
+	./autogen.sh && \
+	./configure --disable-shared --disable-pie && \
+	CFLAGS="-fPIC" make install
+
+libraries: libargon2 libsodium
+
+php:
 	rm -rf /tmp/php-$(VERSION)
 	echo Building for PHP $(VERSION)
 
@@ -132,12 +163,11 @@ php: libargon2
 	# Checkout PHP	
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
-ifeq ($(major),7)
-	echo "Using php7::phpredis"
-	cd /tmp/php-$(VERSION)/ext && git clone -b php7 https://github.com/phpredis/phpredis redis
-else
-	cd /tmp/php-$(VERSION)/ext && git clone -b 2.2.8  https://github.com/phpredis/phpredis redis
-endif
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
+	mkdir -p /tmp/php-$(VERSION)/ext/argon2
+	cp -R $(ARGON2_DIR)/*  /tmp/php-$(VERSION)/ext/argon2/
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php libsodium
 
 	# Build
 	cd /tmp/php-$(VERSION) && \
@@ -167,13 +197,19 @@ endif
 		--disable-short-tags \
 		--with-curl=$(CURL_PREFIX) \
 		--with-openssl=$(OPENSSL_PATH) \
-		--with-sqlite3 \
-		--with-pdo-sqlite \
-		--with-pdo-mysql=mysqlnd \
-		--with-mysqli=mysqlnd \
-		--enable-mysqlnd \
-		--with-pgsql \
-		--with-pdo-pgsql \
+		--enable-pdo \
+		--enable-mysqlnd=shared \
+		--with-pgsql=shared \
+		--with-sqlite3=shared \
+		--with-pdo-sqlite=shared \
+		--with-pdo-mysql=shared,mysqlnd \
+		--with-mysqli=shared,mysqlnd \
+		--with-pdo-pgsql=shared \
+		--with-mcrypt=shared \
+		--with-xsl=shared \
+		--enable-redis=shared \
+		--with-argon2=shared,$(ARGON2_DIR) \
+		--with-libsodium=shared \
 		--with-readline \
 		--with-jpeg-dir \
 		--with-freetype-dir \
@@ -182,42 +218,40 @@ endif
 		--with-gettext \
 		--with-iconv \
 		--with-pcre-regex \
+		--with-pcre-jit \
 		--with-zlib \
 		--with-layout=GNU \
-		--with-gd \
-		--with-mcrypt=shared \
-		--enable-redis=shared \
+		--with-gd=shared \
 		--with-mhash \
 		--with-password-argon2=$(ARGON2_DIR) \
 		--with-kerberos \
 		--enable-exif \
-		--enable-ftp \
-		--enable-sockets \
-		--enable-sysvsem \
-		--enable-sysvshm \
-		--enable-sysvmsg \
 		--enable-hash \
 		--enable-filter \
 		--enable-shmop \
 		--enable-calendar \
-		--enable-pdo \
-		--enable-xml=static \
-		--enable-xmlreader=static \
+		--enable-sockets \
+		--enable-sysvsem \
+		--enable-sysvshm \
+		--enable-sysvmsg \
+		--enable-ftp \
+		--enable-xml=shared \
+		--enable-xmlreader=shared \
+		--enable-mbstring=shared \
+		--enable-zip=shared \
+		--enable-intl=shared \
+		--enable-soap=shared \
 		--enable-json \
 		--enable-fpm \
-		--enable-mbstring \
 		--enable-inline-optimization \
 		--enable-pcntl \
 		--enable-mbregex \
 		--enable-mbregex-backtrack \
-		--enable-zip \
 		--enable-opcache \
 		--enable-opcache-file \
 		--enable-huge-code-pages \
-		--enable-soap \
 		--enable-bcmath \
-		--enable-phar=static \
-		--enable-intl=static && \
+		--enable-phar=static && \
 	make -j$(CORES)
 
 pear:
@@ -261,9 +295,13 @@ pre_package:
 
 	# Output modules that are available as shared extensions
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available
-	echo "extension=redis.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/redis.ini
-	echo "extension=mcrypt.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/mcrypt.ini
-	echo "zend_extension=opcache.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/opache.ini
+	for ext in $(SHARED_EXTENSIONS); do \
+		echo "extension=$$ext.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+	done;
+
+	for ext in $(SHARED_ZEND_EXTENSIONS); do \
+		echo "zend_extension=$$ext.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+	done;
 	
 	# Secure Sessions defaults
 	echo "session.use_cookies = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
@@ -359,7 +397,7 @@ fpm_debian: pre_package
 		--before-install /tmp/php-$(VERSION)/debian/preinstall-pak \
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak 
-		
+
 fpm_rpm: pre_package
 	echo "Building native package for rpm"
 

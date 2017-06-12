@@ -16,7 +16,7 @@ REDISEXTVERSION?=3.1.2
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=1.0.6
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_sqlite mysqlnd sqlite3 xml mbstring zip intl redis mcrypt xsl argon2 libsodium
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_sqlite json pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 enchant ldap odbc pspell recode argon2 libsodium gmp sysvsem sysvshm sysvmsg
 SHARED_ZEND_EXTENSIONS := opcache
 
 # Reference library implementations
@@ -53,13 +53,6 @@ RELEASENAME=php$(major).$(minor)-fpm
 PROVIDES=php$(major).$(minor)-fpm
  
 build: openssl curl libraries php
-
-apt:
-	apt-get update
-	apt-get install libxslt-dev
-	
-yum:
-	yum install libxslt
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -207,9 +200,15 @@ php:
 		--with-pdo-pgsql=shared \
 		--with-mcrypt=shared \
 		--with-xsl=shared \
-		--enable-redis=shared \
 		--with-argon2=shared,$(ARGON2_DIR) \
 		--with-libsodium=shared \
+		--with-bz2=shared \
+		--with-enchant=shared \
+		--with-ldap=shared \
+		--with-odbc=shared \
+		--with-pspell=shared \
+		--with-recode=shared \
+		--with-gmp=shared \
 		--with-readline \
 		--with-jpeg-dir \
 		--with-freetype-dir \
@@ -222,18 +221,21 @@ php:
 		--with-zlib \
 		--with-layout=GNU \
 		--with-gd=shared \
+		--enable-gd-native-ttf \
+    	--enable-gd-jis-conv \
 		--with-mhash \
 		--with-password-argon2=$(ARGON2_DIR) \
 		--with-kerberos \
+		--enable-redis=shared \
 		--enable-exif \
 		--enable-hash \
 		--enable-filter \
 		--enable-shmop \
 		--enable-calendar \
 		--enable-sockets \
-		--enable-sysvsem \
-		--enable-sysvshm \
-		--enable-sysvmsg \
+		--enable-sysvsem=shared \
+		--enable-sysvshm=shared \
+		--enable-sysvmsg=shared \
 		--enable-ftp \
 		--enable-xml=shared \
 		--enable-xmlreader=shared \
@@ -241,7 +243,7 @@ php:
 		--enable-zip=shared \
 		--enable-intl=shared \
 		--enable-soap=shared \
-		--enable-json \
+		--enable-json=shared \
 		--enable-fpm \
 		--enable-inline-optimization \
 		--enable-pcntl \

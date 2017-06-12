@@ -13,7 +13,7 @@ if [ ! -d /etc/php/$VERSION ]; then
 	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
 
-$(which cp) -R /usr/local/etc/php/$VERSION/mods-available/* /etc/php/$VERSION/mods-available.
+$(which cp) -R /usr/local/etc/php/$VERSION/mods-available/* /etc/php/$VERSION/mods-available
 
 $(which mkdir) -p /var/log/php/$VERSION/
 $(which touch) /var/log/php/$VERSION/slow.log

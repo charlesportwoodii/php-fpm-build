@@ -34,6 +34,7 @@ ARCH=$(shell arch)
 major=$(shell echo $(VERSION) | cut -d. -f1)
 minor=$(shell echo $(VERSION) | cut -d. -f2)
 micro=$(shell echo $(VERSION) | cut -d. -f3)
+TESTVERSION=$(major)$(minor)
 
 # Prefixes and constants
 OPENSSL_PATH=/opt/openssl
@@ -47,6 +48,14 @@ else ifeq ($(shell lsb_release --codename | cut -f2),xenial)
 LIBICU=libicu55
 else
 LIBICU=libicu48
+endif
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
+PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
+endif
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
+PHP71ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
 RELEASENAME=php$(major).$(minor)-fpm
@@ -118,8 +127,9 @@ curl: nghttp2
 	cd $(CURL_PREFIX) &&\
 	ln -fs lib lib64
 
-# Only build libargon2 for PHP 7.2+
+# Only build libargon2 for PHP 7.0+
 libargon2:
+ifeq ($(shell test $(major)$(minor) -ge 70; echo $?),0)
 	rm -rf $(ARGON2_DIR)
 	
 	cd /tmp && \
@@ -132,6 +142,7 @@ libargon2:
 	ln -s . libs
 
 	rm -rf $(ARGON2_DIR)/libargon2.so*
+endif
 
 libsodium:
 	rm -rf $(LIBSODIUM_DIR)
@@ -157,9 +168,15 @@ php:
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
+
+ifeq ($(shell test $(major)$(minor) -ge 70; echo $?),0)
+	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
+
 	mkdir -p /tmp/php-$(VERSION)/ext/argon2
 	cp -R $(ARGON2_DIR)/*  /tmp/php-$(VERSION)/ext/argon2/
+endif
+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php libsodium
 
 	# Build
@@ -200,7 +217,6 @@ php:
 		--with-pdo-pgsql=shared \
 		--with-mcrypt=shared \
 		--with-xsl=shared \
-		--with-argon2=shared,$(ARGON2_DIR) \
 		--with-libsodium=shared \
 		--with-bz2=shared \
 		--with-enchant=shared \
@@ -224,7 +240,6 @@ php:
 		--enable-gd-native-ttf \
     	--enable-gd-jis-conv \
 		--with-mhash \
-		--with-password-argon2=$(ARGON2_DIR) \
 		--with-kerberos \
 		--enable-redis=shared \
 		--enable-exif \
@@ -253,7 +268,9 @@ php:
 		--enable-opcache-file \
 		--enable-huge-code-pages \
 		--enable-bcmath \
-		--enable-phar=static && \
+		--enable-phar=static \
+		$(PHP70ARGS) \
+		$(PHP71ARGS) && \
 	make -j$(CORES)
 
 pear:
@@ -294,16 +311,6 @@ pre_package:
 
 	# Export the timezone as UTC 
 	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d/UTC-timezone.ini
-
-	# Output modules that are available as shared extensions
-	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available
-	for ext in $(SHARED_EXTENSIONS); do \
-		echo "extension=$$ext.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
-	done;
-
-	for ext in $(SHARED_ZEND_EXTENSIONS); do \
-		echo "zend_extension=$$ext.so" > /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
-	done;
 	
 	# Secure Sessions defaults
 	echo "session.use_cookies = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
@@ -371,7 +378,20 @@ pre_package:
 	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
-fpm_debian: pre_package
+pre_package_ext:
+
+	# Extensions are to be packaged separately
+	for ext in $(SHARED_EXTENSIONS); do \
+		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available
+		echo "extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+	done;
+
+	for ext in $(SHARED_ZEND_EXTENSIONS); do \
+		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available
+		echo "zend_extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+	done;
+
+fpm_debian: pre_package pre_package_ext
 	echo "Building native package for debian"
 
 	fpm -s dir \
@@ -400,7 +420,7 @@ fpm_debian: pre_package
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak 
 
-fpm_rpm: pre_package
+fpm_rpm: pre_package  pre_package_ext
 	echo "Building native package for rpm"
 
 	fpm -s dir \

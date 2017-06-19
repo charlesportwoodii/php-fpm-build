@@ -496,7 +496,7 @@ fpm_debian: pre_package pre_package_ext
 			--url https://github.com/charlesportwoodii/php-fpm-build \
 			--description "PHP $$ext, $(VERSION)" \
 			--vendor "Charles R. Portwood II" \
-			--depends "php$(major).$(minor)-common" \
+			--depends "php$(major).$(minor)-fpm" \
 			--deb-systemd-restart-after-upgrade \
 			--template-scripts \
 			--force \
@@ -547,7 +547,7 @@ fpm_rpm: pre_package pre_package_ext
 			--url https://github.com/charlesportwoodii/php-fpm-build \
 			--description "PHP $$ext, $(VERSION)" \
 			--vendor "Charles R. Portwood II" \
-			--depends "php$(major).$(minor)-common" \
+			--depends "php$(major).$(minor)-fpm" \
 			--rpm-digest sha384 \
 			--rpm-compression gzip \
 			--template-scripts \

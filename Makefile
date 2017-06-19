@@ -3,7 +3,7 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.40
 OPENSSLVERSION?=1.0.2l
-CURLVERSION?=7_52_1
+CURLVERSION?=7_54_1
 NGHTTPVERSION?=v1.14.0
 RELEASEVER?=1
 
@@ -16,8 +16,9 @@ REDISEXTVERSION?=3.1.2
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=1.0.6
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_sqlite json pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 enchant ldap odbc pspell recode argon2 libsodium gmp sysvsem sysvshm sysvmsg
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql json pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 SHARED_ZEND_EXTENSIONS := opcache
+REALIZED_EXTENSIONS := sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -60,7 +61,13 @@ endif
 
 RELEASENAME=php$(major).$(minor)-fpm
 PROVIDES=php$(major).$(minor)-fpm
- 
+
+CHDIR_SHELL := $(SHELL)
+define chdir
+   $(eval _D=$(firstword $(1) $(@D)))
+   $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
+endef
+
 build: openssl curl libraries php
 
 openssl:
@@ -129,7 +136,7 @@ curl: nghttp2
 
 # Only build libargon2 for PHP 7.0+
 libargon2:
-ifeq ($(shell test $(major)$(minor) -ge 70; echo $?),0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	rm -rf $(ARGON2_DIR)
 	
 	cd /tmp && \
@@ -169,7 +176,7 @@ php:
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
 
-ifeq ($(shell test $(major)$(minor) -ge 70; echo $?),0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
 
@@ -181,8 +188,8 @@ endif
 
 	# Build
 	cd /tmp/php-$(VERSION) && \
-	./buildconf  --force && \
-	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib"\
+	./buildconf --force && \
+	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \
@@ -207,7 +214,6 @@ endif
 		--disable-short-tags \
 		--with-curl=$(CURL_PREFIX) \
 		--with-openssl=$(OPENSSL_PATH) \
-		--enable-pdo \
 		--enable-mysqlnd=shared \
 		--with-pgsql=shared \
 		--with-sqlite3=shared \
@@ -241,16 +247,18 @@ endif
     	--enable-gd-jis-conv \
 		--with-mhash \
 		--with-kerberos \
+		--with-fileinfo \
 		--enable-redis=shared \
 		--enable-exif \
+		--enable-ctype \
 		--enable-hash \
 		--enable-filter \
 		--enable-shmop \
 		--enable-calendar \
 		--enable-sockets \
-		--enable-sysvsem=shared \
-		--enable-sysvshm=shared \
-		--enable-sysvmsg=shared \
+		--enable-sysvsem \
+		--enable-sysvshm \
+		--enable-sysvmsg \
 		--enable-ftp \
 		--enable-xml=shared \
 		--enable-xmlreader=shared \
@@ -308,6 +316,8 @@ pre_package:
 
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/php-fpm.d
+
+	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available
 
 	# Export the timezone as UTC 
 	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d/UTC-timezone.ini
@@ -379,16 +389,69 @@ pre_package:
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
 pre_package_ext:
-
-	# Extensions are to be packaged separately
-	for ext in $(SHARED_EXTENSIONS); do \
-		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available
-		echo "extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+	$(eval PHPAPI := $(shell /tmp/php-7.1.6/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
+	
+	# Clean up of realized extensions
+	for ext in $(REALIZED_EXTENSIONS); do \
+		rm -rf /tmp/php$(VERSION)-$$ext; \
 	done;
 
-	for ext in $(SHARED_ZEND_EXTENSIONS); do \
-		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available
+	# Extensions are to be packaged separately
+	for ext in $(SHARED_EXTENSIONS) $(SHARED_ZEND_EXTENSIONS); do \
+		rm -rf /tmp/php$(VERSION)-$$ext; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		echo "zend_extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+		cp /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		cp -R /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
+		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
+	done;
+
+	rm -rf /tmp/php-$(VERSION)-install/lib/php/$(major).$(minor)/$(PHPAPI)/
+
+	# Add some Opcache defaults
+	echo "opcache.enable = true" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.enable_cli = true" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.error_log = /var/log/php.log" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.save_comments = false" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.enable_file_override = true" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.memory_consumption=128" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.max_accelerated_files=10000" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.max_wasted_percentage=10" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+	echo "opcache.validate_timestamps=0" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;
+
+	# Merge Sqlite
+	cp -R /tmp/php$(VERSION)-pdo_sqlite/* /tmp/php$(VERSION)-sqlite3/
+	rm -rf /tmp/php$(VERSION)-pdo_sqlite
+	rm -rf /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/*
+	echo "extension=sqlite3.so" > /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/sqlite3.ini;
+	echo "extension=pdo_sqlite.so" > /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/sqlite3.ini;
+
+	# Merge MySQL
+	mkdir -p /tmp/php$(VERSION)-mysql/
+	cp -R /tmp/php$(VERSION)-mysqli/* /tmp/php$(VERSION)-mysql/
+	rm -rf /tmp/php$(VERSION)-mysqli
+	cp -R /tmp/php$(VERSION)-mysqlnd/* /tmp/php$(VERSION)-mysql/
+	rm -rf /tmp/php$(VERSION)-mysqlnd
+	cp -R /tmp/php$(VERSION)-pdo_mysql/* /tmp/php$(VERSION)-mysql/
+	rm -rf /tmp/php$(VERSION)-pdo_mysql
+	rm -rf /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/*
+
+	echo "extension=mysqlnd.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+	echo "extension=mysqli.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+	echo "extension=pdo_mysql.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+
+	# Merge pgsql
+	cp -R /tmp/php$(VERSION)-pdo_pgsql/* /tmp/php$(VERSION)-pgsql/
+	rm -rf /tmp/php$(VERSION)-pdo_pgsql
+	rm -rf /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/*
+	echo "extension=pgsql.so" > /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/pgsql.ini;
+	echo "extension=pdo_pgsql.so" > /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/pgsql.ini;
+
+	for ext in $(REALIZED_EXTENSIONS); do \
+		mkdir -p /tmp/php$(VERSION)-$$ext/etc/php/$(major).$(minor)/mods-available; \
+		ln -s /usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini /tmp/php$(VERSION)-$$ext/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
 	done;
 
 fpm_debian: pre_package pre_package_ext
@@ -418,9 +481,29 @@ fpm_debian: pre_package pre_package_ext
 		--no-deb-auto-config-files \
 		--before-install /tmp/php-$(VERSION)/debian/preinstall-pak \
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
-		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak 
+		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak \
+		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-common php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar"
 
-fpm_rpm: pre_package  pre_package_ext
+	for ext in $(REALIZED_EXTENSIONS); do \
+		fpm -s dir \
+			-t deb \
+			-n "php$(major).$(minor)-$$ext" \
+			-v $(VERSION)-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2) \
+			-C "/tmp/php$(VERSION)-$$ext" \
+			-p "php$(major).$(minor).$(micro)-$$ext-$(RELEASEVER)~$(shell lsb_release --codename | cut -f2)_$(shell uname -m).deb" \
+			-m "charlesportwoodii@erianna.com" \
+			--license "PHP License" \
+			--url https://github.com/charlesportwoodii/php-fpm-build \
+			--description "PHP $$ext, $(VERSION)" \
+			--vendor "Charles R. Portwood II" \
+			--depends "php$(major).$(minor)-common" \
+			--deb-systemd-restart-after-upgrade \
+			--template-scripts \
+			--force \
+			--no-deb-auto-config-files; \
+	done;
+	
+fpm_rpm: pre_package pre_package_ext
 	echo "Building native package for rpm"
 
 	fpm -s dir \
@@ -449,4 +532,24 @@ fpm_rpm: pre_package  pre_package_ext
 		--force \
 		--before-install /tmp/php-$(VERSION)/rpm/preinstall \
 		--after-install /tmp/php-$(VERSION)/rpm/postinstall \
-		--before-remove /tmp/php-$(VERSION)/rpm/preremove 
+		--before-remove /tmp/php-$(VERSION)/rpm/preremove \
+		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-common php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar"
+		
+	for ext in $(REALIZED_EXTENSIONS); do \
+		fpm -s dir \
+			-t rpm \
+			-n "php$(major).$(minor)-$$ext" \
+			-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
+			-C "/tmp/php$(VERSION)-$$ext" \
+			-p "php$(major).$(minor).$(micro)-$$ext-$(RELEASEVER)~$(shell arch).rpm" \
+			-m "charlesportwoodii@erianna.com" \
+			--license "PHP License" \
+			--url https://github.com/charlesportwoodii/php-fpm-build \
+			--description "PHP $$ext, $(VERSION)" \
+			--vendor "Charles R. Portwood II" \
+			--depends "php$(major).$(minor)-common" \
+			--rpm-digest sha384 \
+			--rpm-compression gzip \
+			--template-scripts \
+			--force \
+	done;

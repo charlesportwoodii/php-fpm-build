@@ -482,6 +482,7 @@ fpm_debian: pre_package pre_package_ext
 		--before-install /tmp/php-$(VERSION)/debian/preinstall-pak \
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak \
+		--deb-compression=gz \
 		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-common php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
@@ -498,6 +499,7 @@ fpm_debian: pre_package pre_package_ext
 			--vendor "Charles R. Portwood II" \
 			--depends "php$(major).$(minor)-fpm" \
 			--deb-systemd-restart-after-upgrade \
+			--deb-compression=gz \
 			--template-scripts \
 			--force \
 			--no-deb-auto-config-files; \

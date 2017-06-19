@@ -551,5 +551,5 @@ fpm_rpm: pre_package pre_package_ext
 			--rpm-digest sha384 \
 			--rpm-compression gzip \
 			--template-scripts \
-			--force \
+			--force; \
 	done;

@@ -6,7 +6,7 @@ services:
     trusty: 
         image: charlesportwoodii/trusty:build
         container_name: trusty_x64
-        command: bash -lc "source .vs &&make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_debian VERSION=$VERSION"
+        command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_debian VERSION=$VERSION"
         volumes: 
             - .:/data
         working_dir: /data

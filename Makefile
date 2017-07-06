@@ -16,9 +16,9 @@ REDISEXTVERSION?=3.1.2
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=1.0.6
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql json pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := sqlite3 mysql pgsql json xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
+REALIZED_EXTENSIONS := sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -266,7 +266,7 @@ endif
 		--enable-zip=shared \
 		--enable-intl=shared \
 		--enable-soap=shared \
-		--enable-json=shared \
+		--enable-json \
 		--enable-fpm \
 		--enable-inline-optimization \
 		--enable-pcntl \
@@ -389,15 +389,15 @@ pre_package:
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
 pre_package_ext:
-	$(eval PHPAPI := $(shell /tmp/php-7.1.6/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
-	
+	$(eval PHPAPI := $(shell /tmp/php-$$VERSION/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
+
 	# Clean up of realized extensions
 	for ext in $(REALIZED_EXTENSIONS); do \
 		rm -rf /tmp/php$(VERSION)-$$ext; \
 	done;
 
 	# Extensions are to be packaged separately
-	for ext in $(SHARED_EXTENSIONS) do \
+	for ext in $(SHARED_EXTENSIONS); do \
 		rm -rf /tmp/php$(VERSION)-$$ext; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
@@ -408,7 +408,7 @@ pre_package_ext:
 		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
 	done;
 	
-	for ext in $(SHARED_ZEND_EXTENSIONS) do \
+	for ext in $(SHARED_ZEND_EXTENSIONS); do \
 		rm -rf /tmp/php$(VERSION)-$$ext; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
@@ -486,6 +486,10 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
 		--depends "libpng12-0 > 0" \
+		--depends "libenchant1c2a > 0" \
+		--depends "aspell-en > 0" \
+		--depends "librecode0 > 0" \
+		--depends "libmysqlclient20 > 0" \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \

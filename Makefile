@@ -437,7 +437,7 @@ pre_package_ext:
 	rm -rf /tmp/php$(VERSION)-pdo_sqlite
 	rm -rf /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/*
 	echo "extension=sqlite3.so" > /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/sqlite3.ini;
-	echo "extension=pdo_sqlite.so" > /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/sqlite3.ini;
+	echo "extension=pdo_sqlite.so" >> /tmp/php$(VERSION)-sqlite3/usr/local/etc/php/$(major).$(minor)/mods-available/sqlite3.ini;
 
 	# Merge MySQL
 	mkdir -p /tmp/php$(VERSION)-mysql/
@@ -450,15 +450,15 @@ pre_package_ext:
 	rm -rf /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/*
 
 	echo "extension=mysqlnd.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
-	echo "extension=mysqli.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
-	echo "extension=pdo_mysql.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+	echo "extension=mysqli.so" >> /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+	echo "extension=pdo_mysql.so" >? /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
 
 	# Merge pgsql
 	cp -R /tmp/php$(VERSION)-pdo_pgsql/* /tmp/php$(VERSION)-pgsql/
 	rm -rf /tmp/php$(VERSION)-pdo_pgsql
 	rm -rf /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/*
 	echo "extension=pgsql.so" > /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/pgsql.ini;
-	echo "extension=pdo_pgsql.so" > /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/pgsql.ini;
+	echo "extension=pdo_pgsql.so" >> /tmp/php$(VERSION)-pgsql/usr/local/etc/php/$(major).$(minor)/mods-available/pgsql.ini;
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		mkdir -p /tmp/php$(VERSION)-$$ext/etc/php/$(major).$(minor)/mods-available; \

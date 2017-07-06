@@ -18,7 +18,7 @@ LIBSODIUMEXTVERSION?=1.0.6
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql json pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
+REALIZED_EXTENSIONS := sqlite3 mysql pgsql json xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -397,7 +397,18 @@ pre_package_ext:
 	done;
 
 	# Extensions are to be packaged separately
-	for ext in $(SHARED_EXTENSIONS) $(SHARED_ZEND_EXTENSIONS); do \
+	for ext in $(SHARED_EXTENSIONS) do \
+		rm -rf /tmp/php$(VERSION)-$$ext; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		mkdir -p /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
+		echo "extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
+		cp /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		cp -R /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
+		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
+	done;
+	
+	for ext in $(SHARED_ZEND_EXTENSIONS) do \
 		rm -rf /tmp/php$(VERSION)-$$ext; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \

@@ -14,7 +14,7 @@ LIBSODIUMVERSION?=stable
 # External extension versions
 REDISEXTVERSION?=3.1.2
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=1.0.6
+LIBSODIUMEXTVERSION?=2.0.0
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
 SHARED_ZEND_EXTENSIONS := opcache

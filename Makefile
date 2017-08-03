@@ -146,6 +146,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;)
 
 	cd $(ARGON2_DIR) && \
 	ln -s . lib && \
+	ln -s . lib64 && \
 	ln -s . libs
 
 	rm -rf $(ARGON2_DIR)/libargon2.so*

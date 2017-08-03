@@ -55,6 +55,12 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;)
 PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
 endif
 
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
+PHP71ARGS="--with-mcrypt=shared"
+PHP71_RPM_DEPENDS="--depends "libmcrypt > 0"
+PHP71_DEB_DEPENDS="--depends "libmcrypt4 > 0"
+endif
+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
@@ -69,6 +75,13 @@ define chdir
 endef
 
 build: openssl curl libraries php
+
+
+determine_extensions:
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
+	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/mcrypt//g))
+	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/mcrypt//g))
+endif
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -165,7 +178,7 @@ libsodium:
 
 libraries: libargon2 libsodium
 
-php:
+php: determine_extensions
 	rm -rf /tmp/php-$(VERSION)
 	echo Building for PHP $(VERSION)
 
@@ -225,7 +238,6 @@ endif
 		--with-pdo-mysql=shared,mysqlnd \
 		--with-mysqli=shared,mysqlnd \
 		--with-pdo-pgsql=shared \
-		--with-mcrypt=shared \
 		--with-xsl=shared \
 		--with-sodium=shared \
 		--with-bz2=shared \
@@ -282,6 +294,7 @@ endif
 		--enable-bcmath \
 		--enable-phar=static \
 		$(PHP70ARGS) \
+		$(PHP71ARGS) \
 		$(PHP72ARGS) && \
 	make -j$(CORES)
 
@@ -392,7 +405,7 @@ pre_package:
 	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
-pre_package_ext:
+pre_package_ext: determine_extensions
 	$(eval PHPAPI := $(shell /tmp/php-$$VERSION/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
 
 	# Clean up of realized extensions
@@ -484,7 +497,6 @@ fpm_debian: pre_package pre_package_ext
 		--description "PHP FPM, $(VERSION)" \
 		--vendor "Charles R. Portwood II" \
 		--depends "libxml2 > 0" \
-		--depends "libmcrypt4 > 0" \
 		--depends "libjpeg-turbo8 > 0" \
 		--depends "$(LIBICU) > 0" \
 		--depends "libpq5 > 0" \
@@ -494,6 +506,9 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
+		$(PHP70_DEB_DEPENDS) \
+		$(PHP71_DEB_DEPENDS) \
+		$(PHP72_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
@@ -539,7 +554,6 @@ fpm_rpm: pre_package pre_package_ext
 		--description "PHP FPM, $(VERSION)" \
 		--vendor "Charles R. Portwood II" \
 		--depends "libxml2 > 0" \
-		--depends "libmcrypt > 0" \
 		--depends "libjpeg-turbo > 0" \
 		--depends "libicu > 0" \
 		--depends "postgresql-devel > 0" \
@@ -547,6 +561,9 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
+		$(PHP70_RPM_DEPENDS) \
+		$(PHP71_RPM_DEPENDS) \
+		$(PHP72_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \

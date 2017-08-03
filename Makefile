@@ -57,8 +57,8 @@ endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP71ARGS="--with-mcrypt=shared"
-PHP71_RPM_DEPENDS="--depends "libmcrypt > 0"
-PHP71_DEB_DEPENDS="--depends "libmcrypt4 > 0"
+PHP71_RPM_DEPENDS="--depends \"libmcrypt > 0\""
+PHP71_DEB_DEPENDS="--depends \"libmcrypt4 > 0\""
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)

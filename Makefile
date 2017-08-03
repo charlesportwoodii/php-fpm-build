@@ -1,10 +1,10 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-PCREVERSION?=8.40
+PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2l
 CURLVERSION?=7_54_1
-NGHTTPVERSION?=v1.14.0
+NGHTTPVERSION?=v1.24.0
 RELEASEVER?=1
 
 # Argon2 reference library implementation

@@ -14,11 +14,11 @@ LIBSODIUMVERSION?=stable
 # External extension versions
 REDISEXTVERSION?=3.1.2
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=1.0.6
+LIBSODIUMEXTVERSION?=2.0.4
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 sodium gmp
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 libsodium gmp
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 sodium gmp
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -184,7 +184,10 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;)
 	cp -R $(ARGON2_DIR)/*  /tmp/php-$(VERSION)/ext/argon2/
 endif
 
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php libsodium
+# Libsodium is bundled with PHP in 7.2
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
+endif
 
 	# Build
 	cd /tmp/php-$(VERSION) && \
@@ -223,7 +226,7 @@ endif
 		--with-pdo-pgsql=shared \
 		--with-mcrypt=shared \
 		--with-xsl=shared \
-		--with-libsodium=shared \
+		--with-sodium=shared \
 		--with-bz2=shared \
 		--with-enchant=shared \
 		--with-ldap=shared \

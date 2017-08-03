@@ -56,7 +56,7 @@ PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
-PHP71ARGS="--with-password-argon2=$(ARGON2_DIR)"
+PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
 RELEASENAME=php$(major).$(minor)-fpm
@@ -281,7 +281,7 @@ endif
 		--enable-bcmath \
 		--enable-phar=static \
 		$(PHP70ARGS) \
-		$(PHP71ARGS) && \
+		$(PHP72ARGS) && \
 	make -j$(CORES)
 
 pear:

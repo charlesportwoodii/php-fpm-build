@@ -57,8 +57,8 @@ endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP71ARGS="--with-mcrypt=shared"
-PHP71_RPM_DEPENDS="--depends \"libmcrypt > 0\""
-PHP71_DEB_DEPENDS="--depends \"libmcrypt4 > 0\""
+PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
+PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
@@ -505,6 +505,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
+		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
@@ -513,8 +514,7 @@ fpm_debian: pre_package pre_package_ext
 		--after-install /tmp/php-$(VERSION)/debian/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/preremove-pak \
 		--deb-compression=gz \
-		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar php$(major).$(minor)-json" \
-		$(PHP71_DEB_DEPENDS)
+		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar php$(major).$(minor)-json"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
@@ -558,6 +558,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
+		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \
@@ -565,8 +566,7 @@ fpm_rpm: pre_package pre_package_ext
 		--before-install /tmp/php-$(VERSION)/rpm/preinstall \
 		--after-install /tmp/php-$(VERSION)/rpm/postinstall \
 		--before-remove /tmp/php-$(VERSION)/rpm/preremove \
-		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar php$(major).$(minor)-json" \
-		$(PHP71_RPM_DEPENDS)
+		--provides "php$(major).$(minor)-common php$(major).$(minor)-cli php$(major).$(minor)-curl php$(major).$(minor)-iconv php$(major).$(minor)-calendar php$(major).$(minor)-exif php$(major).$(minor)-hash php$(major).$(minor)-sockets php$(major).$(minor)-sysvsem php$(major).$(minor)-sysvshm php$(major).$(minor)-sysvmsg php$(major).$(minor)-ctype php$(major).$(minor)-filter php$(major).$(minor)-ftp php$(major).$(minor)-fileinfo php$(major).$(minor)-gettext php$(major).$(minor)-phar php$(major).$(minor)-json"
 		
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \

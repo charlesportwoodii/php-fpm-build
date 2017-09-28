@@ -3,8 +3,8 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2l
-CURLVERSION?=7_54_1
-NGHTTPVERSION?=v1.24.0
+CURLVERSION?=7_55_1
+NGHTTPVERSION?=v1.26.0
 RELEASEVER?=1
 
 # Library versions
@@ -139,13 +139,16 @@ curl: nghttp2
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
+		--enable-ipv6 \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
-	cd $(CURL_PREFIX) &&\
-	ln -fs lib lib64
-
+	cd $(CURL_PREFIX) && \
+	ln -fs lib lib64 && \
+	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc $(CURL_PREFIX)/lib/libcurl.pc
+	# PHP 7.2 tries to use pkg-config, but it pulls in the wrong libraries. We can prevent it from being used by simply moving libcurl.pc to somewhere else
+	
 # Only build libargon2 for PHP 7.0+
 libargon2:
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)

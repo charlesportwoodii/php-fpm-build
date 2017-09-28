@@ -132,12 +132,7 @@ php: libargon2
 	# Checkout PHP	
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
-ifeq ($(major),7)
-	echo "Using php7::phpredis"
-	cd /tmp/php-$(VERSION)/ext && git clone -b php7 https://github.com/phpredis/phpredis redis
-else
-	cd /tmp/php-$(VERSION)/ext && git clone -b 2.2.8  https://github.com/phpredis/phpredis redis
-endif
+	cd /tmp/php-$(VERSION)/ext && git clone -b 3.1.4 https://github.com/phpredis/phpredis redis
 
 	# Build
 	cd /tmp/php-$(VERSION) && \

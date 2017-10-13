@@ -34,3 +34,11 @@ services:
         volumes: 
             - .:/data
         working_dir: /data
+    
+    alpine36:
+        image: charlesportwoodii/alpine36:build
+        container_name: alpine36_x86_64
+        command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_alpine VERSION=$VERSION"
+        volumes: 
+            - .:/data
+        working_dir: /data

@@ -17,7 +17,7 @@ fi
 
 $(which mkdir) -p /var/run/php/$VERSION
 
-systemctl enable php-fpm-$VERSION.service
-systemctl start php-fpm-$VERSION.service
+rc-update add php-fpm-$VERSION default
+rc-update php-fpm-$VERSION start
 
 exit 0

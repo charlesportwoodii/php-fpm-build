@@ -65,6 +65,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;)
 PHP71ARGS="--with-mcrypt=shared"
 PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
 PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
+PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
@@ -81,6 +82,11 @@ define chdir
 endef
 
 build: openssl curl libraries php
+
+clean_dist:
+	rm -rf *.deb
+	rm -rf *.apk
+	rm -rf *.rpm
 
 determine_extensions:
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
@@ -339,15 +345,21 @@ pre_package:
 	# Copy the local configuration files
 	mkdir -p /tmp/php-$(VERSION)/debian
 	mkdir -p /tmp/php-$(VERSION)/rpm
+	mkdir -p /tmp/php-$(VERSION)/alpine
 	cp -R $(SCRIPTPATH)/debian/* /tmp/php-$(VERSION)/debian
 	cp -R $(SCRIPTPATH)/rpm/* /tmp/php-$(VERSION)/rpm
+	cp -R $(SCRIPTPATH)/alpine/* /tmp/php-$(VERSION)/alpine
 
 	# Replace the subpackages
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/common/postinstall-pak
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/common/postinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/common/post-install
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preremove
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/postinstall
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/pre-deinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/post-install
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/pre-install
 
 	# Build out the subpackage structure
 	for pkg in $(SUBPACKAGES); do \
@@ -358,6 +370,12 @@ pre_package:
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/postinstall-pak; \
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/preinstall-pak; \
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/preremove-pak; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/$$pkg/post-install; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/$$pkg/pre-install; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/$$pkg/pre-deinstall; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/postinstall; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/preinstall; \
+		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/preremove; \
 	done;
 
 	# FPM
@@ -378,6 +396,10 @@ pre_package:
 
 	mkdir -p /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d
 	cp $(SCRIPTPATH)/debian/fpm/init-php-fpm /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
+	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
+
+	mkdir -p /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d
+	cp $(SCRIPTPATH)/alpine/php-fpm.rc /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
 
 	# CGI
@@ -522,7 +544,6 @@ pre_package_ext: determine_extensions
 
 fpm_debian: pre_package pre_package_ext
 	echo "Building native package for debian"
-	rm -rf *.deb
 
 	fpm -s dir \
 		-t deb \
@@ -665,5 +686,67 @@ fpm_rpm: pre_package pre_package_ext
 			--before-install /tmp/php-$(VERSION)/rpm/$$pkg/preinstall \
 			--after-install /tmp/php-$(VERSION)/rpm/$$pkg/postinstall \
 			--before-remove /tmp/php-$(VERSION)/rpm/$$pkg/preremove \
+			--force; \
+	done;
+
+fpm_alpine: pre_package pre_package_ext
+	fpm -s dir \
+		-t apk \
+		-n $(RELEASENAME) \
+		-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
+		-C /tmp/php-$(VERSION)-install \
+		-p $(PKG_NAME).$(micro)-common-$(RELEASEVER)~$(shell uname -m).apk \
+		-m "charlesportwoodii@erianna.com" \
+		--license "PHP License" \
+		--url https://github.com/charlesportwoodii/php-fpm-build \
+		--description "PHP FPM, $(VERSION)" \
+		--vendor "Charles R. Portwood II" \
+		--depends "libxml2 > 0" \
+		--depends "libjpeg > 0" \
+		--depends "icu-libs > 0" \
+		--depends "libpq > 0" \
+		--depends "freetype > 0" \
+		--depends "libpng > 0" \
+		--depends "enchant > 0" \
+		--depends "aspell-en > 0" \
+		--depends "recode-dev > 0" \
+		--depends "mariadb-client-libs > 0" \
+		$(PHP71_APK_DEPENDS) \
+		--force \
+		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
+		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+
+	for ext in $(REALIZED_EXTENSIONS); do \
+		fpm -s dir \
+			-t apk \
+			-n "$(PKG_NAME)-$$ext" \
+			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
+			-C "/tmp/php$(VERSION)-$$ext" \
+			-p "$(PKG_NAME).$(micro)-$$ext-$(RELEASEVER)~$(shell uname -m).apk" \
+			-m "charlesportwoodii@erianna.com" \
+			--license "PHP License" \
+			--url https://github.com/charlesportwoodii/php-fpm-build \
+			--description "PHP $$ext, $(VERSION)" \
+			--vendor "Charles R. Portwood II" \
+			--depends "$(PKG_NAME)-common" \
+			--force; \
+	done;
+
+	for pkg in $(SUBPACKAGES); do \
+		fpm -s dir \
+			-t apk \
+			-n "$(PKG_NAME)-$$pkg" \
+			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
+			-C "/tmp/php-$(VERSION)-install-$$pkg" \
+			-p "$(PKG_NAME).$(micro)-$$pkg-$(RELEASEVER)~$(shell uname -m).apk" \
+			-m "charlesportwoodii@erianna.com" \
+			--license "PHP License" \
+			--url https://github.com/charlesportwoodii/php-fpm-build \
+			--description "PHP $$pkg, $(VERSION)" \
+			--vendor "Charles R. Portwood II" \
+			--depends "$(PKG_NAME)-common" \
+			--before-install /tmp/php-$(VERSION)/alpine/$$pkg/pre-install \
+			--after-install /tmp/php-$(VERSION)/alpine/$$pkg/post-install \
+			--before-remove /tmp/php-$(VERSION)/alpine/$$pkg/pre-deinstall \
 			--force; \
 	done;

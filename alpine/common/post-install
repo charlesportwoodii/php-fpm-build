@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+
+if [ ! -d /etc/php/$VERSION ]; then
+	$(which mkdir) -p /etc/php/$VERSION
+	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
+	$(which rm) /etc/php/$VERSION/LICENSE*
+fi
+
+$(which cp) -R /usr/local/etc/php/$VERSION/mods-available/* /etc/php/$VERSION/mods-available
+
+OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
+echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/$VERSION/conf.d/openssl-default.ini 
+echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/$VERSION/conf.d/openssl-default.ini
+
+exit 0

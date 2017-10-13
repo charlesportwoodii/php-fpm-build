@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set +e
+VERSION=
+echo "Stopping PHP"
+
+rc-update php-fpm-$VERSION stop
+rc-update del php-fpm-$VERSION default
+
+$(which mkdir -p) /var/run/php/$VERSION
+$(which touch) /var/run/php/$VERSION/php-fpm.pid
+
+WWWDATAUSER=$(id www-data)
+if [ $? -eq 1 ]; then
+    echo "Creating www-data user"
+    adduser -S www-data
+fi
+
+exit 0

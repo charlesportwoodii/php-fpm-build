@@ -4,7 +4,7 @@ set +e
 
 VERSION=
 
-if [ ! -d /etc/php/$VERSION ]; then
+if [ ! -f /etc/php/$VERSION/php-fpm.conf ]; then
 	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
 	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi

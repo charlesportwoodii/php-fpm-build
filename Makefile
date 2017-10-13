@@ -651,7 +651,7 @@ fpm_rpm: pre_package pre_package_ext
 			-t rpm \
 			-n "$(PKG_NAME)-$$pkg" \
 			-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
-			-C "/tmp/php$(VERSION)-$$pkg" \
+			-C "/tmp/php$(VERSION)-install-$$pkg" \
 			-p "$(PKG_NAME).$(micro)-$$pkg-$(RELEASEVER)~$(shell arch).rpm" \
 			-m "charlesportwoodii@erianna.com" \
 			--license "PHP License" \

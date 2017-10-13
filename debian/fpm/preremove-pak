@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+which systemctl
+if [ "$?" == 1 ]
+then
+    $(which service) php-fpm stop
+else
+    $(which systemctl) stop php-fpm-$VERSION.service
+    $(which systemctl) disable php-fpm-$VERSION.service
+fi
+
+exit 0

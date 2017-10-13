@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+
+priority=$(echo $VERSION | tr -d '.')
+update-alternatives --install /usr/bin/php php $(which php$VERSION) $priority
+
+exit 0

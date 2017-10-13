@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+
+priority=$(echo $VERSION | tr -d '.')
+update-alternatives --install /usr/bin/phpize phpize $(which phpize$VERSION) $priority
+update-alternatives --install /usr/bin/phpdbg phpdbg $(which phpdbg$VERSION) $priority
+update-alternatives --install /usr/bin/php-config php-config $(which php-config$VERSION) $priority
+
+exit 0

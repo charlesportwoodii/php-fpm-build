@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+
+if [ ! -d /etc/php/$VERSION ]; then
+	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
+	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
+fi
+
+which systemctl
+if [ "$?" == 1 ]
+then
+	$(which cp) /usr/local/etc/init.d/php-fpm-$VERSION /etc/init.d/php-fpm-$VERSION
+
+	$(which update-rc.d) php-fpm-$VERSION defaults
+	$(which service) php-fpm-$VERSION start
+else
+	$(which systemctl) enable php-fpm-$VERSION.service
+	$(which systemctl) start php-fpm-$VERSION.service
+fi
+exit 0

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+update-alternatives --remove phpize $(which phpize$VERSION)
+update-alternatives --remove phpdbg $(which phpdbg$VERSION)
+update-alternatives --remove php-config $(which php-config$VERSION)
+
+exit 0

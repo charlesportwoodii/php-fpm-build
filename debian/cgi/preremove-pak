@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+update-alternatives --remove php-cgi $(which php-cgi$VERSION)
+
+exit 0

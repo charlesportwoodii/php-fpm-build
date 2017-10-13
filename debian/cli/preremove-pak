@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set +e
+
+VERSION=
+
+update-alternatives --remove php $(which php$VERSION)
+
+exit 0

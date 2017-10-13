@@ -624,7 +624,7 @@ fpm_rpm: pre_package pre_package_ext
 		--rpm-compression gzip \
 		--template-scripts \
 		--force \
-		--after-install /tmp/php-$(VERSION)/rpm/postinstall \
+		--after-install /tmp/php-$(VERSION)/rpm/common/postinstall \
 		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 		
 	for ext in $(REALIZED_EXTENSIONS); do \

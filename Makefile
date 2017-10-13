@@ -3,8 +3,8 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2l
-CURLVERSION?=7_55_1
-NGHTTPVERSION?=v1.26.0
+CURLVERSION?=7_54_1
+NGHTTPVERSION?=v1.24.0
 RELEASEVER?=1
 
 # Library versions
@@ -14,7 +14,7 @@ LIBSODIUMVERSION?=stable
 # External extension versions
 REDISEXTVERSION?=3.1.4
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.7
+LIBSODIUMEXTVERSION?=2.0.8
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 sodium gmp soap
 SHARED_ZEND_EXTENSIONS := opcache
@@ -139,16 +139,13 @@ curl: nghttp2
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
-		--enable-ipv6 \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
-	cd $(CURL_PREFIX) && \
-	ln -fs lib lib64 && \
-	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc $(CURL_PREFIX)/lib/libcurl.pc
-	# PHP 7.2 tries to use pkg-config, but it pulls in the wrong libraries. We can prevent it from being used by simply moving libcurl.pc to somewhere else
-	
+	cd $(CURL_PREFIX) &&\
+	ln -fs lib lib64
+
 # Only build libargon2 for PHP 7.0+
 libargon2:
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
@@ -470,7 +467,7 @@ pre_package_ext: determine_extensions
 
 	echo "extension=mysqlnd.so" > /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
 	echo "extension=mysqli.so" >> /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
-	echo "extension=pdo_mysql.so" >? /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
+	echo "extension=pdo_mysql.so" >> /tmp/php$(VERSION)-mysql/usr/local/etc/php/$(major).$(minor)/mods-available/mysql.ini;
 
 	# Merge pgsql
 	cp -R /tmp/php$(VERSION)-pdo_pgsql/* /tmp/php$(VERSION)-pgsql/

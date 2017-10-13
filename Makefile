@@ -344,7 +344,10 @@ pre_package:
 
 	# Replace the subpackages
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/common/postinstall-pak
-	#sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/common/postinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/common/postinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preremove
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/postinstall
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preinstall
 
 	# Build out the subpackage structure
 	for pkg in $(SUBPACKAGES); do \
@@ -355,9 +358,6 @@ pre_package:
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/postinstall-pak; \
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/preinstall-pak; \
 		sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/$$pkg/preremove-pak; \
-		#sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/preremove; \
-		#sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/postinstall; \
-		#sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/$$pkg/preinstall; \
 	done;
 
 	# FPM
@@ -624,9 +624,7 @@ fpm_rpm: pre_package pre_package_ext
 		--rpm-compression gzip \
 		--template-scripts \
 		--force \
-		--before-install /tmp/php-$(VERSION)/rpm/preinstall \
 		--after-install /tmp/php-$(VERSION)/rpm/postinstall \
-		--before-remove /tmp/php-$(VERSION)/rpm/preremove \
 		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 		
 	for ext in $(REALIZED_EXTENSIONS); do \
@@ -645,5 +643,27 @@ fpm_rpm: pre_package pre_package_ext
 			--rpm-digest sha384 \
 			--rpm-compression gzip \
 			--template-scripts \
+			--force; \
+	done;
+
+	for pkg in $(SUBPACKAGES); do \
+		fpm -s dir \
+			-t rpm \
+			-n "$(PKG_NAME)-$$pkg" \
+			-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
+			-C "/tmp/php$(VERSION)-$$pkg" \
+			-p "$(PKG_NAME).$(micro)-$$pkg-$(RELEASEVER)~$(shell arch).rpm" \
+			-m "charlesportwoodii@erianna.com" \
+			--license "PHP License" \
+			--url https://github.com/charlesportwoodii/php-fpm-build \
+			--description "PHP $$pkg, $(VERSION)" \
+			--vendor "Charles R. Portwood II" \
+			--depends "$(PKG_NAME)-common" \
+			--rpm-digest sha384 \
+			--rpm-compression gzip \
+			--template-scripts \
+			--before-install /tmp/php-$(VERSION)/rpm/$$pkg/preinstall \
+			--after-install /tmp/php-$(VERSION)/rpm/$$pkg/postinstall \
+			--before-remove /tmp/php-$(VERSION)/rpm/$$pkg/preremove \
 			--force; \
 	done;

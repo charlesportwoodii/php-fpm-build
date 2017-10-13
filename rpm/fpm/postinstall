@@ -5,15 +5,9 @@ set +e
 VERSION=
 
 if [ ! -d /etc/php/$VERSION ]; then
-	$(which mkdir) -p /etc/php/$VERSION
-	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
-	$(which rm) /etc/php/$VERSION/LICENSE*
-	$(which mv) /etc/php/$VERSION/php.ini-production /etc/php/$VERSION/php.ini
 	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
 	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
-
-$(which cp) -R /usr/local/etc/php/$VERSION/mods-available/* /etc/php/$VERSION/mods-available
 
 if [ ! -f /var/log/php/$VERSION/ ]; then
 	$(which mkdir) -p /var/log/php/$VERSION/
@@ -22,10 +16,6 @@ if [ ! -f /var/log/php/$VERSION/ ]; then
 fi
 
 $(which mkdir) -p /var/run/php/$VERSION
-
-OPENSSLDIR=$(openssl version -d | awk '{ print $2 }' | sed 's/"//g')
-echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/$VERSION/conf.d/openssl-default.ini 
-echo "openssl.cafile=$OPENSSLDIR/cert.pem" >> /etc/php/$VERSION/conf.d/openssl-default.ini
 
 systemctl enable php-fpm-$VERSION.service
 systemctl start php-fpm-$VERSION.service

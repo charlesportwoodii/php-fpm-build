@@ -41,7 +41,7 @@ TESTVERSION=$(major)$(minor)
 PKG_NAME=php$(major).$(minor)
 
 # Sub packages that will be created as part of a separate build
-SUBPACKAGES=cli cgi fpm dev
+SUBPACKAGES=cgi fpm dev
 
 # Prefixes and constants
 OPENSSL_PATH=/opt/openssl
@@ -352,6 +352,7 @@ pre_package:
 
 	# Replace the subpackages
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/common/postinstall-pak
+	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/common/preremove-pak
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/common/postinstall
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/common/post-install
 
@@ -399,10 +400,6 @@ pre_package:
 	# CGI
 	mv /tmp/php-$(VERSION)-install/usr/bin/php-cgi$(major).$(minor) /tmp/php-$(VERSION)-install-cgi/usr/bin/
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/php-cgi* /tmp/php-$(VERSION)-install-cgi/share/man/php/$(major).$(minor)/man1
-
-	# CLI
-	mv /tmp/php-$(VERSION)-install/usr/bin/php$(major).$(minor) /tmp/php-$(VERSION)-install-cli/usr/bin/
-	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/php$(major).$(minor).1 /tmp/php-$(VERSION)-install-cli/share/man/php/$(major).$(minor)/man1
 
 	# DEV
 	mv /tmp/php-$(VERSION)-install/usr/bin/phpdbg$(major).$(minor) /tmp/php-$(VERSION)-install-dev/usr/bin/
@@ -566,8 +563,9 @@ fpm_debian: pre_package pre_package_ext
 		--force \
 		--no-deb-auto-config-files \
 		--after-install /tmp/php-$(VERSION)/debian/common/postinstall-pak \
+		--before-remove /tmp/php-$(VERSION)/debian/common/preremove-pak \
 		--deb-compression=gz \
-		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
@@ -640,7 +638,7 @@ fpm_rpm: pre_package pre_package_ext
 		--template-scripts \
 		--force \
 		--after-install /tmp/php-$(VERSION)/rpm/common/postinstall \
-		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 		
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
@@ -708,7 +706,7 @@ fpm_alpine: pre_package pre_package_ext
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
-		--provides "$(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \

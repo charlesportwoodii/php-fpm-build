@@ -4,7 +4,7 @@ set +e
 VERSION=
 echo "Stopping PHP"
 
-rc-update php-fpm-$VERSION stop
+rc-service php-fpm-$VERSION stop
 rc-update del php-fpm-$VERSION default
 
 $(which mkdir) -p /var/run/php/$VERSION

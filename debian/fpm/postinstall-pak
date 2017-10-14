@@ -5,8 +5,9 @@ set +e
 VERSION=
 
 if [ ! -f /etc/php/$VERSION/php-fpm.conf ]; then
-	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
-	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
+	$(which mv) /usr/local/etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
+	$(which mkdir -p) /etc/php/$VERSION/php-fpm.d
+	$(which mv) /usr/local/etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
 
 which systemctl

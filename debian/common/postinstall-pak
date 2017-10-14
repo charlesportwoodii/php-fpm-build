@@ -20,4 +20,7 @@ if [ ! -f /etc/php/$VERSION/conf.d/openssl-default.ini ]; then
 	echo "openssl.capath=$OPENSSLDIR/certs" > /etc/php/$VERSION/conf.d/openssl-default.ini 
 fi
 
+priority=$(echo $VERSION | tr -d '.')
+update-alternatives --install /usr/bin/php php $(which php$VERSION) $priority
+
 exit 0

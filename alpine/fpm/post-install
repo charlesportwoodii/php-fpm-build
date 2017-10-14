@@ -5,8 +5,9 @@ set +e
 VERSION=
 
 if [ ! -f /etc/php/$VERSION/php-fpm.conf ]; then
-	$(which mv) /etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
-	$(which mv) /etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
+	$(which cp) /usr/local/etc/php/$VERSION/php-fpm.conf.default /etc/php/$VERSION/php-fpm.conf
+	$(which mkdir) -p /etc/php/$VERSION/php-fpm.d
+	$(which cp) /usr/local/etc/php/$VERSION/php-fpm.d/pool.conf.default /etc/php/$VERSION/php-fpm.d/pool.conf
 fi
 
 if [ ! -f /var/log/php/$VERSION/ ]; then
@@ -17,7 +18,10 @@ fi
 
 $(which mkdir) -p /var/run/php/$VERSION
 
+if [ ! -f /etc/init.d/php-fpm-$VERSION ]; then
+	$(which cp) /usr/local/etc/init.d/php-fpm-$VERSION /etc/init.d
+fi
 rc-update add php-fpm-$VERSION default
-rc-update php-fpm-$VERSION start
+rc-service php-fpm-$VERSION start
 
 exit 0

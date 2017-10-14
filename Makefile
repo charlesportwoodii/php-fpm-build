@@ -354,12 +354,6 @@ pre_package:
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/debian/common/postinstall-pak
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/common/postinstall
 	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/common/post-install
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preremove
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/postinstall
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/rpm/fpm/preinstall
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/pre-deinstall
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/post-install
-	sed -i s/VERSION=/VERSION=$(major).$(minor)/g /tmp/php-$(VERSION)/alpine/fpm/pre-install
 
 	# Build out the subpackage structure
 	for pkg in $(SUBPACKAGES); do \

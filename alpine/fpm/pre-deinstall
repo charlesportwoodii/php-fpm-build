@@ -2,6 +2,8 @@
 
 set +e
 
+VERSION=
+
 rc-update php-fpm-$VERSION stop
 rc-update del php-fpm-$VERSION default
 

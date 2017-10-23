@@ -16,9 +16,9 @@ REDISEXTVERSION?=3.1.4
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.7
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 sodium gmp soap
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap odbc pspell recode argon2 sodium gmp soap
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -57,10 +57,12 @@ else
 LIBICU=libicu48
 endif
 
+# Argon2 extension can be enabled for PHP 7.0+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
 endif
 
+# Mcrypt is only available in PHP 7.1 and lower
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP71ARGS="--with-mcrypt=shared"
 PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
@@ -68,8 +70,18 @@ PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
 endif
 
+# PASSWORD_ARGON2 is only available in PHP 7.2
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
+endif
+
+# Alpine Linux needs to use system libraries for sqlite to prevent linker failures
+ifeq ($(shell if [ -f /etc/alpine-release ]; then echo 0; else echo 1; fi;), 0)
+SQLITEARGS=--with-sqlite3=shared,/usr
+PDOSQLITEARGS=--with-pdo-sqlite=shared,/usr
+else
+SQLITEARGS=--with-sqlite3=shared
+PDOSQLITEARGS=--with-pdo-sqlite=shared
 endif
 
 RELEASENAME=$(PKG_NAME)-common
@@ -244,8 +256,6 @@ endif
 		--with-openssl=$(OPENSSL_PATH) \
 		--enable-mysqlnd=shared \
 		--with-pgsql=shared \
-		--with-sqlite3=shared \
-		--with-pdo-sqlite=shared \
 		--with-pdo-mysql=shared,mysqlnd \
 		--with-mysqli=shared,mysqlnd \
 		--with-pdo-pgsql=shared \
@@ -254,7 +264,6 @@ endif
 		--with-bz2=shared \
 		--with-enchant=shared \
 		--with-ldap=shared \
-		--with-odbc=shared \
 		--with-pspell=shared \
 		--with-recode=shared \
 		--with-gmp=shared \
@@ -304,6 +313,8 @@ endif
 		--enable-huge-code-pages \
 		--enable-bcmath \
 		--enable-phar=static \
+		$(SQLITEARGS) \
+		$(PDOSQLITEARGS) \
 		$(PHP70ARGS) \
 		$(PHP71ARGS) \
 		$(PHP72ARGS) && \
@@ -704,6 +715,8 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "recode-dev > 0" \
 		--depends "mariadb-client-libs > 0" \
 		--depends "bash" \
+		--depends "libxslt-dev" \
+		--depends "gmp" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \

@@ -4,8 +4,8 @@ set +e
 
 VERSION=
 
-if [ ! -d /etc/php/$VERSION ]; then
-	$(which mkdir) -p /etc/php/$VERSION
+if [ ! -f /etc/php/$VERSION/php.ini ]; then
+	$(which mkdir) -p /etc/php/$VERSION/conf.d
 	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
 	$(which rm) /etc/php/$VERSION/LICENSE*
 fi

@@ -4,10 +4,11 @@ set +e
 
 VERSION=
 
-if [ ! -d /etc/php/$VERSION ]; then
-	$(which mkdir) -p /etc/php/$VERSION
+if [ ! -f /etc/php/$VERSION/php.ini ]; then
+	$(which mkdir) -p /etc/php/$VERSION/conf.d
 	$(which cp) -R /usr/local/etc/php/$VERSION/* /etc/php/$VERSION
 	$(which rm) /etc/php/$VERSION/LICENSE*
+	$(which mv) /etc/php/$VERSION/php.ini-production /etc/php/$VERSION/php.ini
 fi
 
 $(which cp) -R /usr/local/etc/php/$VERSION/mods-available/* /etc/php/$VERSION/mods-available

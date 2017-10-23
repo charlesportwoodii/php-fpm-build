@@ -1,5 +1,6 @@
 #!/sbin/openrc-run
 
+description="PHP-FPM VERSION"
 name=php-fpm-VERSION
 cfgfile="/etc/php/VERSION/php-fpm.conf"
 command="/usr/sbin/php-fpmVERSION"
@@ -7,6 +8,8 @@ pid=/var/run/php/VERSION/php-fpm.pid
 
 depend() {
     need net
+    need localmount
+    use dns logger
 }
 
 start_pre() {
@@ -15,7 +18,7 @@ start_pre() {
 }
 
 start() {
-    /usr/sbin/php-fpmVERSION --fpm-config /etc/php/VERSION/php-fpm.conf
+    $command --fpm-config $cfgfile
 }
 
 reload() {
@@ -24,4 +27,8 @@ reload() {
 
 stop() {
     /bin/kill -QUIT $pid
+}
+
+checkconfig() {
+    $command --fpm-config $cfgfile -t
 }

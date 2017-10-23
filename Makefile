@@ -687,7 +687,7 @@ fpm_alpine: pre_package pre_package_ext
 		-n $(RELEASENAME) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
 		-C /tmp/php-$(VERSION)-install \
-		-p $(PKG_NAME).$(micro)-common-$(RELEASEVER)~$(shell uname -m).apk \
+		-p $(RELEASENAME)-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk \
 		-m "charlesportwoodii@erianna.com" \
 		--license "PHP License" \
 		--url https://github.com/charlesportwoodii/php-fpm-build \
@@ -703,9 +703,11 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "recode-dev > 0" \
 		--depends "mariadb-client-libs > 0" \
+		--depends "bash" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
+		-a $(shell uname -m) \
 		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
@@ -714,13 +716,14 @@ fpm_alpine: pre_package pre_package_ext
 			-n "$(PKG_NAME)-$$ext" \
 			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
 			-C "/tmp/php$(VERSION)-$$ext" \
-			-p "$(PKG_NAME).$(micro)-$$ext-$(RELEASEVER)~$(shell uname -m).apk" \
+			-p "$(PKG_NAME)-$$ext-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk" \
 			-m "charlesportwoodii@erianna.com" \
 			--license "PHP License" \
 			--url https://github.com/charlesportwoodii/php-fpm-build \
 			--description "PHP $$ext, $(VERSION)" \
 			--vendor "Charles R. Portwood II" \
 			--depends "$(PKG_NAME)-common" \
+			-a $(shell uname -m) \
 			--force; \
 	done;
 
@@ -730,15 +733,18 @@ fpm_alpine: pre_package pre_package_ext
 			-n "$(PKG_NAME)-$$pkg" \
 			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
 			-C "/tmp/php-$(VERSION)-install-$$pkg" \
-			-p "$(PKG_NAME).$(micro)-$$pkg-$(RELEASEVER)~$(shell uname -m).apk" \
+			-p "$(PKG_NAME)-$$pkg-$(VERSION)-$(RELEASEVER)~$(shell uname -m).apk" \
 			-m "charlesportwoodii@erianna.com" \
 			--license "PHP License" \
 			--url https://github.com/charlesportwoodii/php-fpm-build \
 			--description "PHP $$pkg, $(VERSION)" \
 			--vendor "Charles R. Portwood II" \
 			--depends "$(PKG_NAME)-common" \
+			--depends "openrc" \
+			--depends "bash" \
 			--before-install /tmp/php-$(VERSION)/alpine/$$pkg/pre-install \
 			--after-install /tmp/php-$(VERSION)/alpine/$$pkg/post-install \
 			--before-remove /tmp/php-$(VERSION)/alpine/$$pkg/pre-deinstall \
+			-a $(shell uname -m) \
 			--force; \
 	done;

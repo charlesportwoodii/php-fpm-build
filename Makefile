@@ -717,6 +717,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "bash" \
 		--depends "libxslt-dev" \
 		--depends "gmp" \
+		--depends "sqlite-dev" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \

@@ -297,7 +297,6 @@ endif
 		--enable-sysvmsg \
 		--enable-ftp \
 		--enable-xml=shared \
-		--enable-xmlreader=shared \
 		--enable-mbstring=shared \
 		--enable-zip=shared \
 		--enable-intl=shared \

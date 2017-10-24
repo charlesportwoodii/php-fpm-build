@@ -692,7 +692,7 @@ fpm_rpm: pre_package pre_package_ext
 	done;
 
 fpm_alpine: pre_package pre_package_ext
-	fpm -s dir \
+	/fpm/bin/fpm -s dir \
 		-t apk \
 		-n $(RELEASENAME) \
 		-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
@@ -717,6 +717,8 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libxslt-dev" \
 		--depends "gmp" \
 		--depends "sqlite-dev" \
+		--depends "openssl" \
+		--depends "ca-certificates" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
@@ -724,7 +726,7 @@ fpm_alpine: pre_package pre_package_ext
 		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
-		fpm -s dir \
+		/fpm/bin/fpm -s dir \
 			-t apk \
 			-n "$(PKG_NAME)-$$ext" \
 			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \
@@ -741,7 +743,7 @@ fpm_alpine: pre_package pre_package_ext
 	done;
 
 	for pkg in $(SUBPACKAGES); do \
-		fpm -s dir \
+		/fpm/bin/fpm -s dir \
 			-t apk \
 			-n "$(PKG_NAME)-$$pkg" \
 			-v $(VERSION)-$(RELEASEVER)~$(shell uname -m) \

@@ -163,12 +163,14 @@ curl: nghttp2
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
+		--with-libssl-prefix=$(OPENSSL_PREFIX) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
-	cd $(CURL_PREFIX) &&\
-	ln -fs lib lib64
+	cd $(CURL_PREFIX) && \
+	ln -fs lib lib64 && \
+	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 
 # Only build libargon2 for PHP 7.0+
 libargon2:

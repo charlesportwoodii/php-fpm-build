@@ -87,7 +87,7 @@ curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
-	git clone https://github.com/bagder/curl && \
+	git clone https://github.com/curl/curl && \
 	cd curl &&\
 	git checkout curl-$(CURLVERSION) &&\
 	./buildconf && \
@@ -98,12 +98,14 @@ curl: nghttp2
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
+		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
-	cd $(CURL_PREFIX) &&\
-	ln -fs lib lib64
+	cd $(CURL_PREFIX) && \
+	ln -fs lib lib64 && \
+	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 
 # Only build libargon2 for PHP 7.2+
 libargon2:
@@ -136,8 +138,8 @@ php: libargon2
 
 	# Build
 	cd /tmp/php-$(VERSION) && \
-	./buildconf  --force && \
-	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib"\
+	./buildconf --force && \
+	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

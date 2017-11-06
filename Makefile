@@ -20,6 +20,10 @@ SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3
 SHARED_ZEND_EXTENSIONS := opcache
 REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
 
+PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
+PHP_CPPFLAGS="$(PHP_CFLAGS)"
+PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
+
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
 LIBSODIUM_DIR=/tmp/libsodium
@@ -231,7 +235,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib" \
+	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include $(PHP_CFLAGS)" LDFLAGS="-L$(NGHTTP_PREFIX)/lib $(PHP_LDFLAGS)" CPPFLAGS="$(PHP_CPPFLAGS) \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

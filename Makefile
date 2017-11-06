@@ -231,7 +231,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include -fstack-protector-strong -fpic -fpie -O2" LDFLAGS="-L$(NGHTTP_PREFIX)/lib $(PHP_LDFLAGS) -Wl,-O1 -Wl,--hash-style=both -pie" \
+	./configure CFLAGS="-I$(NGHTTP_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

@@ -53,7 +53,7 @@ services:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
     alpine3.7:
-        image: charlesportwoodii/alpine:3.6-build
+        image: charlesportwoodii/alpine:3.7-build
         container_name: alpine36_x86_64
         command: bash -lc "make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes: 

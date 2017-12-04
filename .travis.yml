@@ -31,6 +31,9 @@ script:
   - if [ "$BUILD_IMAGE" == "alpine3.6" ]; then mv *.apk build/alpine/v3.6/x86_64; fi
   - if [ "$BUILD_IMAGE" == "alpine3.7" ]; then mv *.apk build/alpine/v3.7/x86_64; fi
 
+after_failure:
+  - cat /tmp/php-$VERSION/config.log
+
 deploy:
   provider: s3
   access_key_id: AKIAJ5QCEUQ2WVNY7GDA

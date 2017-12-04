@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+SHELL := /bin/sh
 
 # Dependency Versions
 PCREVERSION?=8.41
@@ -10,7 +10,7 @@ RELEASEVER?=1
 
 # Library versions
 ARGON2VERSION?=20161029
-LIBSODIUMVERSION?=stable
+LIBSODIUMVERSION?=1.0.15
 
 # External extension versions
 REDISEXTVERSION?=3.1.4
@@ -30,7 +30,7 @@ BUILDTIME=$(shell date +%s)
 
 # Bash data
 SCRIPTPATH=$(shell pwd -P)
-CORES=$(shell grep -c ^processor /proc/cpuinfo)
+CORES?=$(shell grep -c ^processor /proc/cpuinfo)
 ARCH=$(shell arch)
 
 major=$(shell echo $(VERSION) | cut -d. -f1)
@@ -79,7 +79,7 @@ endif
 # Alpine Linux needs to use system libraries for sqlite to prevent linker failures
 ifeq ($(shell if [ -f /etc/alpine-release ]; then echo 0; else echo 1; fi;), 0)
 SQLITEARGS=--with-sqlite3=shared,/usr
-PDOSQLITEARGS=--with-pdo-sqlite=shared,/usr
+PDOSQLITEARGS=--with-pdo-sqlite=sharefd,/usr
 else
 SQLITEARGS=--with-sqlite3=shared
 PDOSQLITEARGS=--with-pdo-sqlite=shared
@@ -186,13 +186,14 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;)
 endif
 
 libsodium:
-	rm -rf $(LIBSODIUM_DIR)
+	rm -rf /tmp/libsodium*
 
 	cd /tmp && \
-	git clone -b $(LIBSODIUMVERSION) https://github.com/jedisct1/libsodium.git && \
-	cd /tmp/libsodium && \
+	wget https://github.com/jedisct1/libsodium/releases/download/$(LIBSODIUMVERSION)/libsodium-$(LIBSODIUMVERSION).tar.gz && \
+	tar -xf libsodium-$(LIBSODIUMVERSION).tar.gz && \
+	mv libsodium-$(LIBSODIUMVERSION) $(LIBSODIUM_DIR) && \
+	cd libsodium && \
 	rm -rf /tmp/libsodium/lib && \
-	./autogen.sh && \
 	./configure --disable-shared --disable-pie && \
 	CFLAGS="-fPIC" make install
 

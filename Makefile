@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2m
 CURLVERSION?=7_56_1
-NGHTTPVERSION?=v1.27.0
+NGHTTPVERSION?=1.28.0
 RELEASEVER?=1
 
 # Library versions
@@ -136,12 +136,9 @@ nghttp2:
 	echo $(NGHTTP_PREFIX)
 	rm -rf /tmp/nghttp2*
 	cd /tmp && \
-	git clone https://github.com/tatsuhiro-t/nghttp2 && \
-	cd nghttp2 && \
-	git checkout $(NGHTTPVERSION) &&\
-	autoreconf -i && \
-	automake && \
-	autoconf && \
+	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
+	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
+	cd nghttp2-$(NGHTTPVERSION) && \
 	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) --enable-static=yes --enable-shared=no && \
 	make -j$(CORES) && \
 	make install && \

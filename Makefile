@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+SHELL := /bin/sh
 
 # Dependency Versions
 PCREVERSION?=8.41
@@ -157,7 +157,7 @@ curl: nghttp2
 	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	LD_LIBRARY_PATH=/usr/local/lib LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \

@@ -1,10 +1,9 @@
-SHELL := /bin/sh
+SHELL := /bin/bash
 
 # Dependency Versions
 PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2m
 CURLVERSION?=7_57_0
-CURL_DOT_VERSION?=7.57.0
 NGHTTPVERSION?=1.28.0
 RELEASEVER?=1
 
@@ -150,10 +149,13 @@ curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
-	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(CURL_DOT_VERSION).tar.gz && \
-	tar -xf curl-$(CURL_DOT_VERSION).tar.gz && \
-	cd curl-$(CURL_DOT_VERSION) && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure  \
+	git clone https://github.com/curl/curl && \
+	cd curl && \
+	git checkout curl-$(CURLVERSION) &&\
+	./buildconf && \
+	autoreconf -fi && \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \
 		--disable-shared \
@@ -165,7 +167,7 @@ curl: nghttp2
 	make install && \
 	cd $(CURL_PREFIX) && \
 	ln -fs lib lib64 && \
-	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
+	rm -rf $(CURL_PREFIX)/lib/pkgconfig
 
 # Only build libargon2 for PHP 7.0+
 libargon2:

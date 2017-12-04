@@ -139,7 +139,12 @@ nghttp2:
 	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
 	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
 	cd nghttp2-$(NGHTTPVERSION) && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) --enable-static=yes --enable-shared=no --disable-python-bindings && \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	./configure \
+		--prefix=$(NGHTTP_PREFIX) \
+		--enable-static=yes \
+		--enable-shared=no \
+		--disable-python-bindings && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
@@ -149,11 +154,9 @@ curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
-	git clone https://github.com/curl/curl && \
-	cd curl && \
-	git checkout curl-$(CURLVERSION) &&\
-	./buildconf && \
-	autoreconf -fi && \
+	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
+	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
+	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
 	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
@@ -167,7 +170,7 @@ curl: nghttp2
 	make install && \
 	cd $(CURL_PREFIX) && \
 	ln -fs lib lib64 && \
-	rm -rf $(CURL_PREFIX)/lib/pkgconfig
+	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 
 # Only build libargon2 for PHP 7.0+
 libargon2:

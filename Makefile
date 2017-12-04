@@ -3,7 +3,8 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.41
 OPENSSLVERSION?=1.0.2m
-CURLVERSION?=7_56_1
+CURLVERSION?=7_57_0
+CURL_DOT_VERSION?=7.57.0
 NGHTTPVERSION?=1.28.0
 RELEASEVER?=1
 
@@ -139,7 +140,7 @@ nghttp2:
 	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
 	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
 	cd nghttp2-$(NGHTTPVERSION) && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) --enable-static=yes --enable-shared=no && \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure --prefix=$(NGHTTP_PREFIX) --enable-static=yes --enable-shared=no --disable-python-bindings && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
@@ -149,13 +150,10 @@ curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
-	git clone https://github.com/curl/curl && \
-	cd curl &&\
-	git checkout curl-$(CURLVERSION) &&\
-	./buildconf && \
-	autoreconf -fi && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
-	./configure  \
+	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(CURL_DOT_VERSION).tar.gz && \
+	tar -xf curl-$(CURL_DOT_VERSION).tar.gz && \
+	cd curl-$(CURL_DOT_VERSION) && \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig ./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \
 		--disable-shared \

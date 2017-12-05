@@ -4,7 +4,7 @@ version: '2'
 services:
 
     trusty: 
-        image: charlesportwoodii/trusty:build
+        image: charlesportwoodii/ubuntu:14.04-build
         container_name: trusty_x64
         command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_debian VERSION=$VERSION"
         volumes: 
@@ -12,7 +12,7 @@ services:
         working_dir: /data
 
     xenial:
-        image: charlesportwoodii/xenial:build
+        image: charlesportwoodii/ubuntu:16.04-build
         container_name: xenial_x64
         command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_debian VERSION=$VERSION"
         volumes: 

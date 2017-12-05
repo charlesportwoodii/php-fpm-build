@@ -14,7 +14,7 @@ LIBSODIUMVERSION?=1.0.15
 # External extension versions
 REDISEXTVERSION?=3.1.4
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.7
+LIBSODIUMEXTVERSION?=2.0.10
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
 SHARED_ZEND_EXTENSIONS := opcache
@@ -232,7 +232,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
+	./configure LD_LIBRARY_PATH=/usr/local/lib LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

@@ -157,7 +157,7 @@ curl: nghttp2
 	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
-	LD_LIBRARY_PATH=/usr/local/lib LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \
@@ -232,7 +232,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure LD_LIBRARY_PATH=/usr/local/lib LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
+	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \

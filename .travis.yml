@@ -7,8 +7,6 @@ language: generic
 env:
   - BUILD_IMAGE=xenial
   - BUILD_IMAGE=trusty
-  - BUILD_IMAGE=centos7
-  - BUILD_IMAGE=rhel7
 
 services:
   - docker

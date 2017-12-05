@@ -18,19 +18,3 @@ services:
         volumes: 
             - .:/data
         working_dir: /data
-
-    centos7:
-        image: charlesportwoodii/centos7:build
-        container_name: centos7_x86_64
-        command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_rpm VERSION=$VERSION"
-        volumes: 
-            - .:/data
-        working_dir: /data
-
-    rhel7:
-        image: charlesportwoodii/rhel7:build
-        container_name: rhel7_x86_64
-        command: bash -lc "source .vs && make build VERISON=$VERSION RELEASEVER=$RELEASEVER && make fpm_rpm VERSION=$VERSION"
-        volumes: 
-            - .:/data
-        working_dir: /data

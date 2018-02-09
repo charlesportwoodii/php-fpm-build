@@ -55,7 +55,7 @@ services:
     alpine3.7:
         image: charlesportwoodii/alpine:3.7-build
         container_name: alpine37_x86_64
-        command: sh -lc "apk del apr-dev apr-util-dev apache2-dev bash-completion bash libtool; sed -i '1c\SHELL := /bin/sh' Makefile; CORES=1 VERSION=$VERSION RELEASEVER=$RELEASEVER make openssl curl libargon2 libsodium php fpm_alpine"
+        command: bash -lc "make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes: 
             - ${PWD-.}:/data
         working_dir: /data

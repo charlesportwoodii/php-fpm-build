@@ -93,7 +93,13 @@ define chdir
    $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
-build: openssl curl libraries php
+build: info openssl curl libraries php
+
+info:
+	@echo "Building $(VERSION)-$(RELEASEVER) ($(major).$(minor).$(micro))"
+	@echo "Native Compiler Optimizations"
+	gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
+	echo | gcc -dM -E - -march=native
 
 clean_dist:
 	rm -rf *.deb

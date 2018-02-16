@@ -347,7 +347,7 @@ pear:
 		--description "PHP PEAR" \
 		--vendor "Charles R. Portwood II"
 
-pre_package:
+pre_package: determine_extensions
 	# Removing the work build directory
 	rm -rf /tmp/php-$(VERSION)-install*
 

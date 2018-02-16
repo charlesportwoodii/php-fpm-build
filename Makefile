@@ -180,7 +180,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;)
 	cd /tmp && \
 	git clone https://github.com/P-H-C/phc-winner-argon2 -b $(ARGON2VERSION) libargon2 && \
 	cd $(ARGON2_DIR) && \
-	CFLAGS="-fPIC" make
+	CFLAGS="-fPIC" make -j1 OPTTARGET=i686
 
 	cd $(ARGON2_DIR) && \
 	ln -s . lib && \

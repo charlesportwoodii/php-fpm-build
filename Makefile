@@ -3,8 +3,8 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.42
 OPENSSLVERSION?=1.0.2o
-CURLVERSION?=7_58_0
-NGHTTPVERSION?=1.30.0
+CURLVERSION?=7_59_0
+NGHTTPVERSION?=1.31.1
 RELEASEVER?=1
 
 # Library versions
@@ -12,9 +12,9 @@ ARGON2VERSION?=20171227
 LIBSODIUMVERSION?=1.0.16
 
 # External extension versions
-REDISEXTVERSION?=3.1.6
+REDISEXTVERSION?=4.0.2
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.10
+LIBSODIUMEXTVERSION?=2.0.11
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
 SHARED_ZEND_EXTENSIONS := opcache
@@ -53,6 +53,8 @@ ifeq ($(shell lsb_release --codename | cut -f2),trusty)
 LIBICU=libicu52
 else ifeq ($(shell lsb_release --codename | cut -f2),xenial)
 LIBICU=libicu55
+else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
+LIBICU=libicu60
 else
 LIBICU=libicu48
 endif

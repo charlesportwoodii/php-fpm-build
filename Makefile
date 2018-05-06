@@ -579,7 +579,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "$(LIBICU) > 0" \
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
-		--depends "$(LIIBPNG) > 0" \
+		--depends "$(LIBPNG) > 0" \
 		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \

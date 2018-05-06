@@ -59,6 +59,12 @@ else
 LIBICU=libicu48
 endif
 
+ifeq ($(shell lsb_release --codename | cut -f2),bionic)
+LIBPNG=libpng16-16
+else
+LIBPNG=libpng12-0
+endif
+
 # Argon2 extension can be enabled for PHP 7.0+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
@@ -573,7 +579,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "$(LIBICU) > 0" \
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
-		--depends "libpng12-0 > 0" \
+		--depends "$(LIIBPNG) > 0" \
 		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \

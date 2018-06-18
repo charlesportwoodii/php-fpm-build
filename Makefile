@@ -3,8 +3,8 @@ SHELL := /bin/bash
 # Dependency Versions
 PCREVERSION?=8.42
 OPENSSLVERSION?=1.0.2o
-CURLVERSION?=7_59_0
-NGHTTPVERSION?=1.31.1
+CURLVERSION?=7_60_0
+NGHTTPVERSION?=1.32.0
 RELEASEVER?=1
 
 # Library versions
@@ -13,12 +13,13 @@ LIBSODIUMVERSION?=1.0.16
 
 # External extension versions
 REDISEXTVERSION?=4.0.2
+IGBINARYVERISON?=2.0.6
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.11
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -230,6 +231,8 @@ php: determine_extensions
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
 
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
@@ -302,6 +305,8 @@ endif
 		--with-kerberos \
 		--with-fileinfo \
 		--enable-redis=shared \
+		--enable-redis-igbinary \
+		--enable-igbinary=shared \
 		--enable-exif \
 		--enable-ctype \
 		--enable-hash \

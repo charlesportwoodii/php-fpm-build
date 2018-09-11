@@ -55,7 +55,7 @@ services:
     alpine3.6:
         image: charlesportwoodii/alpine:3.6-build
         container_name: alpine36_x86_64
-        command: bash -lc "make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
+        command: bash -lc "apk add --no-cache linux-headers; make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes: 
             - ${PWD-.}:/data
         working_dir: /data
@@ -65,7 +65,7 @@ services:
     alpine3.7:
         image: charlesportwoodii/alpine:3.7-build
         container_name: alpine37_x86_64
-        command: bash -lc "make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
+        command: bash -lc "apk add --no-cache linux-headers; make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes: 
             - ${PWD-.}:/data
         working_dir: /data

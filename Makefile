@@ -1,10 +1,8 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-PCREVERSION?=8.42
-OPENSSLVERSION?=1.0.2p
-CURLVERSION?=7_61_0
-NGHTTPVERSION?=1.32.0
+CURLVERSION?=7_61_1
+NGHTTPVERSION?=1.33.0
 RELEASEVER?=1
 
 # Library versions
@@ -15,7 +13,7 @@ LIBSODIUMVERSION?=1.0.16
 REDISEXTVERSION?=4.1.1
 IGBINARYVERISON?=2.0.7
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.11
+LIBSODIUMEXTVERSION?=2.0.12
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
@@ -84,6 +82,12 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
+OPENSSLVERSION?=1.1.1
+else
+OPENSSLVERSION?=1.0.2p
+endif
+
 # Alpine Linux needs to use system libraries for sqlite to prevent linker failures
 ifeq ($(shell if [ -f /etc/alpine-release ]; then echo 0; else echo 1; fi;), 0)
 SQLITEARGS=--with-sqlite3=shared,/usr
@@ -127,17 +131,21 @@ openssl:
 	cd /tmp && \
 	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz
-
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
+	cd /tmp/openssl-$(OPENSSLVERSION) && \
+	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3
+else
 	if [[ "$(ARCH)" == "arm"* ]]; then \
-		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3; \
+		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) --release no-shared enable-tlsext no-ssl2 no-ssl3; \
 	else \
 		cd /tmp/openssl-$(OPENSSLVERSION) && \
 		wget https://raw.githubusercontent.com/cloudflare/sslconfig/master/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch && \
 		patch -p1 < openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch 2>/dev/null; true && \
 		wget https://gist.githubusercontent.com/charlesportwoodii/9e95c6a4ecde31ea23c17f6823bdb320/raw/a02fac917fc30f4767fb60a9563bad69dc1c054d/chacha.patch && \
 		patch < chacha.patch 2>/dev/null; true && \
-		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
+		./config --prefix=$(OPENSSL_PATH) --release no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
 	fi 
+endif
 
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	make depend && \

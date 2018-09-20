@@ -136,14 +136,14 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;)
 	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3
 else
 	if [[ "$(ARCH)" == "arm"* ]]; then \
-		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) --release no-shared enable-tlsext no-ssl2 no-ssl3; \
+		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3; \
 	else \
 		cd /tmp/openssl-$(OPENSSLVERSION) && \
 		wget https://raw.githubusercontent.com/cloudflare/sslconfig/master/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch && \
 		patch -p1 < openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch 2>/dev/null; true && \
 		wget https://gist.githubusercontent.com/charlesportwoodii/9e95c6a4ecde31ea23c17f6823bdb320/raw/a02fac917fc30f4767fb60a9563bad69dc1c054d/chacha.patch && \
 		patch < chacha.patch 2>/dev/null; true && \
-		./config --prefix=$(OPENSSL_PATH) --release no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
+		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
 	fi 
 endif
 

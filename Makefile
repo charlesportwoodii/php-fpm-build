@@ -597,6 +597,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
+		--depends "libbrotli > 0" \
 		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
@@ -672,6 +673,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
+		--depends "libbrotli > 0 \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
@@ -749,6 +751,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "sqlite-dev" \
 		--depends "openssl" \
 		--depends "ca-certificates" \
+		--depends "libbrotli" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \

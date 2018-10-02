@@ -673,7 +673,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
-		--depends "libbrotli > 0 \
+		--depends "libbrotli > 0" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \

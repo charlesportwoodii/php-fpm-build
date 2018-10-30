@@ -12,6 +12,7 @@ env:
   - BUILD_IMAGE=rhel7
   - BUILD_IMAGE=alpine3.6
   - BUILD_IMAGE=alpine3.7
+  - BUILD_IMAGE=alpine3.8
 
 services:
   - docker
@@ -31,6 +32,7 @@ script:
   - if [ "$BUILD_IMAGE" == "rhel7" ]; then mv *.rpm build/rpm/RHEL/7/x86_64; fi
   - if [ "$BUILD_IMAGE" == "alpine3.6" ]; then mv *.apk build/alpine/v3.6/x86_64; fi
   - if [ "$BUILD_IMAGE" == "alpine3.7" ]; then mv *.apk build/alpine/v3.7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "alpine3.8" ]; then mv *.apk build/alpine/v3.8/x86_64; fi
 
 after_failure:
   - cat /tmp/php-$VERSION/config.log

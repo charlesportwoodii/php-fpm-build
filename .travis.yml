@@ -12,6 +12,7 @@ env:
   - BUILD_IMAGE=rhel7
   - BUILD_IMAGE=alpine3.6
   - BUILD_IMAGE=alpine3.7
+  - BUILD_IMAGE=alpine3.8
 
 services:
   - docker
@@ -31,15 +32,16 @@ script:
   - if [ "$BUILD_IMAGE" == "rhel7" ]; then mv *.rpm build/rpm/RHEL/7/x86_64; fi
   - if [ "$BUILD_IMAGE" == "alpine3.6" ]; then mv *.apk build/alpine/v3.6/x86_64; fi
   - if [ "$BUILD_IMAGE" == "alpine3.7" ]; then mv *.apk build/alpine/v3.7/x86_64; fi
+  - if [ "$BUILD_IMAGE" == "alpine3.8" ]; then mv *.apk build/alpine/v3.8/x86_64; fi
 
 after_failure:
   - cat /tmp/php-$VERSION/config.log
 
 deploy:
   provider: s3
-  access_key_id: AKIAJ5QCEUQ2WVNY7GDA
+  access_key_id: AKIAINRCDYGMMTSHTIHA
   secret_access_key:
-    secure: ARfuwOF+VJB+L9h9bbAvsXdO5PLsvzKnhvwGmnmIYI5FDAhhv5apq0ytFPVDLuHho74AkWK5wJP5YGQ2JnGOAj8Sq/Zg+wcHbt9FZ3p0otNaUl4pririIUt/Cz3B7vLR2lEd6ZUn3ekQzJWkEO9/SQTKkUUq+kxRhHZsr2KUdCk=
+    secure: 2XQmmT2Lmrui0hh/aCnNnKU37/daK6XWV2OlebDHtePpZJfFVRzI7x88JL7QaPM4wzg6aGkNjchXlHd2UFMDYAdo3CHHGEQNU/uXjlAO7di0Cn5GSeTVPKqaaow2IuMWcZrYm3HJVQZ3rG292owtwgQ/36D05w7GayVUijUtBBnBblqetbKIZBdkQ3J/Vj687uvk1cf1Isjh8+2z51ZmSxJrS/klspOd2oP2QnPWRkD4ElIDCsYtefPhjJDKMJzpWCMB+QOwWYdlip/tUkJ2OPuQ1iLWmkthyRdclB9YWEaDgWz2fsqu2chuDSHZl+GcdLBGnGC9l/nBYjiSvulsGinlAUXQny01T4oejr/B7vPccHh2Q2Y0cjY0GJG5fiHJ89GJkluFhbHV6C6N15u0lkCjxC7WaqFoLFjqVdxVQLE/VlxAS7MCwcY3O02Aj9uRbW/A1evwI0mk553pmYLEMhdFbRUTF8PKjg+tKHMwJtG2rh8u60klw/eFPsWQEliWRsK8ZEfvdGKncaXBraCgBX8Woc7n1xJoqbCrLNQkM/oNS7BHq6udrIUJBRzcNAcvXgopBLN3BGHzdDL4yXZJiRpz9nlF9VHu0F3ZzslYWPoHipXAcIrO3jh+2Vt5AqCoYbLn1+io++AXlNtoec7WohtZB7m/VFCUztvl7NeAyYw=
   bucket: travis-packages.erianna.com
   detect_encoding: true
   skip_cleanup: true

@@ -1,8 +1,6 @@
 SHELL := /bin/bash
 
 # Dependency Versions
-PCREVERSION?=8.42
-OPENSSLVERSION?=1.0.2p
 CURLVERSION?=7_62_0
 NGHTTPVERSION?=1.34.0
 RELEASEVER?=1
@@ -85,6 +83,12 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
+OPENSSLVERSION?=1.1.1
+else
+OPENSSLVERSION?=1.0.2p
+endif
+
 # Alpine Linux needs to use system libraries for sqlite to prevent linker failures
 ifeq ($(shell if [ -f /etc/alpine-release ]; then echo 0; else echo 1; fi;), 0)
 SQLITEARGS=--with-sqlite3=shared,/usr
@@ -128,7 +132,10 @@ openssl:
 	cd /tmp && \
 	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz
-
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
+	cd /tmp/openssl-$(OPENSSLVERSION) && \
+	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3
+else
 	if [[ "$(ARCH)" == "arm"* ]]; then \
 		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3; \
 	else \
@@ -139,6 +146,7 @@ openssl:
 		patch < chacha.patch 2>/dev/null; true && \
 		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
 	fi
+endif
 
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	make depend && \
@@ -594,7 +602,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
-		--depends "libgeos3.6" \
+		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
@@ -671,7 +679,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
-		--depends "libgeos3.6" \
+		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
@@ -750,7 +758,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "sqlite-dev" \
 		--depends "openssl" \
 		--depends "ca-certificates" \
-		--depends "libgeos3.6" \
+		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_APK_DEPENDS) \
 		--force \

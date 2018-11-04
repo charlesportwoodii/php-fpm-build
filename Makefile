@@ -2,9 +2,9 @@ SHELL := /bin/bash
 
 # Dependency Versions
 PCREVERSION?=8.42
-OPENSSLVERSION?=1.0.2o
-CURLVERSION?=7_60_0
-NGHTTPVERSION?=1.32.0
+OPENSSLVERSION?=1.0.2p
+CURLVERSION?=7_62_0
+NGHTTPVERSION?=1.34.0
 RELEASEVER?=1
 
 # Library versions
@@ -12,14 +12,15 @@ ARGON2VERSION?=20171227
 LIBSODIUMVERSION?=1.0.16
 
 # External extension versions
-REDISEXTVERSION?=4.0.2
-IGBINARYVERISON?=2.0.6
+REDISEXTVERSION?=4.1.1
+IGBINARYVERISON?=2.0.8
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.11
+LIBSODIUMEXTVERSION?=2.0.13
+GEOSEXTVERSION?=master
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary geos
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary geos
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -137,7 +138,7 @@ openssl:
 		wget https://gist.githubusercontent.com/charlesportwoodii/9e95c6a4ecde31ea23c17f6823bdb320/raw/a02fac917fc30f4767fb60a9563bad69dc1c054d/chacha.patch && \
 		patch < chacha.patch 2>/dev/null; true && \
 		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
-	fi 
+	fi
 
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	make depend && \
@@ -191,7 +192,7 @@ curl: nghttp2
 libargon2:
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	rm -rf $(ARGON2_DIR)
-	
+
 	cd /tmp && \
 	git clone https://github.com/P-H-C/phc-winner-argon2 -b $(ARGON2VERSION) libargon2 && \
 	cd $(ARGON2_DIR) && \
@@ -226,12 +227,14 @@ php: determine_extensions
 	cd /tmp && \
 	git clone --depth 15 -b php-$(VERSION) https://github.com/php/php-src.git /tmp/php-$(VERSION)
 
-	# Checkout PHP	
+	# Checkout PHP
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
+
+	cd /tmp/php-$(VERSION)/ext && git clone -b $(GEOSEXTVERSION) https://github.com/libgeos/php-geos geos
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
@@ -249,7 +252,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
+	./configure LIBS="-lpthread" CFLAGS="-I/usr/local/include/ -I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L/usr/local/lib -L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \
@@ -307,6 +310,8 @@ endif
 		--enable-redis=shared \
 		--enable-redis-igbinary \
 		--enable-igbinary=shared \
+		--enable-geos=shared \
+		--with-geos-config=/usr/local/bin/geos-config \
 		--enable-exif \
 		--enable-ctype \
 		--enable-hash \
@@ -412,7 +417,7 @@ pre_package: determine_extensions
 	mkdir -p /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.d
 	cp $(SCRIPTPATH)/conf/php-fpm.conf /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
 	cp $(SCRIPTPATH)/conf/default.conf /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
-	
+
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.conf.default
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
 	sed -i s/PORT/$(major)$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/php/$(major).$(minor)/php-fpm.d/pool.conf.default
@@ -448,9 +453,9 @@ pre_package: determine_extensions
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available
 
-	# Export the timezone as UTC 
+	# Export the timezone as UTC
 	echo "date.timezone=UTC" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d/UTC-timezone.ini
-	
+
 	# Secure Sessions defaults
 	echo "session.use_cookies = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
 	echo "session.cookie_secure = 1" >> /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/mods-available/secure_session_cookies.ini
@@ -470,7 +475,7 @@ pre_package: determine_extensions
 
 	# Copy the license file
 	cp /tmp/php-$(VERSION)/LICENSE /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)
-	
+
 	# Remove phar to be packaged in a separate repository
 	rm -rf /tmp/php-$(VERSION)-install/etc/pear.conf
 	rm -rf /tmp/php-$(VERSION)-install/.registry
@@ -507,7 +512,7 @@ pre_package_ext: determine_extensions
 		mv /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
 	done;
-	
+
 	for ext in $(SHARED_ZEND_EXTENSIONS); do \
 		rm -rf /tmp/php$(VERSION)-$$ext; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available; \
@@ -589,6 +594,8 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
+		--depends "libgeos3.6" \
+		--depends "libbrotli" \
 		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
@@ -641,7 +648,7 @@ fpm_debian: pre_package pre_package_ext
 			--force \
 			--no-deb-auto-config-files; \
 	done;
-	
+
 fpm_rpm: pre_package pre_package_ext
 	echo "Building native package for rpm"
 
@@ -664,6 +671,8 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
+		--depends "libgeos3.6" \
+		--depends "libbrotli" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
@@ -671,7 +680,7 @@ fpm_rpm: pre_package pre_package_ext
 		--force \
 		--after-install /tmp/php-$(VERSION)/rpm/common/postinstall \
 		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
-		
+
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
 			-t rpm \
@@ -741,6 +750,8 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "sqlite-dev" \
 		--depends "openssl" \
 		--depends "ca-certificates" \
+		--depends "libgeos3.6" \
+		--depends "libbrotli" \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \

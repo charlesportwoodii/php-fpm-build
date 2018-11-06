@@ -14,11 +14,10 @@ REDISEXTVERSION?=4.1.1
 IGBINARYVERISON?=2.0.8
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.13
-GEOSEXTVERSION?=master
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary geos
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary geos
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -72,7 +71,7 @@ endif
 
 # Mcrypt is only available in PHP 7.1 and lower
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
-PHP71ARGS="--with-mcrypt=shared"
+PHP71ARGS="--with-mcrypt=shared --enable-gd-native-ttf"
 PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
 PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
@@ -242,8 +241,6 @@ php: determine_extensions
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
 
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(GEOSEXTVERSION) https://github.com/libgeos/php-geos geos
-
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
@@ -260,7 +257,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure LIBS="-lpthread" CFLAGS="-I/usr/local/include/ -I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L/usr/local/lib -L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
+	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
 		--with-libdir=lib64 \
 		--build=x86_64-linux-gnu \
 		--host=x86_64-linux-gnu \
@@ -307,19 +304,17 @@ endif
 		--with-iconv \
 		--with-pcre-regex \
 		--with-pcre-jit \
+		--with-libzip \
 		--with-zlib \
 		--with-layout=GNU \
 		--with-gd=shared \
-		--enable-gd-native-ttf \
     	--enable-gd-jis-conv \
 		--with-mhash \
 		--with-kerberos \
-		--with-fileinfo \
+		--enable-fileinfo \
 		--enable-redis=shared \
 		--enable-redis-igbinary \
 		--enable-igbinary=shared \
-		--enable-geos=shared \
-		--with-geos-config=/usr/local/bin/geos-config \
 		--enable-exif \
 		--enable-ctype \
 		--enable-hash \
@@ -602,7 +597,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libmysqlclient20 > 0" \
-		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
@@ -679,7 +673,6 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
-		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
@@ -758,7 +751,6 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "sqlite-dev" \
 		--depends "openssl" \
 		--depends "ca-certificates" \
-		--depends "libgeos36" \
 		--depends "libbrotli" \
 		$(PHP71_APK_DEPENDS) \
 		--force \

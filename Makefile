@@ -304,7 +304,6 @@ endif
 		--with-iconv \
 		--with-pcre-regex \
 		--with-pcre-jit \
-#		--with-libzip
 		--with-zlib \
 		--with-layout=GNU \
 		--with-gd=shared \

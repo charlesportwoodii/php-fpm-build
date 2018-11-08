@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+# Alpine Linux version, only used for Alpine builds
+ALPINE_VERSION?=
+
 # Dependency Versions
 CURLVERSION?=7_62_0
 NGHTTPVERSION?=1.34.0
@@ -62,6 +65,12 @@ ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBPNG=libpng16-16
 else
 LIBPNG=libpng12-0
+endif
+
+ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)
+ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0"
+else
+ALPINE_DEPENDS=--depends "mariadb-client-libs > 0"
 endif
 
 # Argon2 extension can be enabled for PHP 7.0+
@@ -743,7 +752,6 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "enchant > 0" \
 		--depends "aspell-en > 0" \
 		--depends "recode-dev > 0" \
-		--depends "mariadb-client-libs > 0" \
 		--depends "bash" \
 		--depends "libxslt-dev" \
 		--depends "gmp" \
@@ -751,6 +759,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "openssl" \
 		--depends "ca-certificates" \
 		--depends "libbrotli" \
+		$(ALPINE_DEPENDS) \
 		$(PHP71_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \

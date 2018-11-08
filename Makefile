@@ -80,7 +80,7 @@ endif
 
 # Mcrypt is only available in PHP 7.1 and lower
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
-PHP71ARGS="--with-mcrypt=shared --enable-gd-native-ttf"
+PHP71ARGS="--with-mcrypt=shared"
 PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
 PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"

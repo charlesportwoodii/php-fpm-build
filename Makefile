@@ -97,14 +97,8 @@ else
 OPENSSLVERSION?=1.0.2p
 endif
 
-# Alpine Linux needs to use system libraries for sqlite to prevent linker failures
-ifeq ($(shell if [ -f /etc/alpine-release ]; then echo 0; else echo 1; fi;), 0)
 SQLITEARGS=--with-sqlite3=shared,/usr
 PDOSQLITEARGS=--with-pdo-sqlite=shared,/usr
-else
-SQLITEARGS=--with-sqlite3=shared
-PDOSQLITEARGS=--with-pdo-sqlite=shared
-endif
 
 RELEASENAME=$(PKG_NAME)-common
 PROVIDES=$(PKG_NAME)-common

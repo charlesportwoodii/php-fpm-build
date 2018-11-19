@@ -16,7 +16,7 @@ LIBSODIUMVERSION?=1.0.16
 REDISEXTVERSION?=4.2.0
 IGBINARYVERISON?=2.0.8
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.13
+LIBSODIUMEXTVERSION?=2.0.15
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache

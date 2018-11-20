@@ -92,9 +92,9 @@ PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
-OPENSSLVERSION?=1.1.1
+OPENSSLVERSION?=1.1.1a
 else
-OPENSSLVERSION?=1.0.2p
+OPENSSLVERSION?=1.0.2q
 endif
 
 SQLITEARGS=--with-sqlite3=shared,/usr

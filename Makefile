@@ -67,6 +67,12 @@ else
 LIBPNG=libpng12-0
 endif
 
+ifneq ($(ALPINE_VERSION),)
+TARGET=x86_64-unknown-linux-musl
+else
+TARGET=x86_64-linux-gnu
+endif
+
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)
 ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0"
 else
@@ -262,8 +268,8 @@ endif
 	./buildconf --force && \
 	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
 		--with-libdir=lib64 \
-		--build=x86_64-linux-gnu \
-		--host=x86_64-linux-gnu \
+		--build=$(TARGET) \
+		--host=$(TARGET) \
 		--prefix=/usr \
 		--includedir=${prefix}/include/php/$(major).$(minor) \
 		--mandir=${prefix}/share/man/php/$(major).$(minor) \

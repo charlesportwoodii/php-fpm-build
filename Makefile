@@ -1,5 +1,10 @@
 SHELL := /bin/bash
 
+# Extra packages that certain distributions may require
+EXTRA_APT_PACKAGES?=
+EXTRA_RPM_PACKAGES?=
+REMOVE_RPM_PACKAGES?=
+
 # Alpine Linux version, only used for Alpine builds
 ALPINE_VERSION?=
 
@@ -53,12 +58,16 @@ CURL_PREFIX=/opt/curl
 # Ubuntu dependencies
 ifeq ($(shell lsb_release --codename | cut -f2),trusty)
 LIBICU=libicu52
+LIBMYSQLCLIENT=libmysqlclient18
 else ifeq ($(shell lsb_release --codename | cut -f2),xenial)
 LIBICU=libicu55
+LIBMYSQLCLIENT=libmysqlclient20
 else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
+LIBMYSQLCLIENT=libmysqlclient20
 else
 LIBICU=libicu48
+LIBMYSQLCLIENT=libmysqlclient20
 endif
 
 ifeq ($(shell lsb_release --codename | cut -f2),bionic)
@@ -115,7 +124,30 @@ define chdir
    $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
-build: info openssl curl libraries php
+define install_apt_package_from_curl
+	curl -sqL $(1) -o package.deb;
+	dpkg -i package.deb;
+	rm package.deb;
+endef
+
+define install_rpm_package_from_curl
+	curl -sqL $(1) -o package.rpm;
+	rpm -if --replacefiles package.rpm;
+	rm package.rpm;
+endef
+
+build: pre_install info openssl curl libraries php
+
+pre_install:
+ifneq ($(EXTRA_APT_PACKAGES),)
+	$(foreach package, $(EXTRA_APT_PACKAGES), $(call install_apt_package_from_curl, $(package)))
+endif
+ifneq ($(REMOVE_RPM_PACKAGES),)
+	yum remove -y $(REMOVE_RPM_PACKAGES)
+endif
+ifneq ($(EXTRA_RPM_PACKAGES),)
+	$(foreach package, $(EXTRA_RPM_PACKAGES), $(call install_rpm_package_from_curl, $(package)))
+endif
 
 info:
 	@echo "Building $(VERSION)-$(RELEASEVER) ($(major).$(minor).$(micro))"
@@ -604,8 +636,9 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
-		--depends "libmysqlclient20 > 0" \
+		--depends "$(LIBMYSQLCLIENT) > 0" \
 		--depends "libbrotli" \
+		--depends "openssl" \
 		$(PHP71_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
@@ -682,6 +715,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
 		--depends "libbrotli" \
+		--depends "openssl" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \

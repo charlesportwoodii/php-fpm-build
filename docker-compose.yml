@@ -12,6 +12,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
+            - EXTRA_APT_PACKAGES=http://security.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip4_1.1.2-1.1_amd64.deb http://launchpadlibrarian.net/260671105/libzip-dev_1.1.2-1.1_amd64.deb
     xenial:
         image: charlesportwoodii/ubuntu:16.04-build
         container_name: xenial_x64
@@ -42,6 +43,8 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
+            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.5.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.1-1.el7.remi.x86_64.rpm
+            - REMOVE_RPM_PACKAGES=libzip libzip-devel
     rhel7:
         image: charlesportwoodii/rhel:7-build
         container_name: rhel7_x86_64
@@ -52,10 +55,12 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
+            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.5.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.1-1.el7.remi.x86_64.rpm
+            - REMOVE_RPM_PACKAGES=libzip libzip-devel
     alpine3.6:
         image: charlesportwoodii/alpine:3.6-build
         container_name: alpine36_x86_64
-        command: bash -lc "apk add --no-cache linux-headers;  ALPINE_VERSION=360 make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
+        command: bash -lc "apk add --no-cache linux-headers; ALPINE_VERSION=360 make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes:
             - ${PWD-.}:/data
         working_dir: /data
@@ -65,7 +70,7 @@ services:
     alpine3.7:
         image: charlesportwoodii/alpine:3.7-build
         container_name: alpine37_x86_64
-        command: bash -lc "apk add --no-cache linux-headers;  ALPINE_VERSION=370 make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
+        command: bash -lc "apk add --no-cache linux-headers; ALPINE_VERSION=370 make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER"
         volumes:
             - ${PWD-.}:/data
         working_dir: /data

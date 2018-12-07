@@ -67,7 +67,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
-            - ALPINE_VERSION=36
+            - ALPINE_VERSION=360
     alpine3.7:
         image: charlesportwoodii/alpine:3.7-build
         container_name: alpine37_x86_64
@@ -78,7 +78,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
-            - ALPINE_VERSION=37
+            - ALPINE_VERSION=370
     alpine3.8:
         image: charlesportwoodii/alpine:3.8-build
         container_name: alpine38_x86_64
@@ -89,4 +89,4 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
-            - ALPINE_VERSION=38
+            - ALPINE_VERSION=380

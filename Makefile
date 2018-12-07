@@ -637,6 +637,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "$(LIBMYSQLCLIENT) > 0" \
+		--depends "libzip4 > 1.1.0" \
 		--depends "libbrotli" \
 		--depends "openssl" \
 		$(PHP71_DEB_DEPENDS) \
@@ -715,6 +716,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
 		--depends "libbrotli" \
+		--depends "libzip > 1.1.0" \
 		--depends "openssl" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \
@@ -793,6 +795,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "openssl" \
 		--depends "ca-certificates" \
 		--depends "libbrotli" \
+		--depends "libzip > 1.1.0" \
 		$(ALPINE_DEPENDS) \
 		$(PHP71_APK_DEPENDS) \
 		--force \

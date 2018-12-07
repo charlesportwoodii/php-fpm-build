@@ -151,6 +151,7 @@ endif
 
 info:
 	@echo "Building $(VERSION)-$(RELEASEVER) ($(major).$(minor).$(micro))"
+	@echo $(ALPINE_DEPENDS)
 	@echo "Native Compiler Optimizations"
 	gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
 	echo | gcc -dM -E - -march=native

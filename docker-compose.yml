@@ -23,6 +23,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
+            - EXTRA_APT_PACKAGES=http://security.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip4_1.1.2-1.1_amd64.deb http://launchpadlibrarian.net/260671105/libzip-dev_1.1.2-1.1_amd64.deb
     bionic:
         image: charlesportwoodii/ubuntu:18.04-build
         container_name: xenial_x64

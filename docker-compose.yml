@@ -91,3 +91,14 @@ services:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
             - ALPINE_VERSION=380
+    alpine3.9:
+        image: charlesportwoodii/alpine:3.9-build
+        container_name: alpine38_x86_64
+        command: bash -lc "apk add --no-cache linux-headers; make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER ALPINE_VERSION=$ALPINE_VERSION"
+        volumes:
+            - ${PWD-.}:/data
+        working_dir: /data
+        environment:
+            - VERSION=$VERSION
+            - RELEASEVER=$RELEASEVER
+            - ALPINE_VERSION=390

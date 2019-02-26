@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+# Zend Maintainer Debug Mode
+ENABLE_MAINTAINER_MODE?=false
+
 # Extra packages that certain distributions may require
 EXTRA_APT_PACKAGES?=
 EXTRA_RPM_PACKAGES?=
@@ -9,19 +12,19 @@ REMOVE_RPM_PACKAGES?=
 ALPINE_VERSION?=
 
 # Dependency Versions
-CURLVERSION?=7_63_0
-NGHTTPVERSION?=1.35.1
+CURLVERSION?=7_64_0
+NGHTTPVERSION?=1.36.0
 RELEASEVER?=1
 
 # Library versions
 ARGON2VERSION?=20171227
-LIBSODIUMVERSION?=1.0.16
+LIBSODIUMVERSION?=1.0.17
 
 # External extension versions
 REDISEXTVERSION?=4.2.0
-IGBINARYVERISON?=2.0.8
+IGBINARYVERISON?=3.0.0
 ARGON2EXTVERSION?=1.2.1
-LIBSODIUMEXTVERSION?=2.0.20
+LIBSODIUMEXTVERSION?=2.0.21
 
 SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
@@ -101,15 +104,25 @@ PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
 endif
 
-# PASSWORD_ARGON2 is only available in PHP 7.2
+# PASSWORD_ARGON2 is only available in PHP 7.2+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
-OPENSSLVERSION?=1.1.1a
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
+PHP74ARGS="--with-readline"
 else
-OPENSSLVERSION?=1.0.2q
+PHP74ARGS="--with-libedit"
+endif
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
+OPENSSLVERSION?=1.1.1b
+else
+OPENSSLVERSION?=1.0.2r
+endif
+
+ifeq ($(ENABLE_MAINTAINER_MODE), true)
+MAINTAINER_FLAGS=--enable-debug --enable-maintainer-zts
 endif
 
 SQLITEARGS=--with-sqlite3=shared,/usr
@@ -173,7 +186,7 @@ openssl:
 	cd /tmp && \
 	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "73" ]]; then echo 0; else echo 1; fi;), 0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3
 else
@@ -283,6 +296,10 @@ php: determine_extensions
 
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
 
+	# Need to patch igbinary 3.0.0 due to $phpincludedir not being defined
+	# BUG: https://github.com/igbinary/igbinary/issues/50
+	sed -i s/\\$phpincludedir/\\/tmp\\/php-$(major).$(minor).$(micro)/g /tmp/php-$(VERSION)/ext/igbinary/config.m4
+
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
@@ -296,6 +313,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;)
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
 endif
 
+	
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
@@ -337,7 +355,6 @@ endif
 		--with-pspell=shared \
 		--with-recode=shared \
 		--with-gmp=shared \
-		--with-readline \
 		--with-jpeg-dir \
 		--with-freetype-dir \
 		--with-png-dir \
@@ -353,9 +370,9 @@ endif
 		--with-mhash \
 		--with-kerberos \
 		--enable-fileinfo \
+		--enable-igbinary=shared \
 		--enable-redis=shared \
 		--enable-redis-igbinary \
-		--enable-igbinary=shared \
 		--enable-exif \
 		--enable-ctype \
 		--enable-hash \
@@ -383,11 +400,13 @@ endif
 		--enable-huge-code-pages \
 		--enable-bcmath \
 		--enable-phar=static \
+		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \
 		$(PHP70ARGS) \
 		$(PHP71ARGS) \
-		$(PHP72ARGS) && \
+		$(PHP72ARGS) \
+		$(PHP74ARGS) && \
 	make -j$(CORES)
 
 pear:

@@ -116,9 +116,9 @@ PHP74ARGS="--with-libedit"
 endif
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
-OPENSSLVERSION?=1.1.1b
+OPENSSLVERSION?=1.1.1c
 else
-OPENSSLVERSION?=1.0.2r
+OPENSSLVERSION?=1.0.2s
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)

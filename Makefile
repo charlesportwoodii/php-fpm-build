@@ -18,7 +18,7 @@ RELEASEVER?=1
 
 # Library versions
 ARGON2VERSION?=20171227
-LIBSODIUMVERSION?=1.0.18
+LIBSODIUMVERSION?=1.0.18-RELEASE
 
 # External extension versions
 REDISEXTVERSION?=4.3.0
@@ -272,11 +272,11 @@ libsodium:
 	rm -rf /tmp/libsodium*
 
 	cd /tmp && \
-	wget https://github.com/jedisct1/libsodium/releases/download/$(LIBSODIUMVERSION)/libsodium-$(LIBSODIUMVERSION).tar.gz && \
-	tar -xf libsodium-$(LIBSODIUMVERSION).tar.gz && \
+	wget https://github.com/jedisct1/libsodium/archive/$(LIBSODIUMVERSION).tar.gz
+	tar -xf /tmp/$(LIBSODIUMVERSION).tar.gz && \
 	mv libsodium-$(LIBSODIUMVERSION) $(LIBSODIUM_DIR) && \
-	cd libsodium && \
-	rm -rf /tmp/libsodium/lib && \
+	cd $(LIBSODIUM_DIR) && \
+	rm -rf $(LIBSODIUM_DIR)/lib && \
 	./configure --disable-shared --disable-pie && \
 	CFLAGS="-fPIC" make install
 
@@ -313,7 +313,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;)
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
 endif
 
-	
+
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \

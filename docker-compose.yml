@@ -58,17 +58,6 @@ services:
             - RELEASEVER=$RELEASEVER
             - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.5.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.1-1.el7.remi.x86_64.rpm
             - REMOVE_RPM_PACKAGES=libzip libzip-devel
-    alpine3.6:
-        image: charlesportwoodii/alpine:3.6-build
-        container_name: alpine36_x86_64
-        command: bash -lc "apk add --no-cache linux-headers; make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER ALPINE_VERSION=$ALPINE_VERSION"
-        volumes:
-            - ${PWD-.}:/data
-        working_dir: /data
-        environment:
-            - VERSION=$VERSION
-            - RELEASEVER=$RELEASEVER
-            - ALPINE_VERSION=360
     alpine3.7:
         image: charlesportwoodii/alpine:3.7-build
         container_name: alpine37_x86_64
@@ -102,3 +91,14 @@ services:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
             - ALPINE_VERSION=390
+    alpine3.10:
+        image: charlesportwoodii/alpine:3.10-build
+        container_name: alpine36_x86_64
+        command: bash -lc "apk add --no-cache linux-headers; make build fpm_alpine VERSION=$VERSION RELEASEVER=$RELEASEVER ALPINE_VERSION=$ALPINE_VERSION"
+        volumes:
+            - ${PWD-.}:/data
+        working_dir: /data
+        environment:
+            - VERSION=$VERSION
+            - RELEASEVER=$RELEASEVER
+            - ALPINE_VERSION=3100

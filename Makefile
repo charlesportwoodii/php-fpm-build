@@ -12,8 +12,8 @@ REMOVE_RPM_PACKAGES?=
 ALPINE_VERSION?=
 
 # Dependency Versions
-CURLVERSION?=7_64_1
-NGHTTPVERSION?=1.37.0
+CURLVERSION?=7_65_3
+NGHTTPVERSION?=1.39.2
 RELEASEVER?=1
 
 # Library versions
@@ -26,9 +26,9 @@ IGBINARYVERISON?=3.0.1
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.21
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode argon2 sodium gmp soap igbinary
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -59,24 +59,22 @@ NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
 # Ubuntu dependencies
-ifeq ($(shell lsb_release --codename | cut -f2),trusty)
-LIBICU=libicu52
-LIBMYSQLCLIENT=libmysqlclient18
-else ifeq ($(shell lsb_release --codename | cut -f2),xenial)
+ifeq ($(shell lsb_release --codename | cut -f2),xenial)
 LIBICU=libicu55
 LIBMYSQLCLIENT=libmysqlclient20
-else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
-LIBICU=libicu60
-LIBMYSQLCLIENT=libmysqlclient20
-else
-LIBICU=libicu48
-LIBMYSQLCLIENT=libmysqlclient20
+LIBWEBP_DEBIAN=libwebp5
+LIBPNG=libpng12-0
 endif
 
 ifeq ($(shell lsb_release --codename | cut -f2),bionic)
+LIBICU=libicu60
+LIBMYSQLCLIENT=libmysqlclient20
+LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 else
-LIBPNG=libpng12-0
+LIBICU=libicu48
+LIBMYSQLCLIENT=libmysqlclient20
+LIBPNG=libpng16-16
 endif
 
 ifneq ($(ALPINE_VERSION),)
@@ -91,11 +89,6 @@ else
 ALPINE_DEPENDS=--depends "mariadb-client-libs > 0"
 endif
 
-# Argon2 extension can be enabled for PHP 7.0+
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
-PHP70ARGS="--with-argon2=shared,$(ARGON2_DIR)"
-endif
-
 # Mcrypt is only available in PHP 7.1 and lower
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP71ARGS="--with-mcrypt=shared"
@@ -104,21 +97,36 @@ PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
 endif
 
-# PASSWORD_ARGON2 is only available in PHP 7.2+
+# Argon2 is only in PHP 7.2+
+# use OpenSSL 1.1.1 in 7.2
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
-endif
-
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP74ARGS="--with-readline"
-else
-PHP74ARGS="--with-libedit"
-endif
-
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 OPENSSLVERSION?=1.1.1c
 else
 OPENSSLVERSION?=1.0.2s
+endif
+
+# Set PHP_CONFIG_FLAGS for different PHP version
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
+PHP_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include"
+PHP_LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib"
+PHP_CONFIG_FLAGS= CFLAGS=$(PHP_CFLAGS) LDFLAGS=$(PHP_LDFLAGS)
+PHP72_DEB_DEPENDS=--depends "librecode > 0"
+PHP72_RPM_DEPENDS=--depends "librecode0 > 0"
+PHP72_APK_DEPENDS= --depends "recode-dev > 0"
+endif
+
+# Adjust gd configuration for 7.4 vs 7.3--
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
+PHP74ARGS=--enable-gd --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl
+PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
+PHP74_DEB_DEPENDS=--depends "libonig" --depends "libedit" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4"
+
+# Rconfigure PKG_CONFIG_PATH environment variable
+PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
+PKG_CONFIG_PATH=$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:$(OPENSSL_PATH)/lib/pkgconfig:$(PKG_CONFIG_PATH_BASE)
+else
+PHP70ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX)
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
@@ -137,6 +145,10 @@ define chdir
    $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
 endef
 
+define install_apt_package
+	apt install $(1) -y;
+endef
+
 define install_apt_package_from_curl
 	curl -sqL $(1) -o package.deb;
 	dpkg -i package.deb;
@@ -152,19 +164,27 @@ endef
 build: pre_install info openssl curl libraries php
 
 pre_install:
-ifneq ($(EXTRA_APT_PACKAGES),)
-	$(foreach package, $(EXTRA_APT_PACKAGES), $(call install_apt_package_from_curl, $(package)))
+ifneq ($(EXTRA_DEB_PACKAGES),)
+	$(foreach package, $(EXTRA_DEB_PACKAGES), $(call install_apt_package_from_curl, $(package)))
 endif
+
+ifneq ($(EXTRA_APT_PACKAGES),)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
+	apt update -qq;
+	$(foreach package, $(EXTRA_APT_PACKAGES), $(call install_apt_package, $(package)))
+endif
+endif
+
 ifneq ($(REMOVE_RPM_PACKAGES),)
 	yum remove -y $(REMOVE_RPM_PACKAGES)
 endif
+
 ifneq ($(EXTRA_RPM_PACKAGES),)
 	$(foreach package, $(EXTRA_RPM_PACKAGES), $(call install_rpm_package_from_curl, $(package)))
 endif
 
 info:
 	@echo "Building $(VERSION)-$(RELEASEVER) ($(major).$(minor).$(micro))"
-	@echo $(ALPINE_DEPENDS)
 	@echo "Native Compiler Optimizations"
 	gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
 	echo | gcc -dM -E - -march=native
@@ -179,6 +199,19 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;)
 	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/mcrypt//g))
 	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/mcrypt//g))
 endif
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
+	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/recode//g))
+	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/recode//g))
+endif
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
+	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/gd//g))
+	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/gd//g))
+endif
+
+	@echo $(SHARED_EXTENSIONS)
+	@echo $(REALIZED_EXTENSIONS)
 
 openssl:
 	echo $(OPENSSL_PATH)
@@ -217,7 +250,7 @@ nghttp2:
 	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
 	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
 	cd nghttp2-$(NGHTTPVERSION) && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	LIBS="-ldl" PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure \
 		--prefix=$(NGHTTP_PREFIX) \
 		--enable-static=yes \
@@ -235,20 +268,25 @@ curl: nghttp2
 	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	LIBS="-ldl" LDFLAGS="-static" PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
+		--enable-static \
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
 		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
-	make -j$(CORES) && \
-	make install && \
+	make -j$(CORES) V=1 curl_LDFLAGS=-all-static  && \
+	make install curl_LDFLAGS=-all-static && \
 	cd $(CURL_PREFIX) && \
-	ln -fs lib lib64 && \
+	ln -fs lib lib64
+
+# PHP 7.3- don't use pkgconfig correctly, 7.4+ doesls /opt
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
+endif
 
 # Only build libargon2 for PHP 7.0+
 libargon2:
@@ -313,11 +351,10 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;)
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
 endif
 
-
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	./configure LIBS="-lpthread" CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib" \
+	PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) ./configure CURL_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LIBS="-lpthread" $(PHP_CONFIG_FLAGS) \
 		--with-libdir=lib64 \
 		--build=$(TARGET) \
 		--host=$(TARGET) \
@@ -340,8 +377,6 @@ endif
 		--without-pear \
 		--without-gdbm \
 		--disable-short-tags \
-		--with-curl=$(CURL_PREFIX) \
-		--with-openssl=$(OPENSSL_PATH) \
 		--enable-mysqlnd=shared \
 		--with-pgsql=shared \
 		--with-pdo-mysql=shared,mysqlnd \
@@ -353,11 +388,7 @@ endif
 		--with-enchant=shared \
 		--with-ldap=shared \
 		--with-pspell=shared \
-		--with-recode=shared \
 		--with-gmp=shared \
-		--with-jpeg-dir \
-		--with-freetype-dir \
-		--with-png-dir \
 		--with-pic \
 		--with-gettext \
 		--with-iconv \
@@ -365,7 +396,6 @@ endif
 		--with-pcre-jit \
 		--with-zlib \
 		--with-layout=GNU \
-		--with-gd=shared \
     	--enable-gd-jis-conv \
 		--with-mhash \
 		--with-kerberos \
@@ -655,12 +685,13 @@ fpm_debian: pre_package pre_package_ext
 		--depends "$(LIBPNG) > 0" \
 		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
-		--depends "librecode0 > 0" \
 		--depends "$(LIBMYSQLCLIENT) > 0" \
 		--depends "libzip4 > 1.1.0" \
 		--depends "libbrotli" \
 		--depends "openssl" \
 		$(PHP71_DEB_DEPENDS) \
+		$(PHP72_DEB_DEPENDS) \
+		$(PHP74_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
@@ -739,6 +770,8 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libzip > 1.1.0" \
 		--depends "openssl" \
 		$(PHP71_RPM_DEPENDS) \
+		$(PHP72_RPM_DEPENDS) \
+		$(PHP74_RPM_DEPENDS) \
 		--rpm-digest sha384 \
 		--rpm-compression gzip \
 		--template-scripts \
@@ -807,7 +840,6 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libpng > 0" \
 		--depends "enchant > 0" \
 		--depends "aspell-en > 0" \
-		--depends "recode-dev > 0" \
 		--depends "bash" \
 		--depends "libxslt-dev" \
 		--depends "gmp" \
@@ -818,6 +850,8 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libzip > 1.1.0" \
 		$(ALPINE_DEPENDS) \
 		$(PHP71_APK_DEPENDS) \
+		$(PHP72_APK_DEPENDS) \
+		$(PHP74_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
 		-a $(shell uname -m) \

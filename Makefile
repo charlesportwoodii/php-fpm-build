@@ -686,6 +686,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libzip4 > 1.1.0" \
 		--depends "libbrotli" \
 		--depends "openssl" \
+		--depends "libxslt1.1" \
 		$(PHP71_DEB_DEPENDS) \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \

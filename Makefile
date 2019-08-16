@@ -64,6 +64,7 @@ LIBICU=libicu55
 LIBMYSQLCLIENT=libmysqlclient20
 LIBWEBP_DEBIAN=libwebp5
 LIBPNG=libpng12-0
+LIBONIG_DEBIAN=libonig2
 endif
 
 ifeq ($(shell lsb_release --codename | cut -f2),bionic)
@@ -71,10 +72,12 @@ LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
 LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
+LIBONIG_DEBIAN=libonig4
 else
 LIBICU=libicu48
 LIBMYSQLCLIENT=libmysqlclient20
 LIBPNG=libpng16-16
+LIBONIG_DEBIAN=libonig5
 endif
 
 ifneq ($(ALPINE_VERSION),)
@@ -99,7 +102,7 @@ endif
 
 # Argon2 is only in PHP 7.2+
 # use OpenSSL 1.1.1 in 7.2
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 OPENSSLVERSION?=1.1.1c
 else
@@ -108,9 +111,9 @@ endif
 
 # Set PHP_CONFIG_FLAGS for different PHP version
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include"
-PHP_LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib"
-PHP_CONFIG_FLAGS= CFLAGS=$(PHP_CFLAGS) LDFLAGS=$(PHP_LDFLAGS)
+PHP_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include -I$(OPENSSL_PATH)/include"
+PHP_LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib -L$(OPENSSL_PATH)/lib"
+PHP_CONFIG_FLAGS= LIBS="-lpthread" CFLAGS=$(PHP_CFLAGS) LDFLAGS=$(PHP_LDFLAGS)
 PHP72_DEB_DEPENDS=--depends "librecode > 0"
 PHP72_RPM_DEPENDS=--depends "librecode0 > 0"
 PHP72_APK_DEPENDS= --depends "recode-dev > 0"
@@ -118,15 +121,15 @@ endif
 
 # Adjust gd configuration for 7.4 vs 7.3--
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP74ARGS=--enable-gd --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl
+PHP74ARGS=--enable-gd --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --enable-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
-PHP74_DEB_DEPENDS=--depends "libonig" --depends "libedit" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4"
+PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4"
 
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-PKG_CONFIG_PATH=$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:$(OPENSSL_PATH)/lib/pkgconfig:$(PKG_CONFIG_PATH_BASE)
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(PKG_CONFIG_PATH_BASE)
 else
-PHP70ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX)
+PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
@@ -203,9 +206,6 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/recode//g))
 	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/recode//g))
-endif
-
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/gd//g))
 	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/gd//g))
 endif
@@ -214,6 +214,7 @@ endif
 	@echo $(REALIZED_EXTENSIONS)
 
 openssl:
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	echo $(OPENSSL_PATH)
 	rm -rf /tmp/openssl*
 	cd /tmp && \
@@ -242,8 +243,10 @@ endif
 	make install_sw && \
 	cd $(OPENSSL_PATH) && \
 	ln -fs lib lib64
+endif
 
 nghttp2:
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	echo $(NGHTTP_PREFIX)
 	rm -rf /tmp/nghttp2*
 	cd /tmp && \
@@ -260,6 +263,10 @@ nghttp2:
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
 	ln -fs lib lib64
+endif
+
+curl: nghttp2
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 
 curl: nghttp2
 	echo $(CURL_PREFIX)
@@ -268,35 +275,31 @@ curl: nghttp2
 	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
-	LIBS="-ldl" LDFLAGS="-static" PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
-		--enable-static \
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
 		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
-	make -j$(CORES) V=1 curl_LDFLAGS=-all-static  && \
-	make install curl_LDFLAGS=-all-static && \
+	make -j$(CORES) && \
+	make install && \
 	cd $(CURL_PREFIX) && \
-	ln -fs lib lib64
-
-# PHP 7.3- don't use pkgconfig correctly, 7.4+ doesls /opt
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
+	ln -fs lib lib64 && \
 	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 endif
 
 # Only build libargon2 for PHP 7.0+
 libargon2:
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	rm -rf $(ARGON2_DIR)
 
 	cd /tmp && \
 	git clone https://github.com/P-H-C/phc-winner-argon2 -b $(ARGON2VERSION) libargon2 && \
 	cd $(ARGON2_DIR) && \
-	CFLAGS="-fPIC" make -j1 OPTTARGET=i686
+	CFLAGS="-fPIC" make -j$(CORES) OPTTARGET=i686
 
 	cd $(ARGON2_DIR) && \
 	ln -s . lib && \
@@ -316,7 +319,7 @@ libsodium:
 	cd $(LIBSODIUM_DIR) && \
 	rm -rf $(LIBSODIUM_DIR)/lib && \
 	./configure --disable-shared --disable-pie && \
-	CFLAGS="-fPIC" make install
+	CFLAGS="-fPIC" make -j$(CORES) install
 
 libraries: libargon2 libsodium
 
@@ -354,7 +357,7 @@ endif
 	# Build
 	cd /tmp/php-$(VERSION) && \
 	./buildconf --force && \
-	PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) ./configure CURL_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include" LIBS="-lpthread" $(PHP_CONFIG_FLAGS) \
+	$(USE_PKG_CONFIG) ./configure $(PHP_CONFIG_FLAGS) \
 		--with-libdir=lib64 \
 		--build=$(TARGET) \
 		--host=$(TARGET) \
@@ -392,20 +395,17 @@ endif
 		--with-pic \
 		--with-gettext \
 		--with-iconv \
-		--with-pcre-regex \
 		--with-pcre-jit \
 		--with-zlib \
 		--with-layout=GNU \
     	--enable-gd-jis-conv \
 		--with-mhash \
-		--with-kerberos \
 		--enable-fileinfo \
 		--enable-igbinary=shared \
 		--enable-redis=shared \
 		--enable-redis-igbinary \
 		--enable-exif \
 		--enable-ctype \
-		--enable-hash \
 		--enable-filter \
 		--enable-shmop \
 		--enable-calendar \
@@ -416,7 +416,6 @@ endif
 		--enable-ftp \
 		--enable-xml=shared \
 		--enable-mbstring=shared \
-		--enable-zip=shared \
 		--enable-intl=shared \
 		--enable-soap=shared \
 		--enable-json \
@@ -424,16 +423,13 @@ endif
 		--enable-inline-optimization \
 		--enable-pcntl \
 		--enable-mbregex \
-		--enable-mbregex-backtrack \
 		--enable-opcache \
-		--enable-opcache-file \
 		--enable-huge-code-pages \
 		--enable-bcmath \
 		--enable-phar=static \
 		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \
-		$(PHP70ARGS) \
 		$(PHP71ARGS) \
 		$(PHP72ARGS) \
 		$(PHP74ARGS) && \

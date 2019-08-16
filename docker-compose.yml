@@ -26,7 +26,7 @@ services:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
             - ENABLE_MAINTAINER_MODE=$ENABLE_MAINTAINER_MODE
-            - EXTRA_APT_PACKAGES=bison libbison-dev re2c
+            - EXTRA_APT_PACKAGES=bison libbison-dev
     centos7:
         image: charlesportwoodii/centos:7-build
         container_name: centos7_x86_64

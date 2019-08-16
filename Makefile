@@ -65,19 +65,20 @@ LIBMYSQLCLIENT=libmysqlclient20
 LIBWEBP_DEBIAN=libwebp5
 LIBPNG=libpng12-0
 LIBONIG_DEBIAN=libonig2
-endif
-
-ifeq ($(shell lsb_release --codename | cut -f2),bionic)
+LIBCURL_DEBIAN=libcurl3
+else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
 LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig4
+LIBCURL_DEBIAN=libcurl4
 else
 LIBICU=libicu48
 LIBMYSQLCLIENT=libmysqlclient20
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig5
+LIBCURL_DEBIAN=libcurl4
 endif
 
 ifneq ($(ALPINE_VERSION),)
@@ -114,8 +115,8 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;)
 PHP_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include -I$(OPENSSL_PATH)/include"
 PHP_LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib -L$(OPENSSL_PATH)/lib"
 PHP_CONFIG_FLAGS= LIBS="-lpthread" CFLAGS=$(PHP_CFLAGS) LDFLAGS=$(PHP_LDFLAGS)
-PHP72_DEB_DEPENDS=--depends "librecode > 0"
-PHP72_RPM_DEPENDS=--depends "librecode0 > 0"
+PHP72_DEB_DEPENDS=--depends "librecode0 > 0"
+PHP72_RPM_DEPENDS=--depends "librecode > 0"
 PHP72_APK_DEPENDS= --depends "recode-dev > 0"
 endif
 
@@ -123,8 +124,8 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 PHP74ARGS=--enable-gd --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --enable-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
-PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4"
-
+PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)"
+PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
 USE_PKG_CONFIG=PKG_CONFIG_PATH=$(PKG_CONFIG_PATH_BASE)
@@ -341,7 +342,7 @@ php: determine_extensions
 	# BUG: https://github.com/igbinary/igbinary/issues/50
 	sed -i s/\\$phpincludedir/\\/tmp\\/php-$(major).$(minor).$(micro)/g /tmp/php-$(VERSION)/ext/igbinary/config.m4
 
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]]; then echo 0; else echo 1; fi;), 0)
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
 	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
 

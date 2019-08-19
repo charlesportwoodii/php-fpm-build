@@ -101,13 +101,15 @@ PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
 PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
 endif
 
-# Argon2 is only in PHP 7.2+
-# use OpenSSL 1.1.1 in 7.2
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 OPENSSLVERSION?=1.1.1c
 else
 OPENSSLVERSION?=1.0.2s
+endif
+
+# Argon2 is only in PHP 7.2-7.4 7.4 bundles sodium
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
+PHP72ARGS="--with-password-argon2=$(ARGON2_DIR)"
 endif
 
 # Set PHP_CONFIG_FLAGS for different PHP version
@@ -122,13 +124,13 @@ endif
 
 # Adjust gd configuration for 7.4 vs 7.3--
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP74ARGS=--enable-gd --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --enable-zip
+PHP74ARGS=--enable-gd=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --enable-zip=shared
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
 PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-USE_PKG_CONFIG=PKG_CONFIG_PATH=$(PKG_CONFIG_PATH_BASE)
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(PKG_CONFIG_PATH_BASE)
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
@@ -207,15 +209,12 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/recode//g))
 	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/recode//g))
-	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/gd//g))
-	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/gd//g))
 endif
 
 	@echo $(SHARED_EXTENSIONS)
 	@echo $(REALIZED_EXTENSIONS)
 
 openssl:
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	echo $(OPENSSL_PATH)
 	rm -rf /tmp/openssl*
 	cd /tmp && \
@@ -244,7 +243,6 @@ endif
 	make install_sw && \
 	cd $(OPENSSL_PATH) && \
 	ln -fs lib lib64
-endif
 
 nghttp2:
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)

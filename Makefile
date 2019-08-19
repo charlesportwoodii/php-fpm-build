@@ -440,8 +440,8 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	@echo "Patching Makefile for PHP 7.4 / OpenSSL"
 	$(eval $@_TMP := $(shell awk '/EXTRA_LIBS = -lcrypt/{print NR;exit}' /tmp/php-$(VERSION)/Makefile))
-	@sed '$($@_TMP)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
-	@mv /tmp/php-$(VERSION)/Makefile.tmp /tmp/php-$(VERSION)/Makefile
+	sed '$($@_TMP)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
+	mv /tmp/php-$(VERSION)/Makefile.tmp /tmp/php-$(VERSION)/Makefile
 endif
 
 	cd /tmp/php-$(VERSION) && \

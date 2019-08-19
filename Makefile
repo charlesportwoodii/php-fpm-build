@@ -124,13 +124,13 @@ endif
 
 # Adjust gd configuration for 7.4 vs 7.3--
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
-PHP74ARGS=--enable-gd=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --enable-zip=shared
+PHP74ARGS=--enable-gd=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
 PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(PKG_CONFIG_PATH_BASE)
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
@@ -209,6 +209,9 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/recode//g))
 	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/recode//g))
+
+	$(eval SHARED_EXTENSIONS:= $(shell echo $(SHARED_EXTENSIONS) | sed s/zip//g))
+	$(eval REALIZED_EXTENSIONS:= $(shell echo $(REALIZED_EXTENSIONS) | sed s/zip//g))
 endif
 
 	@echo $(SHARED_EXTENSIONS)
@@ -252,7 +255,6 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;)
 	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
 	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
 	cd nghttp2-$(NGHTTPVERSION) && \
-	LIBS="-ldl" PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
 	./configure \
 		--prefix=$(NGHTTP_PREFIX) \
 		--enable-static=yes \
@@ -274,7 +276,7 @@ curl: nghttp2
 	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
-	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig \
+	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig \
 	./configure  \
 		--prefix=$(CURL_PREFIX) \
 		--with-ssl \
@@ -431,7 +433,18 @@ endif
 		$(PDOSQLITEARGS) \
 		$(PHP71ARGS) \
 		$(PHP72ARGS) \
-		$(PHP74ARGS) && \
+		$(PHP74ARGS)
+
+# pkg-config doesn't detect -lpthread and add it to the right spot for OpenSSL
+# This manually patches the generated Makefile for -lpthread is added last.
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
+	@echo "Patching Makefile for PHP 7.4 / OpenSSL"
+	$(eval $@_TMP := $(shell awk '/EXTRA_LIBS = -lcrypt/{print NR;exit}' /tmp/php-$(VERSION)/Makefile))
+	@sed '$($@_TMP)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
+	@mv /tmp/php-$(VERSION)/Makefile.tmp /tmp/php-$(VERSION)/Makefile
+endif
+
+	cd /tmp/php-$(VERSION) && \
 	make -j$(CORES)
 
 pear:

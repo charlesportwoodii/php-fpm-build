@@ -324,7 +324,7 @@ libsodium:
 
 libraries: libargon2 libsodium
 
-php: determine_extensions
+php-config: determine_extensions
 	rm -rf /tmp/php-$(VERSION)
 	echo Building for PHP $(VERSION)
 
@@ -435,13 +435,14 @@ endif
 		$(PHP72ARGS) \
 		$(PHP74ARGS)
 
+php: php-config
 # pkg-config doesn't detect -lpthread and add it to the right spot for OpenSSL
 # This manually patches the generated Makefile for -lpthread is added last.
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 	@echo "Patching Makefile for PHP 7.4 / OpenSSL"
-	$(eval $@_TMP := $(shell awk '/EXTRA_LIBS = -lcrypt/{print NR;exit}' /tmp/php-$(VERSION)/Makefile))
-	@echo "Changing line: $($@_TMP)"
-	sed '$($@_TMP)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
+	$(eval _LN=$(shell cat /tmp/php-$(VERSION)/Makefile | grep -n "^EXTRA_LIBS" | cut -f1 -d:))
+	@echo "Changing line: $(_LN)"
+	sed '$(_LN)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
 	mv /tmp/php-$(VERSION)/Makefile.tmp /tmp/php-$(VERSION)/Makefile
 endif
 

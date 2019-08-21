@@ -592,11 +592,11 @@ pre_package: determine_extensions
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
 
 	# Remove empty directories that conflict on RHEL
-	if [ $(ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/bin") ]; then \
+	if [ $(shell ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/bin") ]; then \
 		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/bin; \
 	endif
 
-	if [ $(ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/sbin") ]; then \
+	if [ $(shell ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/sbin") ]; then \
 		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/sbin; \
 	endif
 

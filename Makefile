@@ -130,13 +130,15 @@ PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
 MAINTAINER_FLAGS=--enable-debug --enable-maintainer-zts
+else
+MAINTAINER_FLAGS=--disable-debug
 endif
 
 SQLITEARGS=--with-sqlite3=shared,/usr
@@ -225,10 +227,10 @@ openssl:
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
-	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3
+	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3 no-threads
 else
 	if [[ "$(ARCH)" == "arm"* ]]; then \
-		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3; \
+		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3 no-threads; \
 	else \
 		cd /tmp/openssl-$(OPENSSLVERSION) && \
 		wget https://raw.githubusercontent.com/cloudflare/sslconfig/master/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch && \
@@ -248,7 +250,6 @@ endif
 	ln -fs lib lib64
 
 nghttp2:
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	echo $(NGHTTP_PREFIX)
 	rm -rf /tmp/nghttp2*
 	cd /tmp && \
@@ -264,10 +265,6 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;)
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
 	ln -fs lib lib64
-endif
-
-curl: nghttp2
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 
 curl: nghttp2
 	echo $(CURL_PREFIX)
@@ -282,14 +279,26 @@ curl: nghttp2
 		--with-ssl \
 		--disable-shared \
 		--disable-ldap \
+		--disable-threaded-resolver \
+		--disable-pthreads \
 		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
 	make -j$(CORES) && \
 	make install && \
 	cd $(CURL_PREFIX) && \
-	ln -fs lib lib64 && \
+	ln -fs lib lib64
+
+ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	rm $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
+else
+# Curl's generated pkgconfig doesn't contain the right linkage to nghttp2
+#$(eval _LN=$(shell cat $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc | grep -n "Libs:" | cut -f1 -d:))
+#@echo "Changing line: $(_LN)"
+#sed '$(_LN)s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+# Fix this to be dynamic later
+	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 endif
 
 # Only build libargon2 for PHP 7.0+
@@ -324,7 +333,7 @@ libsodium:
 
 libraries: libargon2 libsodium
 
-php-config: determine_extensions
+php: determine_extensions
 	rm -rf /tmp/php-$(VERSION)
 	echo Building for PHP $(VERSION)
 
@@ -377,7 +386,6 @@ endif
 		--with-config-file-path=/etc/php/$(major).$(minor) \
 		--with-config-file-scan-dir=/etc/php/$(major).$(minor)/conf.d \
 		--with-fpm-user=www-data \
-		--disable-debug \
 		--without-pear \
 		--without-gdbm \
 		--disable-short-tags \
@@ -433,21 +441,8 @@ endif
 		$(PDOSQLITEARGS) \
 		$(PHP71ARGS) \
 		$(PHP72ARGS) \
-		$(PHP74ARGS)
-
-php: php-config
-# pkg-config doesn't detect -lpthread and add it to the right spot for OpenSSL
-# This manually patches the generated Makefile for -lpthread is added last.
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
-	@echo "Patching Makefile for PHP 7.4 / OpenSSL"
-	$(eval _LN=$(shell cat /tmp/php-$(VERSION)/Makefile | grep -n "^EXTRA_LIBS" | cut -f1 -d:))
-	@echo "Changing line: $(_LN)"
-	sed '$(_LN)s/$$/ -lpthread/' /tmp/php-$(VERSION)/Makefile > /tmp/php-$(VERSION)/Makefile.tmp
-	mv /tmp/php-$(VERSION)/Makefile.tmp /tmp/php-$(VERSION)/Makefile
-endif
-
-	cd /tmp/php-$(VERSION) && \
-	make -j$(CORES)
+		$(PHP74ARGS) && \
+		make -j$(CORES)
 
 pear:
 	rm -rf /tmp/php-pear
@@ -595,6 +590,15 @@ pre_package: determine_extensions
 	# Make log and runtime directory
 	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
+
+	# Remove empty directories that conflict on RHEL
+	if [ $(ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/bin") ]; then \
+		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/bin; \
+	endif
+
+	if [ $(ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/sbin") ]; then \
+		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/sbin; \
+	endif
 
 pre_package_ext: determine_extensions
 	$(eval PHPAPI := $(shell /tmp/php-$$VERSION/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
@@ -778,7 +782,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
 		--depends "libbrotli" \
-		--depends "libzip > 1.1.0" \
+		--depends "libzip5 > 1.1.0" \
 		--depends "openssl" \
 		$(PHP71_RPM_DEPENDS) \
 		$(PHP72_RPM_DEPENDS) \

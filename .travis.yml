@@ -45,7 +45,7 @@ deploy:
   skip_cleanup: true
   acl: public_read
   region: us-west-2
-  local_dir: build 
+  local_dir: build
   on:
     tags: true
     all_branches: false

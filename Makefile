@@ -8,6 +8,11 @@ EXTRA_APT_PACKAGES?=
 EXTRA_RPM_PACKAGES?=
 REMOVE_RPM_PACKAGES?=
 
+
+BUILD_OS?=
+BUILD_IMAGE?=
+BUILD_OS_VERSION?=
+
 # Alpine Linux version, only used for Alpine builds
 ALPINE_VERSION?=
 
@@ -81,7 +86,7 @@ LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
 endif
 
-ifneq ($(ALPINE_VERSION),)
+ifneq ($(BUILD_OS),"Alpine")
 TARGET=x86_64-unknown-linux-musl
 else
 TARGET=x86_64-linux-gnu
@@ -297,8 +302,13 @@ else
 #@echo "Changing line: $(_LN)"
 #sed '$(_LN)s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 # Fix this to be dynamic later
-	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
+\
+ifeq ($(BUILD_OS),Ubuntu)
+	sed '37s/$$/ -lbrotlidec -L\/opt\/openssl\/lib -lssl -lcrypto -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
+endif
 endif
 
 # Only build libargon2 for PHP 7.0+

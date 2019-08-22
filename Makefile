@@ -509,6 +509,9 @@ pre_package: determine_extensions
 	done;
 
 	# FPM
+	rm -rf /tmp/php-$(VERSION)-install-fpm/usr/bin/
+	rm -rf /tmp/php-$(VERSION)-install-cgi/usr/sbin/
+	rm -rf /tmp/php-$(VERSION)-install-dev/usr/sbin/
 	mv /tmp/php-$(VERSION)-install/usr/sbin/php-fpm$(major).$(minor) /tmp/php-$(VERSION)-install-fpm/usr/sbin/
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man8/php-fpm* /tmp/php-$(VERSION)-install-fpm/share/man/php/$(major).$(minor)/man8
 
@@ -582,6 +585,7 @@ pre_package: determine_extensions
 	rm -rf /tmp/php-$(VERSION)-install/.filemap
 	rm -rf /tmp/php-$(VERSION)-install/.depdb
 	rm -rf /tmp/php-$(VERSION)-install/.lock
+	rm -rf /tmp/php-$(VERSION)-install/usr/sbin
 	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar
 	rm -rf /tmp/php-$(VERSION)-install/usr/bin/phar.phar
 	rm -rf /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/phar.1
@@ -590,15 +594,6 @@ pre_package: determine_extensions
 	# Make log and runtime directory
 	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
-
-	# Remove empty directories that conflict on RHEL
-	if [ $(shell ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/bin") ]; then \
-		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/bin; \
-	endif
-
-	if [ $(shell ls -A "/tmp/php-$(VERSION)-install-$$pkg/usr/sbin") ]; then \
-		rm -rf /tmp/php-$(VERSION)-install-$$pkg/usr/sbin; \
-	endif
 
 pre_package_ext: determine_extensions
 	$(eval PHPAPI := $(shell /tmp/php-$$VERSION/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))

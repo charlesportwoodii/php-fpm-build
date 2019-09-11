@@ -118,7 +118,7 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
 OPENSSLVERSION?=1.1.1d
 else
-OPENSSLVERSION?=1.0.2s
+OPENSSLVERSION?=1.0.2t
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)

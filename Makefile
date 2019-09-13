@@ -497,9 +497,12 @@ pre_package: determine_extensions
 	cp $(SCRIPTPATH)/alpine/php-fpm.rc /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
 	sed -i s/VERSION/$(major).$(minor)/g /tmp/php-$(VERSION)-install-fpm/usr/local/etc/init.d/php-fpm-$(major).$(minor)
 
+	find  /tmp/php-$(VERSION)-install-fpm -type d -empty -delete
+
 	# CGI
 	mv /tmp/php-$(VERSION)-install/usr/bin/php-cgi$(major).$(minor) /tmp/php-$(VERSION)-install-cgi/usr/bin/
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/php-cgi* /tmp/php-$(VERSION)-install-cgi/share/man/php/$(major).$(minor)/man1
+	find  /tmp/php-$(VERSION)-install-cgi -type d -empty -delete
 
 	# DEV
 	mv /tmp/php-$(VERSION)-install/usr/bin/phpdbg$(major).$(minor) /tmp/php-$(VERSION)-install-dev/usr/bin/
@@ -511,6 +514,8 @@ pre_package: determine_extensions
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/php-config$(major).$(minor).1 /tmp/php-$(VERSION)-install-dev/share/man/php/$(major).$(minor)/man1
 	mkdir -p /tmp/php-$(VERSION)-install-dev/lib/php/$(major).$(minor)/build
 	mv /tmp/php-$(VERSION)-install/lib/php/$(major).$(minor)/build/* /tmp/php-$(VERSION)-install-dev/lib/php/$(major).$(minor)/build/
+
+	find  /tmp/php-$(VERSION)-install-dev -type d -empty -delete
 
 	# Common
 	mkdir -p /tmp/php-$(VERSION)-install/usr/local/etc/php/$(major).$(minor)/conf.d
@@ -555,6 +560,8 @@ pre_package: determine_extensions
 	# Make log and runtime directory
 	mkdir -p /tmp/php-$(VERSION)-install/var/log/php/$(major).$(minor)
 	mkdir -p /tmp/php-$(VERSION)-install/var/run/php/$(major).$(minor)
+
+	find  /tmp/php-$(VERSION)-install -type d -empty -delete
 
 pre_package_ext: determine_extensions
 	$(eval PHPAPI := $(shell /tmp/php-$$VERSION/sapi/cli/php -i | grep 'PHP API' | sed -e 's/PHP API => //'))
@@ -656,6 +663,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
+		--depends "libxslt1.1 > 0" \
 		--depends "$(LIBMYSQLCLIENT) > 0" \
 		--depends "libzip4 > 1.1.0" \
 		--depends "libbrotli" \
@@ -736,7 +744,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "freetype > 0" \
 		--depends "freetype-devel > 0" \
 		--depends "libbrotli" \
-		--depends "libzip > 1.1.0" \
+		--depends "libzip5 > 1.1.0" \
 		--depends "openssl" \
 		$(PHP71_RPM_DEPENDS) \
 		--rpm-digest sha384 \

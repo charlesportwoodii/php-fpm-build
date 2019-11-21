@@ -55,4 +55,4 @@ deploy:
   on:
     tags: true
     all_branches: false
-    repo: charlesportwoodii/libbrotli-build
+    repo: charlesportwoodii/php-fpm-build

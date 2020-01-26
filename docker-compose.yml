@@ -58,7 +58,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
-            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.5.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.1-1.el7.remi.x86_64.rpm
+            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-1.5.2-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.2-1.el7.remi.x86_64.rpm
             - REMOVE_RPM_PACKAGES=libzip libzip-devel
             - ENABLE_MAINTAINER_MODE=$ENABLE_MAINTAINER_MODE
             - BUILD_IMAGE=centos7
@@ -74,7 +74,7 @@ services:
         environment:
             - VERSION=$VERSION
             - RELEASEVER=$RELEASEVER
-            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.5.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.1-1.el7.remi.x86_64.rpm
+            - EXTRA_RPM_PACKAGES=http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-1.5.2-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64//libzip5-devel-1.5.2-1.el7.remi.x86_64.rpm
             - REMOVE_RPM_PACKAGES=libzip libzip-devel
             - ENABLE_MAINTAINER_MODE=$ENABLE_MAINTAINER_MODE
             - BUILD_IMAGE=rhel7

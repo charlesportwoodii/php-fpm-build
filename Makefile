@@ -297,9 +297,8 @@ else
 #@echo "Changing line: $(_LN)"
 #sed '$(_LN)s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 # Fix this to be dynamic later
-	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lbrotlidec -lnghttp2 -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
-\
 ifeq ($(BUILD_OS),Ubuntu)
 	sed '37s/$$/ -lbrotlidec -L\/opt\/openssl\/lib -lssl -lcrypto -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc

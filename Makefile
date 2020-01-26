@@ -63,6 +63,8 @@ OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
+OPENSSLVERSION?=1.1.1d
+
 # Ubuntu dependencies
 ifeq ($(shell lsb_release --codename | cut -f2),xenial)
 LIBICU=libicu55
@@ -103,20 +105,6 @@ ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi
 ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0"
 else
 ALPINE_DEPENDS=--depends "mariadb-client-libs > 0"
-endif
-
-# Mcrypt is only available in PHP 7.1 and lower
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
-PHP71ARGS="--with-mcrypt=shared"
-PHP71_RPM_DEPENDS=--depends "libmcrypt > 0"
-PHP71_DEB_DEPENDS=--depends "libmcrypt4 > 0"
-PHP71_APK_DEPENDS=--depends "libmcrypt > 0"
-endif
-
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
-OPENSSLVERSION?=1.1.1d
-else
-OPENSSLVERSION?=1.0.2t
 endif
 
 # Argon2 is only in PHP 7.2-7.4 7.4 bundles sodium
@@ -456,7 +444,6 @@ endif
 		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \
-		$(PHP71ARGS) \
 		$(PHP72ARGS) \
 		$(PHP74ARGS) && \
 		make -j$(CORES)
@@ -725,7 +712,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "openssl" \
 		--depends "libxslt1.1" \
-		$(PHP71_DEB_DEPENDS) \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
@@ -805,7 +791,6 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "libzip5 > 1.1.0" \
 		--depends "openssl" \
-		$(PHP71_RPM_DEPENDS) \
 		$(PHP72_RPM_DEPENDS) \
 		$(PHP74_RPM_DEPENDS) \
 		--rpm-digest sha384 \
@@ -885,7 +870,6 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "libzip > 1.1.0" \
 		$(ALPINE_DEPENDS) \
-		$(PHP71_APK_DEPENDS) \
 		$(PHP72_APK_DEPENDS) \
 		$(PHP74_APK_DEPENDS) \
 		--force \

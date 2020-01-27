@@ -2,6 +2,10 @@
 sudo: required
 dist: bionic
 
+matrix:
+  allow_failures:
+    - env: BUILD_IMAGE=focal
+
 env:
   global:
     - secure: "RPWGge7FJvE9etFAfKivLuZ3BXHVLQratnWgAz1RdoaqAITAJEAG+lctogLC0DoKtNFjXAIi1Tajb2j5OTUjQoZ7zcrAhRaq/+RqVc+eX4+ikqHGQ8E1uP3dYY0pYl9Xecf5aYau7qCPN+VgNcOaRCV8XJXV8FbxLCsNqPxCAuRKi18VQG8AavEhBCMIueRjhha3EFd/RTuDcahkQsWu3hgDNvCsGlG0n3EU5TPMX2W5Jc98+l4Ew9bUJSr7qw+2EwpUxFuIz9igH0E8bjIM1T9Qi55qlHchiMVrIxAVESS+Xp1bBpxb0dFoLz9bgLyj8crI4CIUveep/7nJwhibvGqruVMrvGzraZMwIlUGO4JvdevDVNJm8Hv2cExfnNbrfaZ9WcpD1jRxcNgRLKyu5v+N5QLUhvvFmm8S11aiuRWxgJUz3XIP3wkxv3LK5GHw8WMmR0xLEa9lByE9YDvjI3gx2WvKa1jUgqIvUR0lNECTMsCuEr79LnsbSb4vO4km3fkfrpMR1XRVZj6O0DLKMmXUGMs2AmaGqr/v7z+PLrQh6rCFRyYbeG9EZYMrVI7FusCLm6JkU8V4x5N3SP7aomGRHjO5sAnKcr3967EdKkFXGSN/9NrqyP2OYkc0jMPXuYfSC6edSrlF2Jarm5azdQw8uuqP8Zg70I3qOvOBuns="
@@ -10,8 +14,6 @@ env:
     - AWS_BUCKET=com-erianna-travis
     - AWS_HOST_BUCKET="$AWS_BUCKET-$AWS_HOST"
   jobs:
-    allow_failures:
-      - if: BUILD_IMAGE=focal
     - BUILD_IMAGE=focal BUILD_OS=Ubuntu BUILD_OS_VERSION=20.04
     - BUILD_IMAGE=bionic BUILD_OS=Ubuntu BUILD_OS_VERSION=18.04
     - BUILD_IMAGE=xenial BUILD_OS=Ubuntu BUILD_OS_VERSION=16.04

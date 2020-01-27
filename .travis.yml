@@ -10,6 +10,8 @@ env:
     - AWS_BUCKET=com-erianna-travis
     - AWS_HOST_BUCKET="$AWS_BUCKET-$AWS_HOST"
   jobs:
+    allow_failures:
+      - if: BUILD_IMAGE=focal
     - BUILD_IMAGE=focal BUILD_OS=Ubuntu BUILD_OS_VERSION=20.04
     - BUILD_IMAGE=bionic BUILD_OS=Ubuntu BUILD_OS_VERSION=18.04
     - BUILD_IMAGE=xenial BUILD_OS=Ubuntu BUILD_OS_VERSION=16.04

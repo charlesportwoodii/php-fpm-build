@@ -8,7 +8,6 @@ matrix:
 
 env:
   global:
-    - secure: "RPWGge7FJvE9etFAfKivLuZ3BXHVLQratnWgAz1RdoaqAITAJEAG+lctogLC0DoKtNFjXAIi1Tajb2j5OTUjQoZ7zcrAhRaq/+RqVc+eX4+ikqHGQ8E1uP3dYY0pYl9Xecf5aYau7qCPN+VgNcOaRCV8XJXV8FbxLCsNqPxCAuRKi18VQG8AavEhBCMIueRjhha3EFd/RTuDcahkQsWu3hgDNvCsGlG0n3EU5TPMX2W5Jc98+l4Ew9bUJSr7qw+2EwpUxFuIz9igH0E8bjIM1T9Qi55qlHchiMVrIxAVESS+Xp1bBpxb0dFoLz9bgLyj8crI4CIUveep/7nJwhibvGqruVMrvGzraZMwIlUGO4JvdevDVNJm8Hv2cExfnNbrfaZ9WcpD1jRxcNgRLKyu5v+N5QLUhvvFmm8S11aiuRWxgJUz3XIP3wkxv3LK5GHw8WMmR0xLEa9lByE9YDvjI3gx2WvKa1jUgqIvUR0lNECTMsCuEr79LnsbSb4vO4km3fkfrpMR1XRVZj6O0DLKMmXUGMs2AmaGqr/v7z+PLrQh6rCFRyYbeG9EZYMrVI7FusCLm6JkU8V4x5N3SP7aomGRHjO5sAnKcr3967EdKkFXGSN/9NrqyP2OYkc0jMPXuYfSC6edSrlF2Jarm5azdQw8uuqP8Zg70I3qOvOBuns="
     - AWS_ACCESS_KEY_ID=XZQSNWFHKYPQDESUJSTT
     - AWS_HOST=nyc3.digitaloceanspaces.com
     - AWS_BUCKET=com-erianna-travis
@@ -48,7 +47,8 @@ script:
 deploy:
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  secret_access_key:
+    secure: gxRYe+/YOKOCTxXxq7gBYTdxj2pfUt8qBPq3b8Wx64BxH8Te+VDy/ry+ixC08VTrdGG+G3+WmJjj7Pc087/dUV6961I7U9WhWye4YhXS/PyAYDmPP568BYvR8j0RpHnYdd5bjmbvB0ac5XwqStTBV/cuuNnoAHun0zph7zIMnjw=
   bucket: $AWS_BUCKET
   local-dir: build
   skip_cleanup: true

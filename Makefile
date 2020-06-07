@@ -348,9 +348,6 @@ php: determine_extensions
 	tar -xf php-$(VERSION).tar.gz && \
 	mv php-src-php-$(VERSION) php-$(VERSION)
 
-	# Checkout PHP
-	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
-
 	cd /tmp/php-$(VERSION)/ext && git clone --depth 1 -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
 
 	cd /tmp/php-$(VERSION)/ext && git clone --depth 1 -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary

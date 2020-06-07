@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+include .envs
+export
+
 # Zend Maintainer Debug Mode
 ENABLE_MAINTAINER_MODE?=false
 
@@ -7,7 +10,6 @@ ENABLE_MAINTAINER_MODE?=false
 EXTRA_APT_PACKAGES?=
 EXTRA_RPM_PACKAGES?=
 REMOVE_RPM_PACKAGES?=
-
 
 BUILD_OS?=
 BUILD_IMAGE?=
@@ -63,7 +65,7 @@ OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
-OPENSSLVERSION?=1.1.1f
+OPENSSLVERSION?=1.1.1g
 
 # Ubuntu dependencies
 ifeq ($(shell lsb_release --codename | cut -f2),xenial)

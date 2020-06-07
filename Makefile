@@ -344,7 +344,9 @@ php: determine_extensions
 	echo Building for PHP $(VERSION)
 
 	cd /tmp && \
-	git clone --depth 15 -b php-$(VERSION) https://github.com/php/php-src.git /tmp/php-$(VERSION)
+	wget https://github.com/php/php-src/archive/php-$(VERSION).tar.gz && \
+	tar -xf php-$(VERSION).tar.gz && \
+	mv php-src-php-$(VERSION) php-$(VERSION)
 
 	# Checkout PHP
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)

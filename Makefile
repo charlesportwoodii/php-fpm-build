@@ -349,9 +349,9 @@ php: determine_extensions
 	# Checkout PHP
 	cd /tmp/php-$(VERSION) && git checkout tags/php-$(VERSION)
 
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
+	cd /tmp/php-$(VERSION)/ext && git clone --depth 1 -b $(REDISEXTVERSION) https://github.com/phpredis/phpredis redis
 
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
+	cd /tmp/php-$(VERSION)/ext && git clone --depth 1 -b $(IGBINARYVERISON) https://github.com/igbinary/igbinary igbinary
 
 	# Need to patch igbinary 3.0.0 due to $phpincludedir not being defined
 	# BUG: https://github.com/igbinary/igbinary/issues/50
@@ -359,7 +359,7 @@ php: determine_extensions
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]] && [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;), 0)
 	# Only download the Argon2 PHP extension for PHP 7.0+
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
+	cd /tmp/php-$(VERSION)/ext && git clone --depth 1  -b $(ARGON2EXTVERSION) https://github.com/charlesportwoodii/php-argon2-ext argon2
 
 	mkdir -p /tmp/php-$(VERSION)/ext/argon2
 	cp -R $(ARGON2_DIR)/*  /tmp/php-$(VERSION)/ext/argon2/
@@ -367,7 +367,7 @@ endif
 
 # Libsodium is bundled with PHP in 7.2
 ifeq ($(shell if [[ "$(TESTVERSION)" -lt "72" ]]; then echo 0; else echo 1; fi;), 0)
-	cd /tmp/php-$(VERSION)/ext && git clone -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
+	cd /tmp/php-$(VERSION)/ext && git clone --depth 1 -b $(LIBSODIUMEXTVERSION) https://github.com/jedisct1/libsodium-php sodium
 endif
 
 	# Build

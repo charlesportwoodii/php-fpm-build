@@ -149,12 +149,6 @@ PDOSQLITEARGS=--with-pdo-sqlite=shared,/usr
 RELEASENAME=$(PKG_NAME)-common
 PROVIDES=$(PKG_NAME)-common
 
-CHDIR_SHELL := $(SHELL)
-define chdir
-   $(eval _D=$(firstword $(1) $(@D)))
-   $(info $(MAKE): cd $(_D)) $(eval SHELL = cd $(_D); $(CHDIR_SHELL))
-endef
-
 define install_apt_package
 	apt install $(1) -y;
 endef

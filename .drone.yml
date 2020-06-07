@@ -95,7 +95,7 @@ steps:
       BUILD_OS_VERSION: "3.9"
       ALPINE_VERSION: "3090"
     commands:
-      - bash -lc "pk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: "alpine3.10"
@@ -108,7 +108,7 @@ steps:
       BUILD_OS_VERSION: "3.10"
       ALPINE_VERSION: "3100"
     commands:
-      - bash -lc "pk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: "alpine3.11"
@@ -121,7 +121,7 @@ steps:
       BUILD_OS_VERSION: "3.11"
       ALPINE_VERSION: "3110"
     commands:
-      - bash -lc "pk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: deploy
@@ -238,7 +238,7 @@ steps:
         from_secret: MATRIX_USER
       password:
         from_secret: MATRIX_PASSWORD
-      template: "Nginx packages have been uploaded to S3"
+      template: "PHP packages have been uploaded to S3"
   - name: docker
     depends_on:
       - "alpine3.11"
@@ -254,10 +254,10 @@ steps:
       password:
         from_secret: DOCKER_PASSWORD
     commands:
-      - docker build $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/nginx:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/nginx:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress --squash .
+      - docker build $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/phpf:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress --squash .
       - docker login -u=$username -p=$password
-      - docker push charlesportwoodii/nginx:$(head -n1 .envs | sed "s/VERSION=//")
-      - docker push charlesportwoodii/nginx:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
+      - docker push charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
+      - docker push charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
     volumes:
       - name: docker_sock
         path: /var/run/docker.sock

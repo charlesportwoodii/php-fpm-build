@@ -1,0 +1,110 @@
+FROM charlesportwoodii/alpine:3.11-base
+LABEL reference="https://github.com/charlesportwoodii/docker-images"
+LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
+LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
+LABEL description="An PHP 7.3 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
+
+ENV XDEBUG_VERSION 2.9.6
+ENV PHP_VERSION 7.3
+ENV GEOS_VERSION 1.0.0
+ENV UOPZ_VERSION 6.1.1
+ENV PROTOBUF_VERSION 3.12.2
+ENV GRPC_VERSION 1.29.1
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_NO_INTERACTION 1
+ENV COMPOSER_HASH e0012edf3e80b6978849f5eff0d4b4e4c79ff1609dd1e613307e16318854d24ae64f26d17af3ef0bf7cfb710ca74755a
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
+RUN apk update && \
+    apk add --no-cache git binutils ca-certificates openssl alpine-sdk make automake gcc g++ autoconf libgeos36 libzip
+
+RUN apk add --no-cache php7.3-common php7.3-fpm php7.3-bz2 php7.3-dev php7.3-enchant php7.3-gd php7.3-gmp php7.3-intl php7.3-ldap php7.3-mbstring php7.3-mysql php7.3-opcache php7.3-pgsql php7.3-pspell php7.3-recode php7.3-redis php7.3-soap php7.3-sodium php7.3-sqlite3 php7.3-xml php7.3-xsl php7.3-zip php7.3-igbinary && \
+    rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
+    mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
+    for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
+    rm -rf /var/cache/apk/* && \
+    ln -s /usr/bin/phpize${PHP_VERSION} /usr/bin/phpize && \
+    ln -s /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config && \
+    ln -s /usr/bin/php${PHP_VERSION} /usr/bin/php && \
+    strip --strip-all /usr/bin/php && \
+    strip --strip-all /usr/sbin/php-fpm7.3
+
+COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
+COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
+
+RUN cd /tmp && \
+    wget https://git.osgeo.org/gitea/geos/php-geos/archive/${GEOS_VERSION}.tar.gz && \
+    tar -xf ${GEOS_VERSION}.tar.gz && \
+    cd php-geos && \
+    phpize && \
+    ./configure && make install && \
+    echo "extension=geos.so" | tee /etc/php/${PHP_VERSION}/conf.d/geos.ini && \
+    rm -rf php-geos*
+
+RUN cd /tmp && \
+    wget http://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
+    tar -xf xdebug-${XDEBUG_VERSION}.tgz && \
+    cd xdebug-${XDEBUG_VERSION} && \
+    phpize && \
+    ./configure && make install && \
+    echo "zend_extension=xdebug.so" | tee /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    echo "xdebug.remote_enable=1" | tee -a  /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    echo "xdebug.remote_autostart=1" | tee -a /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    rm -rf /tmp/xdebug-*
+
+RUN cd /tmp && \
+    wget https://github.com/krakjoe/uopz/archive/v${UOPZ_VERSION}.tar.gz && \
+    tar -xf v${UOPZ_VERSION}.tar.gz && \
+    cd uopz-${UOPZ_VERSION} && \
+    phpize && \
+    ./configure && make install && \
+    echo "extension=uopz.so" | tee /etc/php/${PHP_VERSION}/mods-available/uopz.ini && \
+    rm -rf /tmp/v${UOPZ_VERSION}.tar.gz /tmp/uopz*
+
+RUN cd /tmp && \
+    wget https://pecl.php.net/get/grpc-${GRPC_VERSION}.tgz && \
+    tar -xf grpc-${GRPC_VERSION}.tgz && \
+    cd /tmp/grpc-${GRPC_VERSION} && \
+    phpize && \
+    ./configure && make install && \
+    echo "extension=grpc.so" | tee /etc/php/${PHP_VERSION}/conf.d/grpc.ini && \
+    rm -rf /tmp/grpc
+
+RUN cd /tmp && \
+    wget https://pecl.php.net/get/protobuf-${PROTOBUF_VERSION}.tgz && \
+    tar -xf protobuf-${PROTOBUF_VERSION}.tgz && \
+    cd /tmp/protobuf-${PROTOBUF_VERSION} && \
+    phpize && \
+    ./configure && make install && \
+    echo "extension=protobuf.so" | tee /etc/php/${PHP_VERSION}/conf.d/protobuf.ini && \
+    rm -rf /tmp/protobuf-${PROTOBUF_VERSION}
+
+RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
+    mkdir -p /root/.bin && \
+    chown -R root:root /root/.bin && \
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > composer-setup.php && \
+    php -r "if (hash_file('SHA384', 'composer-setup.php') === '${COMPOSER_HASH}') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
+    php composer-setup.php --install-dir=/root/.bin --filename=composer || true && \
+    php -r "unlink('composer-setup.php');" && \
+    chmod a+x /root/.bin/composer && \
+    chown -R root:root /root/.bin/composer && \
+    /root/.bin/composer global require hirak/prestissimo && \
+    /root/.bin/composer self-update
+
+RUN apk del alpine-sdk make automake gcc g++ autoconf binutils && \
+    rm -rf /var/cache/apk/*
+
+# Ensure pdo_mysql is installed
+RUN grep -qF "extension=pdo_mysql.so" "/etc/php/${PHP_VERSION}/conf.d/mysql.ini" || echo "extension=pdo_mysql.so" >> "/etc/php/${PHP_VERSION}/conf.d/mysql.ini"
+
+# Define mountable directories.
+VOLUME ["/etc/php/7.3/", "/var/www"]
+
+# Define working directory.
+WORKDIR /etc/php/7.3
+
+EXPOSE 9073
+
+ENTRYPOINT ["/usr/sbin/php-fpm7.3", "-R", "--fpm-config", "/etc/php/7.3/php-fpm.conf"]
+

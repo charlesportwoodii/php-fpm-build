@@ -65,7 +65,7 @@ steps:
       BUILD_IMAGE: centos7
       BUILD_OS: CentOS
       BUILD_OS_VERSION: "7"
-      EXTRA_RPM_PACKAGES: "http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.6.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-devel-1.6.1-1.el7.remi.x86_64.rpm"
+      EXTRA_RPM_PACKAGES: "https://mirror.pit.teraswitch.com/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.pit.teraswitch.com/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
       REMOVE_RPM_PACKAGES: "libzip libzip-devel"
     commands:
       - bash -lc "make build fpm_rpm"
@@ -79,7 +79,7 @@ steps:
       BUILD_IMAGE: rhel7
       BUILD_OS: RHEL
       BUILD_OS_VERSION: "7"
-      EXTRA_RPM_PACKAGES: "http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-1.6.1-1.el7.remi.x86_64.rpm http://rpms.remirepo.net/enterprise/7/remi/x86_64/libzip5-devel-1.6.1-1.el7.remi.x86_64.rpm"
+      EXTRA_RPM_PACKAGES: "https://mirror.pit.teraswitch.com/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.pit.teraswitch.com/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
       REMOVE_RPM_PACKAGES: "libzip libzip-devel"
     commands:
       - bash -lc "make build fpm_rpm"

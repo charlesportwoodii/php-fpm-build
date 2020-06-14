@@ -331,7 +331,7 @@ libsodium:
 	cd /tmp && \
 	wget https://github.com/jedisct1/libsodium/archive/$(LIBSODIUMVERSION).tar.gz
 	tar -xf /tmp/$(LIBSODIUMVERSION).tar.gz && \
-	mv libsodium-$(LIBSODIUMVERSION) $(LIBSODIUM_DIR) && \
+	cp -R libsodium-$(LIBSODIUMVERSION) $(LIBSODIUM_DIR) && \
 	cd $(LIBSODIUM_DIR) && \
 	rm -rf $(LIBSODIUM_DIR)/lib && \
 	./configure --disable-shared --disable-pie && \

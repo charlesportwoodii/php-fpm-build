@@ -239,7 +239,7 @@ endif
 
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	make depend && \
-	make -j$(CORES) && \
+	make && \
 	make all && \
 	make install_sw && \
 	cd $(OPENSSL_PATH) && \
@@ -257,7 +257,7 @@ nghttp2:
 		--enable-static=yes \
 		--enable-shared=no \
 		--disable-python-bindings && \
-	make -j$(CORES) && \
+	make && \
 	make install && \
 	cd $(NGHTTP_PREFIX) && \
 	ln -fs lib lib64
@@ -280,7 +280,7 @@ curl: nghttp2
 		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \
-	make -j$(CORES) && \
+	make && \
 	make install && \
 	cd $(CURL_PREFIX) && \
 	ln -fs lib lib64
@@ -315,7 +315,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -ge "70" ]] && [[ "$(TESTVERSION)" -lt "74"
 	cd /tmp && \
 	git clone https://github.com/P-H-C/phc-winner-argon2 -b $(ARGON2VERSION) libargon2 && \
 	cd $(ARGON2_DIR) && \
-	CFLAGS="-fPIC" make -j$(CORES) OPTTARGET=i686
+	CFLAGS="-fPIC" make OPTTARGET=i686
 
 	cd $(ARGON2_DIR) && \
 	ln -s . lib && \
@@ -335,7 +335,7 @@ libsodium:
 	cd $(LIBSODIUM_DIR) && \
 	rm -rf $(LIBSODIUM_DIR)/lib && \
 	./configure --disable-shared --disable-pie && \
-	CFLAGS="-fPIC" make -j$(CORES) install
+	CFLAGS="-fPIC" make install
 
 libraries: libargon2 libsodium
 

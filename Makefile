@@ -446,7 +446,7 @@ endif
 		$(PDOSQLITEARGS) \
 		$(PHP72ARGS) \
 		$(PHP74ARGS) && \
-		make -j$(CORES)
+		make
 
 pear:
 	rm -rf /tmp/php-pear

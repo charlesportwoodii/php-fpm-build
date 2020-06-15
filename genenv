@@ -18,23 +18,11 @@ def exec():
 
         env['VERSION'] = default_version
         env['RELEASEVER'] = default_revision
-
-        if (ver['minor'] % 2 == 0):
-            env['PACKAGE_NAME'] = "nginx"
-        else:
-            env['PACKAGE_NAME'] = "nginx-mainline"
-
         env['SHORT_VERSION'] = str(ver['major']) + "." + str(ver['minor'])
     else:
         ver = semver.parse(tag)
         env['VERSION'] = str(ver['major']) + "." + str(ver['minor']) + "." + str(ver['patch'])
         env['RELEASEVER'] = str(ver['prerelease'])
-
-        if (ver['minor'] % 2 == 0):
-            env['PACKAGE_NAME'] = "nginx"
-        else:
-            env['PACKAGE_NAME'] = "nginx-mainline"
-
         env['SHORT_VERSION'] = str(ver['major']) + "." + str(ver['minor'])
 
     try:

@@ -254,7 +254,7 @@ steps:
       password:
         from_secret: DOCKER_PASSWORD
     commands:
-      - docker build -f Dockerfile.phpb$(tail -n1 .envs | sed "s/SHORT_VERSION=//") $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/phpf:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress --squash .
+      - docker build -f Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//") $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/phpf:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress --squash .
       - docker login -u=$username -p=$password
       - docker push charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
       - docker push charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")

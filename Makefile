@@ -220,24 +220,9 @@ openssl:
 	rm -rf /tmp/openssl*
 	cd /tmp && \
 	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
-	tar -xf openssl-$(OPENSSLVERSION).tar.gz
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "72" ]]; then echo 0; else echo 1; fi;), 0)
+	tar -xf openssl-$(OPENSSLVERSION).tar.gz && \
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
-	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3 no-threads
-else
-	if [[ "$(ARCH)" == "arm"* ]]; then \
-		cd /tmp/openssl-$(OPENSSLVERSION) && ./config --prefix=$(OPENSSL_PATH) no-shared enable-tlsext no-ssl2 no-ssl3 no-threads; \
-	else \
-		cd /tmp/openssl-$(OPENSSLVERSION) && \
-		wget https://raw.githubusercontent.com/cloudflare/sslconfig/master/patches/openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch && \
-		patch -p1 < openssl__chacha20_poly1305_draft_and_rfc_ossl102g.patch 2>/dev/null; true && \
-		wget https://gist.githubusercontent.com/charlesportwoodii/9e95c6a4ecde31ea23c17f6823bdb320/raw/a02fac917fc30f4767fb60a9563bad69dc1c054d/chacha.patch && \
-		patch < chacha.patch 2>/dev/null; true && \
-		./config --prefix=$(OPENSSL_PATH) no-shared enable-ec_nistp_64_gcc_128 enable-tlsext no-ssl2 no-ssl3; \
-	fi
-endif
-
-	cd /tmp/openssl-$(OPENSSLVERSION) && \
+	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3 no-threads && \
 	make depend && \
 	make && \
 	make all && \
@@ -386,7 +371,6 @@ endif
 		--libdir=${prefix}/lib/php/$(major).$(minor) \
 		--libexecdir=${prefix}/lib/php/$(major).$(minor) \
 		--datadir=${prefix}/share/php/$(major).$(minor) \
-		--libdir=${prefix}/lib/php/$(major).$(minor) \
 		--libexecdir=${prefix}/lib/php/$(major).$(minor) \
 		--with-config-file-path=/etc/php/$(major).$(minor) \
 		--with-config-file-scan-dir=/etc/php/$(major).$(minor)/conf.d \
@@ -636,8 +620,6 @@ pre_package_ext: determine_extensions
 		mv /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
 	done;
-
-	rm -rf /tmp/php-$(VERSION)-install/lib/php/$(major).$(minor)/$(PHPAPI)/
 
 	# Add some Opcache defaults
 	echo "opcache.enable = true" >> /tmp/php$(VERSION)-opcache/usr/local/etc/php/$(major).$(minor)/mods-available/opcache.ini;

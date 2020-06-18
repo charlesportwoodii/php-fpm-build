@@ -57,6 +57,10 @@ steps:
       BUILD_OS_VERSION: "16.04"
       EXTRA_DEB_PACKAGES: "http://security.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip4_1.1.2-1.1_amd64.deb http://launchpadlibrarian.net/260671105/libzip-dev_1.1.2-1.1_amd64.deb"
       EXTRA_APT_PACKAGES: "bison libbison-dev"
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.3**
     commands:
       - bash -lc "make build fpm_debian "
       - mkdir -p build/deb/$BUILD_IMAGE

@@ -30,6 +30,10 @@ steps:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
       - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.3**
   - name: bionic
     image: charlesportwoodii/ubuntu:18.04-build
     depends_on:

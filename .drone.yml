@@ -34,6 +34,7 @@ steps:
       ref:
         exclude:
           - refs/tags/7.3**
+          - refs/tags/7.2**
   - name: bionic
     image: charlesportwoodii/ubuntu:18.04-build
     depends_on:

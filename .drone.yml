@@ -270,6 +270,10 @@ steps:
     volumes:
       - name: docker_sock
         path: /var/run/docker.sock
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.2**
 
 volumes:
   - name: docker_sock

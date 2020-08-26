@@ -75,6 +75,7 @@ LIBWEBP_DEBIAN=libwebp5
 LIBPNG=libpng12-0
 LIBONIG_DEBIAN=libonig2
 LIBCURL_DEBIAN=libcurl3
+LIBZIPP_DEBIAN=libzip4
 else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
@@ -82,13 +83,15 @@ LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig4
 LIBCURL_DEBIAN=libcurl4
+LIBZIPP_DEBIAN=libzip4
 else ifeq ($(shell lsb_release --codename | cut -f2),focal)
-LIBICU=libicu63
+LIBICU=libicu66
 LIBMYSQLCLIENT=libmysqlclient21
 LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
+LIBZIPP_DEBIAN=libzip5
 else
 LIBICU=libicu48
 LIBMYSQLCLIENT=libmysqlclient20
@@ -119,7 +122,7 @@ ifeq ($(shell if [[ "$(TESTVERSION)" -lt "74" ]]; then echo 0; else echo 1; fi;)
 PHP_CFLAGS="-I$(NGHTTP_PREFIX)/include -I$(CURL_PREFIX)/include -I$(OPENSSL_PATH)/include"
 PHP_LDFLAGS="-L$(NGHTTP_PREFIX)/lib -L$(CURL_PREFIX)/lib -L$(OPENSSL_PATH)/lib"
 PHP_CONFIG_FLAGS= LIBS="-lpthread" CFLAGS=$(PHP_CFLAGS) LDFLAGS=$(PHP_LDFLAGS)
-PHP72_DEB_DEPENDS=--depends "librecode0 > 0"
+PHP72_DEB_DEPENDS=--depends "librecode0 > 0" --depends "$(LIBZIP_DEBIAN) >= 1.1.0"
 PHP72_RPM_DEPENDS=--depends "librecode > 0"
 PHP72_APK_DEPENDS= --depends "recode-dev > 0"
 endif
@@ -690,7 +693,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "librecode0 > 0" \
 		--depends "libxslt1.1 > 0" \
 		--depends "$(LIBMYSQLCLIENT) > 0" \
-		--depends "libzip4 > 1.1.0" \
 		--depends "libbrotli" \
 		--depends "openssl" \
 		--depends "libxslt1.1" \

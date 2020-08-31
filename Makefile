@@ -608,7 +608,7 @@ pre_package_ext: determine_extensions
 		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		echo "extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
-		cp /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		mv /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
 		mv /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
 	done;
@@ -619,7 +619,7 @@ pre_package_ext: determine_extensions
 		mkdir -p /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
 		mkdir -p /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		echo "zend_extension=$$ext.so" > /tmp/php$(VERSION)-$$ext/usr/local/etc/php/$(major).$(minor)/mods-available/$$ext.ini; \
-		cp /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
+		mv /tmp/php-$(VERSION)/modules/$$ext.* /tmp/php$(VERSION)-$$ext/lib/php/$(major).$(minor)/$(PHPAPI)/; \
 		mv /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/* /tmp/php$(VERSION)-$$ext/include/php/$(major).$(minor)/php/ext/$$ext/; \
 		rm -rf /tmp/php-$(VERSION)-install/include/php/$(major).$(minor)/php/ext/$$ext/; \
 	done;

@@ -75,7 +75,7 @@ LIBWEBP_DEBIAN=libwebp5
 LIBPNG=libpng12-0
 LIBONIG_DEBIAN=libonig2
 LIBCURL_DEBIAN=libcurl3
-LIBZIPP_DEBIAN=libzip4
+LIBZIP_DEBIAN=libzip4
 else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
@@ -83,7 +83,7 @@ LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig4
 LIBCURL_DEBIAN=libcurl4
-LIBZIPP_DEBIAN=libzip4
+LIBZIP_DEBIAN=libzip4
 else ifeq ($(shell lsb_release --codename | cut -f2),focal)
 LIBICU=libicu66
 LIBMYSQLCLIENT=libmysqlclient21
@@ -91,13 +91,7 @@ LIBWEBP_DEBIAN=libwebp6
 LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
-LIBZIPP_DEBIAN=libzip5
-else
-LIBICU=libicu48
-LIBMYSQLCLIENT=libmysqlclient20
-LIBPNG=libpng16-16
-LIBONIG_DEBIAN=libonig5
-LIBCURL_DEBIAN=libcurl4
+LIBZIP_DEBIAN=libzip5
 endif
 
 ifneq ($(BUILD_OS),"Alpine")

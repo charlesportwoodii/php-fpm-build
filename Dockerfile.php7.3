@@ -13,7 +13,7 @@ ENV GRPC_VERSION 1.29.1
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
-ENV COMPOSER_HASH 795f976fe0ebd8b75f26a6dd68f78fd3453ce79f32ecb33e7fd087d39bfeb978342fb73ac986cd4f54edd0dc902601dc
+ENV COMPOSER_HASH c31c1e292ad7be5f49291169c0ac8f683499edddcfd4e42232982d0fd193004208a58ff6f353fde0012d35fdd72bc394
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \
@@ -89,7 +89,6 @@ RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
     php -r "unlink('composer-setup.php');" && \
     chmod a+x /root/.bin/composer && \
     chown -R root:root /root/.bin/composer && \
-    /root/.bin/composer global require hirak/prestissimo && \
     /root/.bin/composer self-update
 
 RUN apk del alpine-sdk linux-headers make automake gcc g++ autoconf binutils && \

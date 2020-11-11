@@ -770,7 +770,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "libzip5 > 1.1.0" \
 		--depends "openssl" \
-		--depends "libffi" \
+		--depends "libffi > 3.1" \
 		$(PHP72_RPM_DEPENDS) \
 		$(PHP74_RPM_DEPENDS) \
 		--rpm-digest sha384 \

@@ -33,9 +33,9 @@ IGBINARYVERISON?=3.1.4
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.22
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary ffi
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary ffi
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -422,6 +422,7 @@ endif
 		--enable-huge-code-pages \
 		--enable-bcmath \
 		--enable-phar=static \
+		--with-ffi \
 		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \

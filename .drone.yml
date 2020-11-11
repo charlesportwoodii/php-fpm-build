@@ -25,7 +25,7 @@ steps:
       BUILD_IMAGE: focal
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "20.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -43,7 +43,7 @@ steps:
       BUILD_IMAGE: bionic
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "18.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     commands:
       - bash -lc "make build fpm_debian "
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -57,7 +57,7 @@ steps:
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "16.04"
       EXTRA_DEB_PACKAGES: "http://security.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip4_1.1.2-1.1_amd64.deb http://launchpadlibrarian.net/260671105/libzip-dev_1.1.2-1.1_amd64.deb"
-      EXTRA_APT_PACKAGES: "bison libbison-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     when:
       ref:
         exclude:
@@ -75,7 +75,7 @@ steps:
       BUILD_OS: CentOS
       BUILD_OS_VERSION: "7"
       EXTRA_RPM_PACKAGES: "https://mirror.sjc02.svwh.net/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.sjc02.svwh.net/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
-      REMOVE_RPM_PACKAGES: "libzip libzip-devel"
+      REMOVE_RPM_PACKAGES: "libzip libzip-devel libffi-devel"
     commands:
       - bash -lc "make build fpm_rpm"
       - mkdir -p build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
@@ -89,7 +89,7 @@ steps:
       BUILD_OS: RHEL
       BUILD_OS_VERSION: "7"
       EXTRA_RPM_PACKAGES: "https://mirror.sjc02.svwh.net/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.sjc02.svwh.net/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
-      REMOVE_RPM_PACKAGES: "libzip libzip-devel"
+      REMOVE_RPM_PACKAGES: "libzip libzip-devel libffi-devel"
     commands:
       - bash -lc "make build fpm_rpm"
       - mkdir -p build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
@@ -104,7 +104,7 @@ steps:
       BUILD_OS_VERSION: "3.9"
       ALPINE_VERSION: "3090"
     commands:
-      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: "alpine3.10"
@@ -117,7 +117,7 @@ steps:
       BUILD_OS_VERSION: "3.10"
       ALPINE_VERSION: "3100"
     commands:
-      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: "alpine3.11"
@@ -130,7 +130,7 @@ steps:
       BUILD_OS_VERSION: "3.11"
       ALPINE_VERSION: "3110"
     commands:
-      - bash -lc "apk add --no-cache linux-headers; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: deploy

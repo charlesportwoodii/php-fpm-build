@@ -123,9 +123,7 @@ endif
 
 # Adjust gd configuration for 7.4 vs 7.3--
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
-SHARED_EXTENSIONS := $(SHARED_EXTENSIONS) ffi
-REALIZED_EXTENSIONS := $(REALIZED_EXTENSIONS) ffi
-PHP74ARGS=--enable-gd=shared --with-ffi --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
+PHP74ARGS=--enable-gd=shared --with-ffi=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm"
 PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm"
@@ -692,6 +690,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "openssl" \
 		--depends "libxslt1.1" \
+		--depends "libffi" \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
@@ -771,6 +770,7 @@ fpm_rpm: pre_package pre_package_ext
 		--depends "libbrotli" \
 		--depends "libzip5 > 1.1.0" \
 		--depends "openssl" \
+		--depends "libffi" \
 		$(PHP72_RPM_DEPENDS) \
 		$(PHP74_RPM_DEPENDS) \
 		--rpm-digest sha384 \
@@ -849,6 +849,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "ca-certificates" \
 		--depends "libbrotli" \
 		--depends "libzip > 1.1.0" \
+		--depends "libffi" \
 		$(ALPINE_DEPENDS) \
 		$(PHP72_APK_DEPENDS) \
 		$(PHP74_APK_DEPENDS) \

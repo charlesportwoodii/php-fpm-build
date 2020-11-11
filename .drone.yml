@@ -77,7 +77,7 @@ steps:
       EXTRA_RPM_PACKAGES: "https://mirror.sjc02.svwh.net/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.sjc02.svwh.net/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
       REMOVE_RPM_PACKAGES: "libzip libzip-devel libffi-devel"
     commands:
-      - bash -lc "make build fpm_rpm"
+      - bash -lc "yum install libffi-devel -y; make build fpm_rpm"
       - mkdir -p build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
       - mv *.rpm build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
   - name: rhel7
@@ -89,9 +89,9 @@ steps:
       BUILD_OS: RHEL
       BUILD_OS_VERSION: "7"
       EXTRA_RPM_PACKAGES: "https://mirror.sjc02.svwh.net/remi/enterprise/7/safe/x86_64/libzip5-1.7.1-1.el7.remi.x86_64.rpm https://mirror.sjc02.svwh.net/remi/enterprise/7/remi/x86_64/libzip5-devel-1.7.1-1.el7.remi.x86_64.rpm"
-      REMOVE_RPM_PACKAGES: "libzip libzip-devel libffi-devel"
+      REMOVE_RPM_PACKAGES: "libzip libzip-devel"
     commands:
-      - bash -lc "make build fpm_rpm"
+      - bash -lc "yum install libffi-devel -y; make build fpm_rpm"
       - mkdir -p build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
       - mv *.rpm build/rpm/$BUILD_OS/$BUILD_OS_VERSION/x86_64
   - name: "alpine3.9"

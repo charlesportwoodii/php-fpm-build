@@ -130,7 +130,7 @@ PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt
 # Rconfigure PKG_CONFIG_PATH environment variable
 SHARED_EXTENSIONS:=$(SHARED_EXTENSIONS) ffi
 REALIZED_EXTENSIONS:=$(REALIZED_EXTENSIONS) ff
-i
+
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
 USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig
 else

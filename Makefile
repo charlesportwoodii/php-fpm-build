@@ -129,7 +129,8 @@ PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 SHARED_EXTENSIONS:=$(SHARED_EXTENSIONS) ffi
-
+REALIZED_EXTENSIONS:=$(REALIZED_EXTENSIONS) ff
+i
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
 USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig
 else

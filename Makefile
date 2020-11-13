@@ -76,6 +76,7 @@ LIBPNG=libpng12-0
 LIBONIG_DEBIAN=libonig2
 LIBCURL_DEBIAN=libcurl3
 LIBZIP_DEBIAN=libzip4
+LIBFFI_DEBIAN=libffi6
 else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
@@ -84,6 +85,7 @@ LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig4
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
+LIBFFI_DEBIAN=libffi6
 else ifeq ($(shell lsb_release --codename | cut -f2),focal)
 LIBICU=libicu66
 LIBMYSQLCLIENT=libmysqlclient21
@@ -92,6 +94,7 @@ LIBPNG=libpng16-16
 LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip5
+LIBFFI_DEBIAN=libffi7
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -125,7 +128,7 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 PHP74ARGS=--enable-gd=shared --with-ffi --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm" --depends "libffi"
-PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "libffi > 3.1"
+PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "$(LIBFFI_DEBIAN) > 3.1"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 SHARED_EXTENSIONS:=$(SHARED_EXTENSIONS) ffi

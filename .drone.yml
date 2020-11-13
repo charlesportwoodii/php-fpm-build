@@ -4,7 +4,7 @@ type: docker
 name: default
 
 environment:
-  DEFAULT_VERSION: 7.4.6
+  DEFAULT_VERSION: 7.4.12
   DEFAULT_REVISION: 1
 
 steps:
@@ -118,8 +118,6 @@ steps:
       - xenial
       - centos7
       - rhel7
-      - "alpine3.9"
-      - "alpine3.10"
       - "alpine3.11"
     settings:
       bucket:
@@ -195,8 +193,6 @@ steps:
       - xenial
       - centos7
       - rhel7
-      - "alpine3.9"
-      - "alpine3.10"
       - "alpine3.11"
     settings:
       homeserver: https://matrix.erianna.com

@@ -61,6 +61,8 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.0**
+          - refs/tags/7.4**
           - refs/tags/7.3**
     commands:
       - bash -lc "make build fpm_debian "

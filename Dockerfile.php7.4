@@ -4,16 +4,13 @@ LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
 LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
 LABEL description="An PHP 7.4 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
 
-ENV XDEBUG_VERSION 2.9.6
+ENV XDEBUG_VERSION 3.0.0
 ENV PHP_VERSION 7.4
 ENV GEOS_VERSION 1.0.0
-ENV UOPZ_VERSION 6.1.1
-ENV PROTOBUF_VERSION 3.12.2
-ENV GRPC_VERSION 1.29.1
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
-ENV COMPOSER_HASH c31c1e292ad7be5f49291169c0ac8f683499edddcfd4e42232982d0fd193004208a58ff6f353fde0012d35fdd72bc394
+ENV COMPOSER_HASH 756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \
@@ -52,34 +49,6 @@ RUN cd /tmp && \
     echo "xdebug.remote_enable=1" | tee -a  /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
     echo "xdebug.remote_autostart=1" | tee -a /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
     rm -rf /tmp/xdebug-*
-
-RUN cd /tmp && \
-    wget https://github.com/krakjoe/uopz/archive/v${UOPZ_VERSION}.tar.gz && \
-    tar -xf v${UOPZ_VERSION}.tar.gz && \
-    cd uopz-${UOPZ_VERSION} && \
-    phpize && \
-    ./configure && make install && \
-    echo "extension=uopz.so" | tee /etc/php/${PHP_VERSION}/mods-available/uopz.ini && \
-    rm -rf /tmp/v${UOPZ_VERSION}.tar.gz /tmp/uopz*
-
-RUN cd /tmp && \
-    wget https://pecl.php.net/get/grpc-${GRPC_VERSION}.tgz && \
-    tar -xf grpc-${GRPC_VERSION}.tgz && \
-    cd /tmp/grpc-${GRPC_VERSION} && \
-    phpize && \
-    ./configure && make install && \
-    echo "extension=grpc.so" | tee /etc/php/${PHP_VERSION}/conf.d/grpc.ini && \
-    rm -rf /tmp/grpc
-
-# Unsupported on PHP 7.4 at launch
-#RUN cd /tmp && \
-#    wget https://pecl.php.net/get/protobuf-${PROTOBUF_VERSION}.tgz && \
-#    tar -xf protobuf-${PROTOBUF_VERSION}.tgz && \
-#    cd /tmp/protobuf-${PROTOBUF_VERSION} && \
-#    phpize && \
-#    ./configure && make install && \
-#    echo "extension=protobuf.so" | tee /etc/php/${PHP_VERSION}/conf.d/protobuf.ini && \
-#    rm -rf /tmp/protobuf-${PROTOBUF_VERSION}
 
 RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
     mkdir -p /root/.bin && \

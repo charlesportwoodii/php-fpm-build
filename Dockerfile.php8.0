@@ -2,10 +2,10 @@ FROM charlesportwoodii/alpine:3.11-base
 LABEL reference="https://github.com/charlesportwoodii/docker-images"
 LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
 LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
-LABEL description="An PHP 7.3 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
+LABEL description="An PHP 8.0 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
 
 ENV XDEBUG_VERSION 3.0.0
-ENV PHP_VERSION 7.3
+ENV PHP_VERSION 8.0
 ENV GEOS_VERSION 1.0.0
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
@@ -14,9 +14,9 @@ ENV COMPOSER_HASH 756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \
-    apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libgeos36 libzip
+    apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libgeos36 libzip libffi
 
-RUN apk add --no-cache php7.3-common php7.3-fpm php7.3-bz2 php7.3-dev php7.3-enchant php7.3-gd php7.3-gmp php7.3-intl php7.3-ldap php7.3-mbstring php7.3-mysql php7.3-opcache php7.3-pgsql php7.3-pspell php7.3-recode php7.3-redis php7.3-soap php7.3-sodium php7.3-sqlite3 php7.3-xml php7.3-xsl php7.3-zip php7.3-igbinary && \
+RUN apk add --no-cache php8.0-common php8.0-fpm php8.0-bz2 php8.0-dev php8.0-enchant php8.0-ffi php8.0-gd php8.0-gmp php8.0-intl php8.0-ldap php8.0-mbstring php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-pspell php8.0-redis php8.0-soap php8.0-sodium php8.0-sqlite3 php8.0-xml php8.0-xsl php8.0-igbinary && \
     rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
     mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
     for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
@@ -25,7 +25,7 @@ RUN apk add --no-cache php7.3-common php7.3-fpm php7.3-bz2 php7.3-dev php7.3-enc
     ln -s /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config && \
     ln -s /usr/bin/php${PHP_VERSION} /usr/bin/php && \
     strip --strip-all /usr/bin/php && \
-    strip --strip-all /usr/sbin/php-fpm7.3
+    strip --strip-all /usr/sbin/php-fpm8.0
 
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
@@ -68,12 +68,12 @@ RUN apk del alpine-sdk linux-headers make automake gcc g++ autoconf binutils && 
 RUN grep -qF "extension=pdo_mysql.so" "/etc/php/${PHP_VERSION}/conf.d/mysql.ini" || echo "extension=pdo_mysql.so" >> "/etc/php/${PHP_VERSION}/conf.d/mysql.ini"
 
 # Define mountable directories.
-VOLUME ["/etc/php/7.3/", "/var/www"]
+VOLUME ["/etc/php/8.0/", "/var/www"]
 
 # Define working directory.
-WORKDIR /etc/php/7.3
+WORKDIR /etc/php/8.0
 
-EXPOSE 9073
+EXPOSE 9074
 
-ENTRYPOINT ["/usr/sbin/php-fpm7.3", "-R", "--fpm-config", "/etc/php/7.3/php-fpm.conf"]
+ENTRYPOINT ["/usr/sbin/php-fpm8.0", "-R", "--fpm-config", "/etc/php/8.0/php-fpm.conf"]
 

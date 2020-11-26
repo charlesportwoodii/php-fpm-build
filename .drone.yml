@@ -110,7 +110,7 @@ steps:
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: deploy
-    image: plugins/s3-sync
+    image: plugins/s3
     when:
       event:
         - tag

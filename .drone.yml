@@ -130,7 +130,7 @@ steps:
         from_secret: AWS_ACCESS_KEY_ID
       secret_key:
         from_secret: AWS_SECRET_ACCESS_KEY
-      source: build/
+      source: build/**/*
       path_style: true
       target: /
       delete: false

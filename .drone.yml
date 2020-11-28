@@ -129,7 +129,7 @@ steps:
       BUCKET:
         from_secret: AWS_BUCKET
     commands:
-      - "aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://${BUCKET} --recursive"
+      - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
   - name: update-apt-packages
     depends_on:
       - deploy

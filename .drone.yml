@@ -110,7 +110,7 @@ steps:
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: deploy
-    image: plugins/s3
+    image: amazon/aws-cli
     when:
       event:
         - tag
@@ -121,21 +121,15 @@ steps:
       - centos7
       - rhel7
       - "alpine3.11"
-    settings:
-      bucket:
-        from_secret: AWS_BUCKET
-      endpoint:
-        from_secret: AWS_HOST
-      access_key:
+    environment:
+      AWS_ACCESS_KEY_ID:
         from_secret: AWS_ACCESS_KEY_ID
-      secret_key:
+      AWS_SECRET_ACCESS_KEY:
         from_secret: AWS_SECRET_ACCESS_KEY
-      source: build/**/*
-      path_style: true
-      target: /
-      delete: false
-      acl:
-        "*": public-read
+      BUCKET:
+        from_secret: AWS_BUCKET
+    commands:
+      - "aws s3 --endpoint-uri=https://nyc3.digitaloceanspaces.com cp ./build/ s3://${BUCKET} --recursive"
   - name: update-apt-packages
     depends_on:
       - deploy

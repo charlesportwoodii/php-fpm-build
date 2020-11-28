@@ -6,7 +6,6 @@ LABEL description="An PHP 8.0 Docker image with XDebug, Composer, Libsodium, Arg
 
 ENV XDEBUG_VERSION 3.0.0
 ENV PHP_VERSION 8.0
-ENV GEOS_VERSION 1.0.0
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
@@ -16,7 +15,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 RUN apk update && \
     apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libgeos36 libzip libffi
 
-RUN apk add --no-cache php8.0-common php8.0-fpm php8.0-bz2 php8.0-dev php8.0-enchant php8.0-ffi php8.0-gd php8.0-gmp php8.0-intl php8.0-ldap php8.0-mbstring php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-pspell php8.0-redis php8.0-soap php8.0-sodium php8.0-sqlite3 php8.0-xml php8.0-xsl php8.0-igbinary && \
+RUN apk add --no-cache php8.0-common php8.0-fpm php8.0-bz2 php8.0-dev php8.0-enchant php8.0-gd php8.0-gmp php8.0-intl php8.0-ldap php8.0-mbstring php8.0-mysql php8.0-opcache php8.0-pgsql php8.0-pspell php8.0-redis php8.0-soap php8.0-sodium php8.0-sqlite3 php8.0-xml php8.0-xsl php8.0-igbinary && \
     rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
     mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
     for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
@@ -29,15 +28,6 @@ RUN apk add --no-cache php8.0-common php8.0-fpm php8.0-bz2 php8.0-dev php8.0-enc
 
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
-
-RUN cd /tmp && \
-    wget https://git.osgeo.org/gitea/geos/php-geos/archive/${GEOS_VERSION}.tar.gz && \
-    tar -xf ${GEOS_VERSION}.tar.gz && \
-    cd php-geos && \
-    phpize && \
-    ./configure && make install && \
-    echo "extension=geos.so" | tee /etc/php/${PHP_VERSION}/conf.d/geos.ini && \
-    rm -rf php-geos*
 
 RUN cd /tmp && \
     wget http://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \

@@ -425,6 +425,7 @@ endif
 		--enable-huge-code-pages \
 		--enable-bcmath \
 		--enable-phar=static \
+		--disable-phpdbg \
 		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \
@@ -531,11 +532,9 @@ pre_package: determine_extensions
 	find  /tmp/php-$(VERSION)-install-cgi -type d -empty -delete
 
 	# DEV
-	mv /tmp/php-$(VERSION)-install/usr/bin/phpdbg$(major).$(minor) /tmp/php-$(VERSION)-install-dev/usr/bin/
 	mv /tmp/php-$(VERSION)-install/usr/bin/phpize$(major).$(minor) /tmp/php-$(VERSION)-install-dev/usr/bin/
 	mv /tmp/php-$(VERSION)-install/usr/bin/php-config$(major).$(minor) /tmp/php-$(VERSION)-install-dev/usr/bin/
 
-	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/phpdbg$(major).$(minor).1 /tmp/php-$(VERSION)-install-dev/share/man/php/$(major).$(minor)/man1
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/phpize$(major).$(minor).1 /tmp/php-$(VERSION)-install-dev/share/man/php/$(major).$(minor)/man1
 	mv /tmp/php-$(VERSION)-install/share/man/php/$(major).$(minor)/man1/php-config$(major).$(minor).1 /tmp/php-$(VERSION)-install-dev/share/man/php/$(major).$(minor)/man1
 	mkdir -p /tmp/php-$(VERSION)-install-dev/lib/php/$(major).$(minor)/build

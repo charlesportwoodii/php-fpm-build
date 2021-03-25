@@ -65,7 +65,7 @@ OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
-OPENSSLVERSION?=1.1.1j
+OPENSSLVERSION?=1.1.1k
 
 # Ubuntu dependencies
 ifeq ($(shell lsb_release --codename | cut -f2),xenial)

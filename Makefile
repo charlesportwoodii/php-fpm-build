@@ -33,7 +33,7 @@ IGBINARYVERISON?=3.1.6
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.22
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary 
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
 REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 
@@ -778,7 +778,7 @@ fpm_rpm: pre_package pre_package_ext
 		--template-scripts \
 		--force \
 		--after-install /tmp/php-$(VERSION)/rpm/common/postinstall \
-		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \

@@ -33,9 +33,9 @@ IGBINARYVERISON?=3.1.6
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.22
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd ldap pspell recode sodium gmp soap igbinary
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd ldap pspell recode sodium gmp soap igbinary
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -104,7 +104,11 @@ TARGET=x86_64-linux-gnu
 endif
 
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)
-ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0"
+ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 3140 ]]; then echo 0; else echo 1; fi;),0)
+ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant2 > 0"
+else
+ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant > 0"
+endif
 else
 ALPINE_DEPENDS=--depends "mariadb-client-libs > 0"
 endif
@@ -132,7 +136,7 @@ PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:/usr/lib/pkgconfig/enchant-2.pc
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
@@ -386,6 +390,7 @@ endif
 		--with-xsl=shared \
 		--with-sodium=shared \
 		--with-bz2=shared \
+		--with-enchant=shared \
 		--with-ldap=shared \
 		--with-pspell=shared \
 		--with-gmp=shared \
@@ -683,6 +688,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
 		--depends "$(LIBPNG) > 0" \
+		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libxslt1.1 > 0" \
@@ -837,6 +843,7 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libpq > 0" \
 		--depends "freetype > 0" \
 		--depends "libpng > 0" \
+		--depends "libintl > 0" \
 		--depends "aspell-en > 0" \
 		--depends "bash" \
 		--depends "libxslt-dev" \

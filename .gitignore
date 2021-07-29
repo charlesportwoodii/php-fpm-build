@@ -3,3 +3,4 @@
 *.rpm
 *.apk
 .envs
+libsodium-1.0.18-RELEASE/

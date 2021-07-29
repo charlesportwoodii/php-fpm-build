@@ -1,10 +1,13 @@
 ---
 kind: pipeline
 type: docker
-name: default
+name: build-amd64
+
+platform:
+  arch: amd64
 
 environment:
-  DEFAULT_VERSION: 7.4.12
+  DEFAULT_VERSION: 8.0.9
   DEFAULT_REVISION: 1
 
 steps:
@@ -65,6 +68,10 @@ steps:
     image: charlesportwoodii/alpine:3.14-build
     depends_on:
       - preflight
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.4**
     environment:
       BUILD_IMAGE: "alpine3.14"
       BUILD_OS: Alpine
@@ -126,44 +133,140 @@ steps:
       port: 22
       script:
         - /usr/local/bin/update-alpine-packages
-  - name: matrix_notify
-    image: plugins/matrix
+
+---
+kind: pipeline
+type: docker
+name: build-arm64
+
+platform:
+  arch: arm64
+
+environment:
+  DEFAULT_VERSION: 8.0.9
+  DEFAULT_REVISION: 1
+
+steps:
+  - name: preflight
+    image: python:3-alpine
+    commands:
+      - pip3 install semver
+      - python3 genenv
+      - echo $(uname -s):$(uname -r):$(uname -v):$(uname -m)
+      - mkdir -p build/deb
+      - mkdir -p build/alpine
+      - mkdir -p build/rpm
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.4**
+          - refs/tags/7.3**
+  - name: "alpine3.11"
+    image: charlesportwoodii/alpine:3.11-build
     depends_on:
-      - focal
-      - "alpine3.11"
+      - preflight
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.3**
+    environment:
+      BUILD_IMAGE: "alpine3.11"
+      BUILD_OS: Alpine
+      BUILD_OS_VERSION: "3.11"
+      ALPINE_VERSION: "3110"
+    commands:
+      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
+      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
+      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
+  - name: "alpine3.14"
+    image: charlesportwoodii/alpine:3.14-build
+    depends_on:
+      - preflight
+    when:
+      ref:
+        exclude:
+          - refs/tags/7.4**
+          - refs/tags/7.3**
+    environment:
+      BUILD_IMAGE: "alpine3.14"
+      BUILD_OS: Alpine
+      BUILD_OS_VERSION: "3.14"
+      ALPINE_VERSION: "3140"
+    commands:
+      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
+      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
+      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
+  - name: deploy
+    image: amazon/aws-cli
+    when:
+      event:
+        - tag
+    depends_on:
       - "alpine3.14"
-    settings:
-      homeserver: https://matrix.erianna.com
-      roomid:
-        from_secret: MATRIX_ROOM_ID
-      username:
-        from_secret: MATRIX_USER
-      password:
-        from_secret: MATRIX_PASSWORD
-  - name: matrix_notify_deploy
-    image: plugins/matrix
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+      BUCKET:
+        from_secret: AWS_BUCKET
+    commands:
+      - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
+  - name: update-alpine-packages
     depends_on:
       - deploy
     when:
       event:
         - tag
+    image: appleboy/drone-ssh
     settings:
-      homeserver: https://matrix.erianna.com
-      roomid:
-        from_secret: MATRIX_ROOM_ID
+      host:
+        from_secret: SSH_HOST
       username:
-        from_secret: MATRIX_USER
-      password:
-        from_secret: MATRIX_PASSWORD
-      template: "PHP packages have been uploaded to S3"
-  - name: docker
-    depends_on:
-      - "alpine3.14"
-      - "deploy"
-      - "update-alpine-packages"
+        from_secret: SSH_USERNAME
+      key:
+        from_secret: SSH_KEY
+      port: 22
+      script:
+        - /usr/local/bin/update-alpine-packages
+
+---
+kind: pipeline
+type: docker
+name: deploy
+
+environment:
+  DEFAULT_VERSION: 8.0.9
+  DEFAULT_REVISION: 1
+
+depends_on:
+  - build-amd64
+  - build-arm64
+
+platform:
+  arch: amd64
+
+steps:
+  - name: preflight
+    image: python:3-alpine
+    commands:
+      - pip3 install semver
+      - python3 genenv
+      - echo $(uname -s):$(uname -r):$(uname -v):$(uname -m)
+      - mkdir -p build/deb
+      - mkdir -p build/alpine
+      - mkdir -p build/rpm
     when:
       event:
         - tag
+        - promote
+  - name: docker
+    depends_on:
+      - preflight
+    when:
+      event:
+        - tag
+        - promote
     image: docker
     environment:
       username:
@@ -171,16 +274,20 @@ steps:
       password:
         from_secret: DOCKER_PASSWORD
     commands:
-      - docker build -f Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//") $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress --squash .
+      - apk add --no-cache curl
+      - mkdir -p ~/.docker/cli-plugins
+      - curl -Lqqs https://github.com/docker/buildx/releases/download/v0.6.0/buildx-v0.6.0.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
+      - chmod +x ~/.docker/cli-plugins/docker-buildx
+      - docker buildx create --use
       - docker login -u=$username -p=$password
-      - docker push charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
-      - docker push charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
+      - docker buildx build --push --platform linux/arm64,linux/amd64-f Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//") $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress .
     volumes:
       - name: docker_sock
         path: /var/run/docker.sock
     when:
       ref:
         exclude:
+          - refs/tags/7.3**
           - refs/tags/7.2**
 
 volumes:

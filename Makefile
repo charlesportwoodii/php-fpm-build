@@ -701,7 +701,7 @@ fpm_debian: pre_package pre_package_ext
 		--after-install /tmp/php-$(VERSION)/debian/common/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/common/preremove-pak \
 		--deb-compression=gz \
-		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
@@ -855,7 +855,7 @@ fpm_alpine: pre_package pre_package_ext
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
 		-a $(shell uname -m) \
-		--provides "$(PKG_NAME)-cli $(PKG_NAME)-curl $(PKG_NAME)-iconv $(PKG_NAME)-calendar $(PKG_NAME)-exif $(PKG_NAME)-hash $(PKG_NAME)-sockets $(PKG_NAME)-sysvsem $(PKG_NAME)-sysvshm $(PKG_NAME)-sysvmsg $(PKG_NAME)-ctype $(PKG_NAME)-filter $(PKG_NAME)-ftp $(PKG_NAME)-fileinfo $(PKG_NAME)-gettext $(PKG_NAME)-phar $(PKG_NAME)-json"
+		--provides "$(PKG_NAME)-cli"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \

@@ -33,9 +33,9 @@ IGBINARYVERISON?=3.1.6
 ARGON2EXTVERSION?=1.2.1
 LIBSODIUMEXTVERSION?=2.0.22
 
-SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
+SHARED_EXTENSIONS := pdo_sqlite pdo_pgsql pdo_mysql pgsql mysqlnd mysqli sqlite3 xml mbstring zip intl redis mcrypt xsl bz2 gd ldap pspell recode sodium gmp soap igbinary
 SHARED_ZEND_EXTENSIONS := opcache
-REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd enchant ldap pspell recode sodium gmp soap igbinary
+REALIZED_EXTENSIONS := opcache sqlite3 mysql pgsql xml mbstring zip intl redis mcrypt xsl bz2 gd ldap pspell recode sodium gmp soap igbinary
 
 # Reference library implementations
 ARGON2_DIR=/tmp/libargon2
@@ -386,7 +386,6 @@ endif
 		--with-xsl=shared \
 		--with-sodium=shared \
 		--with-bz2=shared \
-		--with-enchant=shared \
 		--with-ldap=shared \
 		--with-pspell=shared \
 		--with-gmp=shared \
@@ -684,7 +683,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
 		--depends "$(LIBPNG) > 0" \
-		--depends "libenchant1c2a > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libxslt1.1 > 0" \
@@ -839,7 +837,6 @@ fpm_alpine: pre_package pre_package_ext
 		--depends "libpq > 0" \
 		--depends "freetype > 0" \
 		--depends "libpng > 0" \
-		--depends "enchant > 0" \
 		--depends "aspell-en > 0" \
 		--depends "bash" \
 		--depends "libxslt-dev" \

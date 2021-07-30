@@ -104,9 +104,9 @@ LIBFFI_DEBIAN=libffi7
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
-TARGET=x86_64-unknown-linux-musl
+TARGET=$(shell arch)-unknown-linux-musl
 else
-TARGET=x86_64-linux-gnu
+TARGET=$(shell arch)-linux-gnu
 endif
 
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)

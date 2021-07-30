@@ -49,6 +49,12 @@ SCRIPTPATH=$(shell pwd -P)
 CORES?=$(shell grep -c ^processor /proc/cpuinfo)
 ARCH=$(shell arch)
 
+# Opcache Jit isn't yet working in <= PHP 8.0.x (yet).
+ifeq ($(shell arch),aarch64)
+IS_ARM=1
+ARM_FLAGS=--disable-opcache-jit
+endif
+
 major=$(shell echo $(VERSION) | cut -d. -f1)
 minor=$(shell echo $(VERSION) | cut -d. -f2)
 micro=$(shell echo $(VERSION) | cut -d. -f3)
@@ -430,6 +436,7 @@ endif
 		--enable-bcmath \
 		--enable-phar=static \
 		--disable-phpdbg \
+		$(ARM_FLAGS) \
 		$(MAINTAINER_FLAGS) \
 		$(SQLITEARGS) \
 		$(PDOSQLITEARGS) \

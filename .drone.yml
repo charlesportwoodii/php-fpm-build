@@ -207,7 +207,7 @@ steps:
         from_secret: AWS_BUCKET
     commands:
       - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
-  - name: deploy-alpine3.14
+  - name: deploy
     image: amazon/aws-cli
     when:
       event:

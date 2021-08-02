@@ -9,7 +9,7 @@ ENV PHP_VERSION 8.0
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
-ENV COMPOSER_HASH 756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3
+ENV COMPOSER_VERSION 2.1.5
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \
@@ -30,7 +30,7 @@ COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/p
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
 
 RUN cd /tmp && \
-    wget http://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
+    wget https://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
     tar -xf xdebug-${XDEBUG_VERSION}.tgz && \
     cd xdebug-${XDEBUG_VERSION} && \
     phpize && \
@@ -43,10 +43,7 @@ RUN cd /tmp && \
 RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
     mkdir -p /root/.bin && \
     chown -R root:root /root/.bin && \
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" > composer-setup.php && \
-    php -r "if (hash_file('SHA384', 'composer-setup.php') === '${COMPOSER_HASH}') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-    php composer-setup.php --install-dir=/root/.bin --filename=composer || true && \
-    php -r "unlink('composer-setup.php');" && \
+    curl -qqsL https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar -o /root/.bin/composer && \
     chmod a+x /root/.bin/composer && \
     chown -R root:root /root/.bin/composer && \
     /root/.bin/composer self-update

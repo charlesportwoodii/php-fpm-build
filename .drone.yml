@@ -133,6 +133,25 @@ steps:
       port: 22
       script:
         - /usr/local/bin/update-alpine-packages x86_64
+  - name: docker-arm64
+    image: plugins/docker
+    depends_on:
+      - update-alpine-packages
+    when:
+      event:
+        - tag
+        - promote
+    settings:
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      compress: true
+      repo: charlesportwoodii/php
+      tags:
+        - $(tail -n1 .envs | sed "s/SHORT_VERSION=//")-amd64
+        - $(head -n1 .envs | sed "s/VERSION=//")-amd64
+      dockerfile: Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
 
 ---
 kind: pipeline
@@ -156,11 +175,6 @@ steps:
       - mkdir -p build/deb
       - mkdir -p build/alpine
       - mkdir -p build/rpm
-    when:
-      ref:
-        exclude:
-          - refs/tags/7.4**
-          - refs/tags/7.3**
   - name: "alpine3.11"
     image: charlesportwoodii/alpine:3.11-build
     depends_on:
@@ -229,22 +243,37 @@ steps:
       port: 22
       script:
         - /usr/local/bin/update-alpine-packages aarch64
+  - name: docker-arm64
+    image: plugins/docker
+    depends_on:
+      - update-alpine-packages
+    when:
+      event:
+        - tag
+        - promote
+    settings:
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      compress: true
+      repo: charlesportwoodii/php
+      tags:
+        - $(tail -n1 .envs | sed "s/SHORT_VERSION=//")-arm64
+        - $(head -n1 .envs | sed "s/VERSION=//")-arm64
+      dockerfile: Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
 
 ---
 kind: pipeline
 type: docker
-name: deploy
+name: docker-manifest
 
-environment:
-  DEFAULT_VERSION: 8.0.9
-  DEFAULT_REVISION: 1
+platform:
+  arch: amd64
 
 depends_on:
   - build-amd64
   - build-arm64
-
-platform:
-  arch: amd64
 
 steps:
   - name: preflight
@@ -252,43 +281,46 @@ steps:
     commands:
       - pip3 install semver
       - python3 genenv
-      - echo $(uname -s):$(uname -r):$(uname -v):$(uname -m)
-      - mkdir -p build/deb
-      - mkdir -p build/alpine
-      - mkdir -p build/rpm
-    when:
-      event:
-        - tag
-        - promote
-  - name: docker
+  - name: manifest-$(head -n1 .envs | sed "s/VERSION=//")-arm6
+    image: docker
     depends_on:
       - preflight
     when:
       event:
         - tag
         - promote
-    image: docker
     environment:
       username:
         from_secret: DOCKER_USERNAME
       password:
         from_secret: DOCKER_PASSWORD
     commands:
-      - apk add --no-cache curl
-      - mkdir -p ~/.docker/cli-plugins
-      - curl -Lqqs https://github.com/docker/buildx/releases/download/v0.6.0/buildx-v0.6.0.linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-      - chmod +x ~/.docker/cli-plugins/docker-buildx
-      - docker buildx create --use
       - docker login -u=$username -p=$password
-      - docker buildx build --push --platform linux/arm64,linux/amd64-f Dockerfile.php$(tail -n1 .envs | sed "s/SHORT_VERSION=//") $(for i in $(cat .envs); do echo -n "--build-arg $i "; done) -t charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//") -t charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//") --no-cache --compress .
+      - docker manifest create charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")-arm64 --amend charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")-amd64 --amend charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
+      - docker manifest push charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
     volumes:
       - name: docker_sock
         path: /var/run/docker.sock
+  - name: manifest-$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
+    image: docker
+    depends_on:
+      - preflight
     when:
-      ref:
-        exclude:
-          - refs/tags/7.3**
-          - refs/tags/7.2**
+      event:
+        - tag
+        - promote
+    environment:
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - docker login -u=$username -p=$password
+      - docker manifest create charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")-arm64 --amend charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")-amd64 --amend charlesportwoodii/php:$(tail -n1 .envs | sed "s/SHORT_VERSION=//")
+      - docker manifest push charlesportwoodii/php:$(head -n1 .envs | sed "s/VERSION=//")
+    volumes:
+      - name: docker_sock
+        path: /var/run/docker.sock
 
 volumes:
   - name: docker_sock

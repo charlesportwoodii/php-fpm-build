@@ -191,22 +191,6 @@ steps:
       - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
-  - name: deploy-alpine3.11
-    image: amazon/aws-cli
-    when:
-      event:
-        - tag
-    depends_on:
-      - "alpine3.11"
-    environment:
-      AWS_ACCESS_KEY_ID:
-        from_secret: AWS_ACCESS_KEY_ID
-      AWS_SECRET_ACCESS_KEY:
-        from_secret: AWS_SECRET_ACCESS_KEY
-      BUCKET:
-        from_secret: AWS_BUCKET
-    commands:
-      - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
   - name: deploy
     image: amazon/aws-cli
     when:

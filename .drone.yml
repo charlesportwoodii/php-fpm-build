@@ -275,6 +275,10 @@ depends_on:
   - build-amd64
   - build-arm64
 
+environment:
+  DEFAULT_VERSION: 8.0.9
+  DEFAULT_REVISION: 1
+
 steps:
   - name: preflight
     image: python:3-alpine

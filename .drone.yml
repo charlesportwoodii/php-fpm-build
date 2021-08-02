@@ -162,8 +162,8 @@ steps:
       - preflight
     when:
       ref:
-        exclude:
-          - refs/tags/7.3**
+        include:
+          - refs/tags/7.4**
     environment:
       BUILD_IMAGE: "alpine3.11"
       BUILD_OS: Alpine
@@ -197,6 +197,7 @@ steps:
       event:
         - tag
     depends_on:
+      - "alpine3.11"
       - "alpine3.14"
     environment:
       AWS_ACCESS_KEY_ID:

@@ -38,25 +38,6 @@ steps:
         exclude:
           - refs/tags/7.3**
           - refs/tags/7.2**
-  - name: bionic
-    image: charlesportwoodii/ubuntu:18.04-build
-    depends_on:
-      - preflight
-    environment:
-      BUILD_IMAGE: bionic
-      BUILD_OS: Ubuntu
-      BUILD_OS_VERSION: "18.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
-    commands:
-      - bash -lc "make build fpm_debian "
-      - mkdir -p build/deb/$BUILD_IMAGE
-      - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
-    when:
-        ref:
-          exclude:
-            - refs/tags/7.4**
-            - refs/tags/7.3**
-            - refs/tags/7.2**
   - name: "alpine3.11"
     image: charlesportwoodii/alpine:3.11-build
     depends_on:

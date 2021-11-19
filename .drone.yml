@@ -51,6 +51,12 @@ steps:
       - bash -lc "make build fpm_debian "
       - mkdir -p build/deb/$BUILD_IMAGE
       - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+        ref:
+          exclude:
+            - refs/tags/7.4**
+            - refs/tags/7.3**
+            - refs/tags/7.2**
   - name: "alpine3.11"
     image: charlesportwoodii/alpine:3.11-build
     depends_on:

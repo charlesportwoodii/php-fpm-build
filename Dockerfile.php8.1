@@ -1,0 +1,66 @@
+FROM charlesportwoodii/alpine:3.14-base
+LABEL reference="https://github.com/charlesportwoodii/docker-images"
+LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
+LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
+LABEL description="An PHP 8.1 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
+
+ENV XDEBUG_VERSION 3.0.4
+ENV PHP_VERSION 8.1
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_NO_INTERACTION 1
+ENV COMPOSER_VERSION 2.1.5
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
+RUN apk update && \
+    apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl || true 2>/dev/null
+
+RUN apk add --no-cache php8.1-common php8.1-fpm php8.1-bz2 php8.1-dev php8.1-gd php8.1-gmp php8.1-intl php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pgsql php8.1-pspell php8.1-redis php8.1-soap php8.1-sodium php8.1-sqlite3 php8.1-xml php8.1-xsl php8.1-igbinary || true 2>/dev/null && \
+    rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
+    mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
+    for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
+    rm -rf /var/cache/apk/* && \
+    ln -s /usr/bin/phpize${PHP_VERSION} /usr/bin/phpize && \
+    ln -s /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config && \
+    ln -s /usr/bin/php${PHP_VERSION} /usr/bin/php && \
+    strip --strip-all /usr/bin/php && \
+    strip --strip-all /usr/sbin/php-fpm8.1
+
+COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
+COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
+
+RUN cd /tmp && \
+    wget https://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
+    tar -xf xdebug-${XDEBUG_VERSION}.tgz && \
+    cd xdebug-${XDEBUG_VERSION} && \
+    phpize && \
+    ./configure && make install && \
+    echo "zend_extension=xdebug.so" | tee /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    echo "xdebug.remote_enable=1" | tee -a  /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    echo "xdebug.remote_autostart=1" | tee -a /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+    rm -rf /tmp/xdebug-*
+
+RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
+    mkdir -p /root/.bin && \
+    chown -R root:root /root/.bin && \
+    curl -qqsL https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar -o /root/.bin/composer && \
+    chmod a+x /root/.bin/composer && \
+    chown -R root:root /root/.bin/composer && \
+    /root/.bin/composer self-update
+
+RUN apk del alpine-sdk linux-headers make automake gcc g++ autoconf binutils && \
+    rm -rf /var/cache/apk/*
+
+# Ensure pdo_mysql is installed
+RUN grep -qF "extension=pdo_mysql.so" "/etc/php/${PHP_VERSION}/conf.d/mysql.ini" || echo "extension=pdo_mysql.so" >> "/etc/php/${PHP_VERSION}/conf.d/mysql.ini"
+
+# Define mountable directories.
+VOLUME ["/etc/php/8.1/", "/var/www"]
+
+# Define working directory.
+WORKDIR /etc/php/8.1
+
+EXPOSE 9080
+
+ENTRYPOINT ["/usr/sbin/php-fpm8.1", "-R", "--fpm-config", "/etc/php/8.1/php-fpm.conf"]
+

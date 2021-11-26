@@ -58,6 +58,8 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.1**
+          - refs/tags/8.0**
           - refs/tags/7.4**
     environment:
       BUILD_IMAGE: "alpine3.14"
@@ -168,6 +170,8 @@ steps:
     when:
       ref:
         include:
+          - refs/tags/8.1**
+          - refs/tags/8.0**
           - refs/tags/7.4**
     environment:
       BUILD_IMAGE: "alpine3.11"

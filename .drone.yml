@@ -58,7 +58,6 @@ steps:
         - tag
     depends_on:
       - focal
-      - "alpine3.11"
       - "alpine3.14"
     environment:
       AWS_ACCESS_KEY_ID:
@@ -168,7 +167,6 @@ steps:
       event:
         - tag
     depends_on:
-      - "alpine3.11"
       - "alpine3.14"
     environment:
       AWS_ACCESS_KEY_ID:

@@ -38,29 +38,10 @@ steps:
         exclude:
           - refs/tags/7.3**
           - refs/tags/7.2**
-  - name: "alpine3.11"
-    image: charlesportwoodii/alpine:3.11-build
-    depends_on:
-      - preflight
-    environment:
-      BUILD_IMAGE: "alpine3.11"
-      BUILD_OS: Alpine
-      BUILD_OS_VERSION: "3.11"
-      ALPINE_VERSION: "3110"
-    commands:
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
-      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
-      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
   - name: "alpine3.14"
     image: charlesportwoodii/alpine:3.14-build
     depends_on:
       - preflight
-    when:
-      ref:
-        exclude:
-          - refs/tags/8.1**
-          - refs/tags/8.0**
-          - refs/tags/7.4**
     environment:
       BUILD_IMAGE: "alpine3.14"
       BUILD_OS: Alpine
@@ -163,25 +144,6 @@ steps:
         exclude:
           - refs/tags/7.3**
           - refs/tags/7.2**
-  - name: "alpine3.11"
-    image: charlesportwoodii/alpine:3.11-build
-    depends_on:
-      - preflight
-    when:
-      ref:
-        include:
-          - refs/tags/8.1**
-          - refs/tags/8.0**
-          - refs/tags/7.4**
-    environment:
-      BUILD_IMAGE: "alpine3.11"
-      BUILD_OS: Alpine
-      BUILD_OS_VERSION: "3.11"
-      ALPINE_VERSION: "3110"
-    commands:
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
-      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
-      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
   - name: "alpine3.14"
     image: charlesportwoodii/alpine:3.14-build
     depends_on:

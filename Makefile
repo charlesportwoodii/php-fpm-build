@@ -71,7 +71,11 @@ OPENSSL_PATH=/opt/openssl
 NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "81" ]]; then echo 0; else echo 1; fi;), 0)
+OPENSSLVERSION?=3.0.2
+else
 OPENSSLVERSION?=1.1.1n
+endif
 
 # Ubuntu dependencies
 ifeq ($(shell lsb_release --codename | cut -f2),xenial)

@@ -4,12 +4,12 @@ LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
 LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
 LABEL description="An PHP 8.0 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
 
-ENV XDEBUG_VERSION 3.0.4
+ENV XDEBUG_VERSION 3.1.4
 ENV PHP_VERSION 8.0
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
-ENV COMPOSER_VERSION 2.1.5
+ENV COMPOSER_VERSION 2.2.3
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \

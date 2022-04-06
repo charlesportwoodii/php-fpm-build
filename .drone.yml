@@ -57,7 +57,7 @@ steps:
           - refs/tags/7.4**
           - refs/tags/7.3**
           - refs/tags/7.2**
-  - name: "alpine3.14"
+  - name: "alpine3.15"
     image: charlesportwoodii/alpine:3.15-build
     depends_on:
       - preflight

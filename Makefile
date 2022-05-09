@@ -115,7 +115,7 @@ endif
 
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 3140 ]]; then echo 0; else echo 1; fi;),0)
-ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant2 > 0"
+ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant2 > 0" --depends "openldap" > 0 --depends "icu" > 0
 else
 ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant > 0"
 endif

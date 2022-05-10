@@ -242,7 +242,7 @@ openssl:
 	echo $(OPENSSL_PATH)
 	rm -rf /tmp/openssl*
 	cd /tmp && \
-	wget https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz && \
+	curl https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz --output openssl-$(OPENSSLVERSION).tar.gz && \
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz && \
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3 no-threads && \
@@ -257,7 +257,7 @@ nghttp2:
 	echo $(NGHTTP_PREFIX)
 	rm -rf /tmp/nghttp2*
 	cd /tmp && \
-	wget https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz && \
+	curl -L https://github.com/nghttp2/nghttp2/releases/download/v$(NGHTTPVERSION)/nghttp2-$(NGHTTPVERSION).tar.gz --output nghttp2-$(NGHTTPVERSION).tar.gz && \
 	tar -xf nghttp2-$(NGHTTPVERSION).tar.gz && \
 	cd nghttp2-$(NGHTTPVERSION) && \
 	./configure \
@@ -274,7 +274,7 @@ curl: nghttp2
 	echo $(CURL_PREFIX)
 	rm -rf /tmp/curl*
 	cd /tmp && \
-	wget https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
+	curl -L https://github.com/curl/curl/releases/download/curl-$(CURLVERSION)/curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz --output curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	tar -xf curl-$(shell echo $(CURLVERSION) | tr '_' '.').tar.gz && \
 	cd curl-$(shell echo $(CURLVERSION) | tr '_' '.') && \
 	LIBS="-ldl" env PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig \
@@ -337,7 +337,7 @@ libsodium:
 	rm -rf /tmp/libsodium*
 
 	cd /tmp && \
-	wget https://github.com/jedisct1/libsodium/archive/$(LIBSODIUMVERSION).tar.gz
+	curl -L https://github.com/jedisct1/libsodium/archive/$(LIBSODIUMVERSION).tar.gz --output $(LIBSODIUMVERSION).tar.gz
 	tar -xf /tmp/$(LIBSODIUMVERSION).tar.gz && \
 	cp -R libsodium-$(LIBSODIUMVERSION) $(LIBSODIUM_DIR) && \
 	cd $(LIBSODIUM_DIR) && \
@@ -352,7 +352,7 @@ php: determine_extensions
 	echo Building for PHP $(VERSION)
 
 	cd /tmp && \
-	wget https://github.com/php/php-src/archive/php-$(VERSION).tar.gz && \
+	curl -L https://github.com/php/php-src/archive/php-$(VERSION).tar.gz --output php-$(VERSION).tar.gz && \
 	tar -xf php-$(VERSION).tar.gz && \
 	mv php-src-php-$(VERSION) php-$(VERSION)
 
@@ -462,7 +462,7 @@ pear:
 	rm -rf /tmp/php-pear-install
 	mkdir -p /tmp/php-pear
 	mkdir -p /tmp/php-pear-install
-	wget -q https://pear.php.net/install-pear-nozlib.phar -O /tmp/php-pear/install-pear-nozlib.phar
+	curl -q https://pear.php.net/install-pear-nozlib.phar --output /tmp/php-pear/install-pear-nozlib.phar
 	php /tmp/php-pear/install-pear-nozlib.phar
 	rm -rf /tmp/php-pear-install/etc
 	mkdir -p /tmp/php-pear-install/usr/share/php/pear

@@ -194,7 +194,7 @@ steps:
   - name: jammy_arm64
     image: charlesportwoodii/ubuntu:22.04-build
     depends_on:
-      - preflight
+      - preflight_arm64
     environment:
       BUILD_IMAGE: jammy
       BUILD_OS: Ubuntu

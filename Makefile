@@ -105,6 +105,15 @@ LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip5
 LIBFFI_DEBIAN=libffi7
+else ifeq ($(shell lsb_release --codename | cut -f2),jammy)
+LIBICU=libicu70
+LIBMYSQLCLIENT=libmysqlclient21
+LIBWEBP_DEBIAN=libwebp7
+LIBPNG=libpng16-16
+LIBONIG_DEBIAN=libonig5
+LIBCURL_DEBIAN=libcurl4
+LIBZIP_DEBIAN=libzip4
+LIBFFI_DEBIAN=libffi8
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -759,81 +768,6 @@ fpm_debian: pre_package pre_package_ext
 			--before-remove /tmp/php-$(VERSION)/debian/$$pkg/preremove-pak \
 			--force \
 			--no-deb-auto-config-files; \
-	done;
-
-fpm_rpm: pre_package pre_package_ext
-	echo "Building native package for rpm"
-
-	fpm -s dir \
-		-t rpm \
-		-n $(RELEASENAME) \
-		-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
-		-C /tmp/php-$(VERSION)-install \
-		-p $(RELEASENAME)_$(micro)-$(RELEASEVER)~$(shell arch).rpm \
-		-m "charlesportwoodii@erianna.com" \
-		--license "PHP License" \
-		--url https://github.com/charlesportwoodii/php-fpm-build \
-		--description "PHP FPM, $(VERSION)" \
-		--vendor "Charles R. Portwood II" \
-		--depends "libxml2 > 0" \
-		--depends "libjpeg-turbo > 0" \
-		--depends "libicu > 0" \
-		--depends "postgresql-devel > 0" \
-		--depends "libpng12 > 0" \
-		--depends "libpng > 0" \
-		--depends "freetype > 0" \
-		--depends "freetype-devel > 0" \
-		--depends "libbrotli" \
-		--depends "libzip5 > 1.1.0" \
-		--depends "openssl" \
-		$(PHP72_RPM_DEPENDS) \
-		$(PHP74_RPM_DEPENDS) \
-		--rpm-digest sha384 \
-		--rpm-compression gzip \
-		--template-scripts \
-		--force \
-		--after-install /tmp/php-$(VERSION)/rpm/common/postinstall \
-		--provides "$(PKG_NAME)-cli"
-
-	for ext in $(REALIZED_EXTENSIONS); do \
-		fpm -s dir \
-			-t rpm \
-			-n "$(PKG_NAME)-$$ext" \
-			-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
-			-C "/tmp/php$(VERSION)-$$ext" \
-			-p "$(PKG_NAME).$(micro)-$$ext-$(RELEASEVER)~$(shell arch).rpm" \
-			-m "charlesportwoodii@erianna.com" \
-			--license "PHP License" \
-			--url https://github.com/charlesportwoodii/php-fpm-build \
-			--description "PHP $$ext, $(VERSION)" \
-			--vendor "Charles R. Portwood II" \
-			--depends "$(PKG_NAME)-fpm" \
-			--rpm-digest sha384 \
-			--rpm-compression gzip \
-			--template-scripts \
-			--force; \
-	done;
-
-	for pkg in $(SUBPACKAGES); do \
-		fpm -s dir \
-			-t rpm \
-			-n "$(PKG_NAME)-$$pkg" \
-			-v $(VERSION)-$(RELEASEVER)~$(shell arch) \
-			-C "/tmp/php-$(VERSION)-install-$$pkg" \
-			-p "$(PKG_NAME).$(micro)-$$pkg-$(RELEASEVER)~$(shell arch).rpm" \
-			-m "charlesportwoodii@erianna.com" \
-			--license "PHP License" \
-			--url https://github.com/charlesportwoodii/php-fpm-build \
-			--description "PHP $$pkg, $(VERSION)" \
-			--vendor "Charles R. Portwood II" \
-			--depends "$(PKG_NAME)-common" \
-			--rpm-digest sha384 \
-			--rpm-compression gzip \
-			--template-scripts \
-			--before-install /tmp/php-$(VERSION)/rpm/$$pkg/preinstall \
-			--after-install /tmp/php-$(VERSION)/rpm/$$pkg/postinstall \
-			--before-remove /tmp/php-$(VERSION)/rpm/$$pkg/preremove \
-			--force; \
 	done;
 
 fpm_alpine: pre_package pre_package_ext

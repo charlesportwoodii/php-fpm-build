@@ -38,6 +38,26 @@ steps:
         exclude:
           - refs/tags/7.3**
           - refs/tags/7.2**
+  - name: jammy
+    image: charlesportwoodii/ubuntu:22.04-build
+    depends_on:
+      - preflight
+    environment:
+      BUILD_IMAGE: jammy
+      BUILD_OS: Ubuntu
+      BUILD_OS_VERSION: "22.04"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+    commands:
+      - bash -lc "make build fpm_debian"
+      - mkdir -p build/deb/$BUILD_IMAGE
+      - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+      ref:
+        exclude:
+          - refs/tags/8.0**
+          - refs/tags/7.4**
+          - refs/tags/7.3**
+          - refs/tags/7.2**
   - name: "alpine3.14"
     image: charlesportwoodii/alpine:3.14-build
     depends_on:
@@ -84,6 +104,7 @@ steps:
         - tag
     depends_on:
       - focal
+      - jammy
       - "alpine3.14"
       - "alpine3.15"
     environment:
@@ -152,7 +173,7 @@ steps:
       - mkdir -p build/deb
       - mkdir -p build/alpine
       - mkdir -p build/rpm
-  - name: focal
+  - name: focal_arm64
     image: charlesportwoodii/ubuntu:20.04-build
     depends_on:
       - preflight_arm64
@@ -168,6 +189,26 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/7.3**
+          - refs/tags/7.2**
+  - name: jammy_arm64
+    image: charlesportwoodii/ubuntu:22.04-build
+    depends_on:
+      - preflight
+    environment:
+      BUILD_IMAGE: jammy
+      BUILD_OS: Ubuntu
+      BUILD_OS_VERSION: "22.04"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+    commands:
+      - bash -lc "make build fpm_debian"
+      - mkdir -p build/deb/$BUILD_IMAGE
+      - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+      ref:
+        exclude:
+          - refs/tags/8.0**
+          - refs/tags/7.4**
           - refs/tags/7.3**
           - refs/tags/7.2**
   - name: "alpine3.14_arm64"
@@ -215,6 +256,8 @@ steps:
     depends_on:
       - "alpine3.14_arm64"
       - "alpine3.15_arm64"
+      - focal_arm64
+      - jammy_arm64
     environment:
       AWS_ACCESS_KEY_ID:
         from_secret: AWS_ACCESS_KEY_ID

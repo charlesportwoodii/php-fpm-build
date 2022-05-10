@@ -725,7 +725,7 @@ fpm_debian: pre_package pre_package_ext
 		--after-install /tmp/php-$(VERSION)/debian/common/postinstall-pak \
 		--before-remove /tmp/php-$(VERSION)/debian/common/preremove-pak \
 		--deb-compression=gz \
-		--provides "$(PKG_NAME)-cli (=$(VERSION))"
+		--provides "php-cli (= $(VERSION))"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \
@@ -804,7 +804,7 @@ fpm_alpine: pre_package pre_package_ext
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
 		-a $(shell uname -m) \
-		--provides "$(PKG_NAME)-cli (=$(VERSION))"
+		--provides "php-cli"
 
 	for ext in $(REALIZED_EXTENSIONS); do \
 		fpm -s dir \

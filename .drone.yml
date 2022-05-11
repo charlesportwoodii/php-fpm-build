@@ -119,6 +119,7 @@ steps:
       BUCKET:
         from_secret: AWS_BUCKET
     commands:
+      - ls -R ./build
       - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
 
 ---
@@ -240,6 +241,7 @@ steps:
       BUCKET:
         from_secret: AWS_BUCKET
     commands:
+      - ls -R ./build
       - aws s3 --endpoint-url=https://nyc3.digitaloceanspaces.com cp ./build/ s3://$BUCKET --recursive
 
 ---

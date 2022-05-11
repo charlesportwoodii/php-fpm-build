@@ -96,6 +96,7 @@ LIBONIG_DEBIAN=libonig4
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi6
+LIBENCHANT_DEBIAN=libenchant1c2a
 else ifeq ($(shell lsb_release --codename | cut -f2),focal)
 LIBICU=libicu66
 LIBMYSQLCLIENT=libmysqlclient21
@@ -105,6 +106,7 @@ LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip5
 LIBFFI_DEBIAN=libffi7
+LIBENCHANT_DEBIAN=libenchant1c2a
 else ifeq ($(shell lsb_release --codename | cut -f2),jammy)
 LIBICU=libicu70
 LIBMYSQLCLIENT=libmysqlclient21
@@ -114,6 +116,7 @@ LIBONIG_DEBIAN=libonig5
 LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi8
+LIBENCHANT_DEBIAN=libenchant-2-2
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -124,7 +127,7 @@ endif
 
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 380 ]]; then echo 0; else echo 1; fi;),0)
 ifeq ($(shell if [[ "$(ALPINE_VERSION)" -ge 3140 ]]; then echo 0; else echo 1; fi;),0)
-ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant2 > 0" --depends "openldap" > 0 --depends "icu" > 0
+ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant2 > 0" --depends "openldap" > 0 --depends "icu" > 0  --depends "openldap-dev" > 0 --depends "icu-dev" > 0
 else
 ALPINE_DEPENDS=--depends "mariadb-connector-c > 0" --depends "mariadb-connector-c-dev > 0" --depends "enchant > 0"
 endif
@@ -708,7 +711,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libpq5 > 0" \
 		--depends "libfreetype6 > 0" \
 		--depends "$(LIBPNG) > 0" \
-		--depends "libenchant1c2a > 0" \
+		--depends "$(LIBENCHANT_DEBIAN) > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libxslt1.1 > 0" \

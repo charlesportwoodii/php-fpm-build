@@ -1,4 +1,4 @@
-FROM charlesportwoodii/alpine:3.15-base
+FROM charlesportwoodii/alpine:3.14-base
 LABEL reference="https://github.com/charlesportwoodii/docker-images"
 LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
 LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
@@ -15,7 +15,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 RUN apk update && \
     apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl || true 2>/dev/null
 
-RUN apk add --no-cache php8.1-common php8.1-fpm php8.1-bz2 php8.1-dev php8.1-gd php8.1-gmp php8.1-intl php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pgsql php8.1-pspell php8.1-redis php8.1-soap php8.1-sodium php8.1-sqlite3 php8.1-xml php8.1-xsl php8.1-igbinary || true 2>/dev/null && \
+RUN apk add --no-cache php8.1-common php8.1-fpm php8.1-bz2 php8.1-dev php8.1-gd php8.1-gmp php8.1-intl php8.1-ldap php8.1-mbstring php8.1-mysql php8.1-opcache php8.1-pgsql php8.1-pspell php8.1-redis php8.1-soap php8.1-sodium php8.1-sqlite3 php8.1-xml php8.1-xsl  || true 2>/dev/null && \
     rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
     mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
     for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
@@ -60,7 +60,7 @@ VOLUME ["/etc/php/8.1/", "/var/www"]
 # Define working directory.
 WORKDIR /etc/php/8.1
 
-EXPOSE 9080
+EXPOSE 9081
 
 ENTRYPOINT ["/usr/sbin/php-fpm8.1", "-R", "--fpm-config", "/etc/php/8.1/php-fpm.conf"]
 

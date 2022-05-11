@@ -79,28 +79,6 @@ steps:
           - refs/tags/7.4**
           - refs/tags/7.3**
           - refs/tags/7.2**
-  - name: "alpine3.15"
-    image: charlesportwoodii/alpine:3.15-build
-    depends_on:
-      - preflight
-    environment:
-      BUILD_IMAGE: "alpine3.15"
-      BUILD_OS: Alpine
-      BUILD_OS_VERSION: "3.15"
-      ALPINE_VERSION: "3150"
-    commands:
-      - cat /etc/alpine-release
-      - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
-      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
-      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
-    when:
-      ref:
-        exclude:
-          - refs/tags/8.0**
-          - refs/tags/7.4**
-          - refs/tags/7.3**
-          - refs/tags/7.2**
   - name: deploy
     image: amazon/aws-cli
     when:
@@ -110,7 +88,6 @@ steps:
       - focal
       - jammy
       - "alpine3.14"
-      - "alpine3.15"
     environment:
       AWS_ACCESS_KEY_ID:
         from_secret: AWS_ACCESS_KEY_ID
@@ -202,27 +179,6 @@ steps:
       - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
-  - name: "alpine3.15_arm64"
-    image: charlesportwoodii/alpine:3.15-build
-    depends_on:
-      - preflight_arm64
-    when:
-      ref:
-        exclude:
-          - refs/tags/8.0**
-          - refs/tags/7.4**
-          - refs/tags/7.3**
-    environment:
-      BUILD_IMAGE: "alpine3.15"
-      BUILD_OS: Alpine
-      BUILD_OS_VERSION: "3.15"
-      ALPINE_VERSION: "3150"
-    commands:
-      - cat /etc/alpine-release
-      - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
-      - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
-      - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
   - name: deploy_arm64
     image: amazon/aws-cli
     when:
@@ -230,7 +186,6 @@ steps:
         - tag
     depends_on:
       - "alpine3.14_arm64"
-      - "alpine3.15_arm64"
       - focal_arm64
       - jammy_arm64
     environment:
@@ -269,7 +224,7 @@ steps:
       port: 22
       script:
         - /usr/local/bin/update-apt-packages
-  - name: update-alpine-packages
+  - name: update-alpine-packages-x64
     when:
       event:
         - tag
@@ -284,6 +239,20 @@ steps:
       port: 22
       script:
         - /usr/local/bin/update-alpine-packages x86_64
+  - name: update-alpine-packages-aarch64
+    when:
+      event:
+        - tag
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        from_secret: SSH_HOST
+      username:
+        from_secret: SSH_USERNAME
+      key:
+        from_secret: SSH_KEY
+      port: 22
+      script:
         - /usr/local/bin/update-alpine-packages aarch64
 
 ---

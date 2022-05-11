@@ -245,8 +245,6 @@ depends_on:
 
 steps:
   - name: update-apt-packages
-    depends_on:
-      - deploy
     when:
       event:
         - tag
@@ -262,8 +260,6 @@ steps:
       script:
         - /usr/local/bin/update-apt-packages
   - name: update-alpine-packages
-    depends_on:
-      - deploy
     when:
       event:
         - tag

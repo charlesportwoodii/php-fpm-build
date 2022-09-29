@@ -12,9 +12,6 @@ ENV COMPOSER_NO_INTERACTION 1
 ENV COMPOSER_VERSION 2.4.2
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
-# For testing
-RUN  sh -c 'echo "https://apk.erianna.com/v3.15/test" | tee -a /etc/apk/repositories
-
 RUN apk update && \
     apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl || true 2>/dev/null
 

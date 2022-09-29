@@ -19,8 +19,8 @@ BUILD_OS_VERSION?=
 ALPINE_VERSION?=
 
 # Dependency Versions
-CURLVERSION?=7_83_0
-NGHTTPVERSION?=1.47.0
+CURLVERSION?=7_85_0
+NGHTTPVERSION?=1.50.0
 RELEASEVER?=1
 
 # Library versions
@@ -158,7 +158,7 @@ PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
-USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:/usr/lib/pkgconfig/enchant-2.pc
+USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:/usr/lib/pkgconfig/enchant-2.pc
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
@@ -304,16 +304,16 @@ else
 #@echo "Changing line: $(_LN)"
 #sed '$(_LN)s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 /' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 # Fix this to be dynamic later
-	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	sed '39s/$$/ -L\/opt\/nghttp2\/lib -lnghttp2 -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 
 ifeq ($(ALPINE_VERSION),3110)
-	sed '37s/$$/ -L\/opt\/nghttp2\/lib -lbrotlidec/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	sed '39s/$$/ -L\/opt\/nghttp2\/lib -lbrotlidec/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 endif
 
 ifeq ($(BUILD_OS),Ubuntu)
-	sed '37s/$$/ -lbrotlidec -L\/opt\/openssl\/lib -lssl -lcrypto -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
+	sed '39s/$$/ -lbrotlidec -L\/opt\/openssl\/lib -lssl -lcrypto -ldl/' $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc > $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp
 	mv $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc.tmp $(CURL_PREFIX)/lib/pkgconfig/libcurl.pc
 endif
 endif

@@ -72,9 +72,9 @@ NGHTTP_PREFIX=/opt/nghttp2
 CURL_PREFIX=/opt/curl
 
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "81" ]]; then echo 0; else echo 1; fi;), 0)
-OPENSSLVERSION?=3.0.5
+OPENSSLVERSION?=3.0.6
 else
-OPENSSLVERSION?=1.1.1q
+OPENSSLVERSION?=1.1.1r
 endif
 
 # Ubuntu dependencies

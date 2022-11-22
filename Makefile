@@ -74,7 +74,7 @@ CURL_PREFIX=/opt/curl
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "81" ]]; then echo 0; else echo 1; fi;), 0)
 OPENSSLVERSION?=3.0.5
 else
-OPENSSLVERSION?=1.1.1q
+OPENSSLVERSION?=1.1.1s
 endif
 
 # Ubuntu dependencies

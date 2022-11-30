@@ -4,6 +4,7 @@ type: docker
 name: build-amd64
 
 platform:
+  os: linux
   arch: amd64
 
 environment:
@@ -105,6 +106,7 @@ type: docker
 name: build-arm64
 
 platform:
+  os: linux
   arch: arm64
 
 environment:
@@ -261,6 +263,7 @@ type: docker
 name: docker-amd64
 
 platform:
+  os: linux
   arch: amd64
 
 depends_on:
@@ -308,6 +311,7 @@ type: docker
 name: docker-arm64
 
 platform:
+  os: linux
   arch: arm64
 
 depends_on:
@@ -355,6 +359,7 @@ type: docker
 name: docker-manifest
 
 platform:
+  os: linux
   arch: amd64
 
 depends_on:

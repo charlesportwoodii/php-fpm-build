@@ -210,52 +210,51 @@ depends_on:
   - build-amd64
   - build-arm64
 
+volumes:
+  - name: teleport-ssh
+    host:
+      path: /opt/teleport/erianna
+      
 steps:
   - name: update-apt-packages
     when:
       event:
         - tag
-    image: appleboy/drone-ssh
+    image: charlesportwoodii/drone-teleport:latest
+    network_mode: host
+    volumes:
+      - name: teleport-ssh
+        path: /opt/teleport/erianna
     settings:
-      host:
-        from_secret: SSH_HOST
-      username:
-        from_secret: SSH_USERNAME
-      key:
-        from_secret: SSH_KEY
-      port: 22
+      op: connect
+      proxy: teleport.erianna.net
+      hosts:
+        - registry.teleport.erianna.net
+      username: drone
+      data_path: /opt/teleport/erianna
       script:
-        - /usr/local/bin/update-apt-packages
-  - name: update-alpine-packages-x64
+        commands:
+          - /usr/local/bin/update-apt-packages
+  - name: update-alpine-packages
     when:
       event:
         - tag
-    image: appleboy/drone-ssh
+    image: charlesportwoodii/drone-teleport:latest
+    network_mode: host
+    volumes:
+      - name: teleport-ssh
+        path: /opt/teleport/erianna
     settings:
-      host:
-        from_secret: SSH_HOST
-      username:
-        from_secret: SSH_USERNAME
-      key:
-        from_secret: SSH_KEY
-      port: 22
+      op: connect
+      proxy: teleport.erianna.net
+      hosts:
+        - registry.teleport.erianna.net
+      username: drone
+      data_path: /opt/teleport/erianna
       script:
-        - /usr/local/bin/update-alpine-packages x86_64
-  - name: update-alpine-packages-aarch64
-    when:
-      event:
-        - tag
-    image: appleboy/drone-ssh
-    settings:
-      host:
-        from_secret: SSH_HOST
-      username:
-        from_secret: SSH_USERNAME
-      key:
-        from_secret: SSH_KEY
-      port: 22
-      script:
-        - /usr/local/bin/update-alpine-packages aarch64
+        commands:
+          - /usr/local/bin/update-alpine-packages x86_64
+          - /usr/local/bin/update-alpine-packages aarch64
 
 ---
 kind: pipeline

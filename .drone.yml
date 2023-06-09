@@ -206,6 +206,10 @@ kind: pipeline
 type: docker
 name: update-packages
 
+platform:
+  os: linux
+  arch: amd64
+  
 depends_on:
   - build-amd64
   - build-arm64

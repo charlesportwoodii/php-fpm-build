@@ -1,8 +1,44 @@
 ---
 kind: pipeline
 type: docker
+name: teleport-connect-test
+
+platform:
+  os: linux
+  arch: amd64
+  
+volumes:
+  - name: teleport-ssh
+    host:
+      path: /opt/teleport/erianna
+      
+steps:
+  - name: test-teleport-connection
+    image: charlesportwoodii/drone-teleport:latest
+    network_mode: host
+    volumes:
+      - name: teleport-ssh
+        path: /opt/teleport/erianna
+    settings:
+      op: connect
+      proxy: teleport.erianna.net
+      hosts:
+        - packages.teleport.erianna.net
+      username: drone
+      data_path: /opt/teleport/erianna
+      script:
+        commands:
+          - whoami
+          - ls
+          
+---
+kind: pipeline
+type: docker
 name: build-amd64
 
+depends_on:
+  - teleport-connect-test
+  
 platform:
   os: linux
   arch: amd64
@@ -105,6 +141,9 @@ kind: pipeline
 type: docker
 name: build-arm64
 
+depends_on:
+  - teleport-connect-test
+  
 platform:
   os: linux
   arch: arm64

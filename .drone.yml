@@ -25,6 +25,7 @@ steps:
       hosts:
         - packages.teleport.erianna.net
       username: drone
+      debug: true
       data_path: /opt/teleport/erianna
       script:
         commands:

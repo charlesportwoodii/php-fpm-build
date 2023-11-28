@@ -29,16 +29,16 @@ RUN apk add --no-cache php8.3-common php8.3-fpm php8.3-bz2 php8.3-dev php8.3-gd 
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
 
-RUN cd /tmp && \
-    wget https://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
-    tar -xf xdebug-${XDEBUG_VERSION}.tgz && \
-    cd xdebug-${XDEBUG_VERSION} && \
-    phpize && \
-    ./configure && make install && \
-    echo "zend_extension=xdebug.so" | tee /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
-    echo "xdebug.start_with_request=no" | tee -a  /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
-    echo "xdebug.mode=off" | tee -a /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
-    rm -rf /tmp/xdebug-*
+#RUN cd /tmp && \
+#    wget https://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz && \
+#    tar -xf xdebug-${XDEBUG_VERSION}.tgz && \
+#    cd xdebug-${XDEBUG_VERSION} && \
+#    phpize && \
+#    ./configure && make install && \
+#    echo "zend_extension=xdebug.so" | tee /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+#    echo "xdebug.start_with_request=no" | tee -a  /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+#    echo "xdebug.mode=off" | tee -a /etc/php/${PHP_VERSION}/conf.d/xdebug.ini && \
+#    rm -rf /tmp/xdebug-*
 
 RUN echo "export PATH=\"\$PATH:\$HOME/.bin\"" >> /root/.bashrc && \
     mkdir -p /root/.bin && \

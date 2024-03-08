@@ -60,7 +60,7 @@ VOLUME ["/etc/php/8.3/", "/var/www"]
 # Define working directory.
 WORKDIR /etc/php/8.3
 
-EXPOSE 9082
+EXPOSE 9083
 
 ENTRYPOINT ["/usr/sbin/php-fpm8.3", "-R", "--fpm-config", "/etc/php/8.3/php-fpm.conf"]
 

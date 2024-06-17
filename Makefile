@@ -241,7 +241,7 @@ openssl:
 	echo $(OPENSSL_PATH)
 	rm -rf /tmp/openssl*
 	cd /tmp && \
-	curl https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz --output openssl-$(OPENSSLVERSION).tar.gz && \
+	curl -L https://www.openssl.org/source/openssl-$(OPENSSLVERSION).tar.gz --output openssl-$(OPENSSLVERSION).tar.gz && \
 	tar -xf openssl-$(OPENSSLVERSION).tar.gz && \
 	cd /tmp/openssl-$(OPENSSLVERSION) && \
 	./config --prefix=$(OPENSSL_PATH) --release no-shared no-ssl3 enable-tls1_3 no-threads && \

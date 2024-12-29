@@ -74,6 +74,7 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.4**
           - refs/tags/7.3**
           - refs/tags/7.2**
   - name: jammy
@@ -92,6 +93,29 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.0**
+          - refs/tags/7.4**
+          - refs/tags/7.3**
+          - refs/tags/7.2**
+  - name: noble
+    image: charlesportwoodii/ubuntu:24.04-build
+    depends_on:
+      - preflight
+    environment:
+      BUILD_IMAGE: noble
+      BUILD_OS: Ubuntu
+      BUILD_OS_VERSION: "24.04"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+    commands:
+      - bash -lc "make build fpm_debian"
+      - mkdir -p build/deb/$BUILD_IMAGE
+      - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+      ref:
+        exclude:
+          - refs/tags/8.3**
+          - refs/tags/8.2**
+          - refs/tags/8.1**
           - refs/tags/8.0**
           - refs/tags/7.4**
           - refs/tags/7.3**
@@ -179,6 +203,7 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.4**
           - refs/tags/7.3**
           - refs/tags/7.2**
   - name: jammy_arm64
@@ -197,6 +222,30 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.4**
+          - refs/tags/8.0**
+          - refs/tags/7.4**
+          - refs/tags/7.3**
+          - refs/tags/7.2**
+  - name: noble_arm64
+    image: charlesportwoodii/ubuntu:24.04-build
+    depends_on:
+      - preflight_arm64
+    environment:
+      BUILD_IMAGE: noble
+      BUILD_OS: Ubuntu
+      BUILD_OS_VERSION: "24.04"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+    commands:
+      - bash -lc "make build fpm_debian"
+      - mkdir -p build/deb/$BUILD_IMAGE
+      - mv *$BUILD_IMAGE*.deb build/deb/$BUILD_IMAGE/
+    when:
+      ref:
+        exclude:
+          - refs/tags/8.3**
+          - refs/tags/8.2**
+          - refs/tags/8.1**
           - refs/tags/8.0**
           - refs/tags/7.4**
           - refs/tags/7.3**

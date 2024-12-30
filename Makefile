@@ -114,6 +114,16 @@ LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi8
 LIBENCHANT_DEBIAN=libenchant-2-2
+else ifeq ($(shell lsb_release --codename | cut -f2),noble)
+LIBICU=libicu74
+LIBMYSQLCLIENT=libmysqlclient21
+LIBWEBP_DEBIAN=libwebp7
+LIBPNG=libpng16-16
+LIBONIG_DEBIAN=libonig5
+LIBCURL_DEBIAN=libcurl4
+LIBZIP_DEBIAN=libzip4
+LIBFFI_DEBIAN=libffi8
+LIBENCHANT_DEBIAN=libenchant-2-2
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -723,7 +733,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "$(LIBMYSQLCLIENT) > 0" \
 		--depends "libbrotli" \
 		--depends "openssl" \
-		--depends "libxslt1.1" \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \
 		$(PHP84_DEB_DEPENDS) \

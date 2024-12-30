@@ -132,7 +132,7 @@ steps:
     commands:
       - cat /etc/alpine-release
       - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev libpsl; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
     when:
@@ -267,7 +267,7 @@ steps:
     commands:
       - cat /etc/alpine-release
       - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev libpsl; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
   - name: deploy_arm64

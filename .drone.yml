@@ -66,7 +66,7 @@ steps:
       BUILD_IMAGE: focal
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "20.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -85,7 +85,7 @@ steps:
       BUILD_IMAGE: jammy
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "22.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -105,7 +105,7 @@ steps:
       BUILD_IMAGE: noble
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "24.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -132,7 +132,7 @@ steps:
     commands:
       - cat /etc/alpine-release
       - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev libpsl; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/x86_64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/x86_64
     when:
@@ -195,7 +195,7 @@ steps:
       BUILD_IMAGE: focal
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "20.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -214,7 +214,7 @@ steps:
       BUILD_IMAGE: jammy
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "22.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -235,7 +235,7 @@ steps:
       BUILD_IMAGE: noble
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "24.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -267,7 +267,7 @@ steps:
     commands:
       - cat /etc/alpine-release
       - ls -laht /usr/lib
-      - bash -lc "apk add --no-cache linux-headers libffi-dev; make build fpm_alpine"
+      - bash -lc "apk add --no-cache linux-headers libffi-dev libpsl-dev libpsl; make build fpm_alpine"
       - mkdir -p build/alpine/v$BUILD_OS_VERSION/main/aarch64
       - mv *.apk build/alpine/v$BUILD_OS_VERSION/main/aarch64
   - name: deploy_arm64

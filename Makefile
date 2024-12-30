@@ -159,6 +159,10 @@ else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
 
+ifeq ($(shell if [[ "$(TESTVERSION)" -ge "84" ]]; then echo 0; else echo 1; fi;), 0)
+PHP84_APK_DEPENDS=--depends "libpsl"
+PHP84_DEB_DEPENDS=--depends "libpsl5t64"
+endif
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
 MAINTAINER_FLAGS=--enable-debug --enable-maintainer-zts
 else
@@ -717,6 +721,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libxslt1.1" \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \
+		$(PHP84_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
@@ -800,6 +805,7 @@ fpm_alpine: pre_package pre_package_ext
 		$(ALPINE_DEPENDS) \
 		$(PHP72_APK_DEPENDS) \
 		$(PHP74_APK_DEPENDS) \
+		$(PHP84_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
 		-a $(shell uname -m) \

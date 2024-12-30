@@ -66,7 +66,7 @@ steps:
       BUILD_IMAGE: focal
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "20.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -85,7 +85,7 @@ steps:
       BUILD_IMAGE: jammy
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "22.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -93,6 +93,7 @@ steps:
     when:
       ref:
         exclude:
+          - refs/tags/8.4**
           - refs/tags/8.0**
           - refs/tags/7.4**
           - refs/tags/7.3**
@@ -105,7 +106,7 @@ steps:
       BUILD_IMAGE: noble
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "24.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -195,7 +196,7 @@ steps:
       BUILD_IMAGE: focal
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "20.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -214,7 +215,7 @@ steps:
       BUILD_IMAGE: jammy
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "22.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE
@@ -235,7 +236,7 @@ steps:
       BUILD_IMAGE: noble
       BUILD_OS: Ubuntu
       BUILD_OS_VERSION: "24.04"
-      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev libpsl"
+      EXTRA_APT_PACKAGES: "bison libbison-dev libffi-dev libpsl-dev"
     commands:
       - bash -lc "make build fpm_debian"
       - mkdir -p build/deb/$BUILD_IMAGE

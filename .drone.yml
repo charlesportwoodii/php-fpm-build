@@ -45,7 +45,7 @@ platform:
   arch: amd64
 
 environment:
-  DEFAULT_VERSION: 8.2.0
+  DEFAULT_VERSION: 8.4.0
   DEFAULT_REVISION: 1
 
 steps:

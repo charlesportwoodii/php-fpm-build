@@ -175,7 +175,7 @@ platform:
   arch: arm64
 
 environment:
-  DEFAULT_VERSION: 8.2.0
+  DEFAULT_VERSION: 8.4.2
   DEFAULT_REVISION: 1
 
 steps:
@@ -363,7 +363,7 @@ depends_on:
   - update-packages
 
 environment:
-  DEFAULT_VERSION: 8.2.0
+  DEFAULT_VERSION: 8.4.2
   DEFAULT_REVISION: 1
 
 steps:
@@ -411,7 +411,7 @@ depends_on:
   - update-packages
 
 environment:
-  DEFAULT_VERSION: 8.2.0
+  DEFAULT_VERSION: 8.4.2
   DEFAULT_REVISION: 1
 
 steps:
@@ -460,7 +460,7 @@ depends_on:
   - docker-arm64
 
 environment:
-  DEFAULT_VERSION: 8.2.0
+  DEFAULT_VERSION: 8.4.2
   DEFAULT_REVISION: 1
 
 steps:

@@ -149,19 +149,14 @@ endif
 # Adjust gd configuration for 7.4 vs 7.3--
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 PHP74ARGS=--enable-gd=shared --with-ffi=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
-PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm" --depends "libffi"
-PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "$(LIBFFI_DEBIAN) > 3.1"
+PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm" --depends "libffi" --depends "libpsl"
+PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "$(LIBFFI_DEBIAN) > 3.1" --depends "libpsl"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
 USE_PKG_CONFIG=PKG_CONFIG_PATH=$(OPENSSL_PATH)/lib/pkgconfig:$(NGHTTP_PREFIX)/lib/pkgconfig:$(CURL_PREFIX)/lib/pkgconfig:/usr/lib/pkgconfig/enchant-2.pc
 else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
-endif
-
-ifeq ($(shell if [[ "$(TESTVERSION)" -lt "84" ]]; then echo 0; else echo 1; fi;), 0)
-PHP84_APK_DEPENDS=$(PHP84_APK_DEPENDS) --depends "libpsl"
-PHP84_DEB_DEPENDS=$(PHP84_APK_DEPENDS) --depends "libpsl"
 endif
 
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
@@ -722,7 +717,6 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libxslt1.1" \
 		$(PHP72_DEB_DEPENDS) \
 		$(PHP74_DEB_DEPENDS) \
-		$(PHP84_DEB_DEPENDS) \
 		--deb-systemd-restart-after-upgrade \
 		--template-scripts \
 		--force \
@@ -806,7 +800,6 @@ fpm_alpine: pre_package pre_package_ext
 		$(ALPINE_DEPENDS) \
 		$(PHP72_APK_DEPENDS) \
 		$(PHP74_APK_DEPENDS) \
-		$(PHP84_APK_DEPENDS) \
 		--force \
 		--after-install /tmp/php-$(VERSION)/alpine/common/post-install \
 		-a $(shell uname -m) \

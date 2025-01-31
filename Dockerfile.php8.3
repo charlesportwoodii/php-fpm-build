@@ -13,7 +13,7 @@ ENV COMPOSER_VERSION 2.6.6
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 
 RUN apk update && \
-    apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl || true 2>/dev/null
+    apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl libpsl || true 2>/dev/null
 
 RUN apk add --no-cache php8.3-common php8.3-fpm php8.3-bz2 php8.3-dev php8.3-gd php8.3-gmp php8.3-intl php8.3-ldap php8.3-mbstring php8.3-mysql php8.3-opcache php8.3-pgsql php8.3-pspell php8.3-redis php8.3-soap php8.3-sodium php8.3-sqlite3 php8.3-xml php8.3-xsl php8.3-igbinary || true 2>/dev/null && \
     rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \

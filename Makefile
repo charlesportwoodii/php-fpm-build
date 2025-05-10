@@ -114,6 +114,16 @@ LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi8
 LIBENCHANT_DEBIAN=libenchant-2-2
+else ifeq ($(shell lsb_release --codename | cut -f2),noble)
+LIBICU=libicu74
+LIBMYSQLCLIENT=libmysqlclient21
+LIBWEBP_DEBIAN=libwebp7
+LIBPNG=libpng16-16t64
+LIBONIG_DEBIAN=libonig5
+LIBCURL_DEBIAN=libcurl4t64
+LIBZIP_DEBIAN=libzip4t64
+LIBFFI_DEBIAN=libffi8
+LIBENCHANT_DEBIAN=libenchant-2-2
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -293,6 +303,7 @@ curl: nghttp2
 		--disable-ldap \
 		--disable-threaded-resolver \
 		--disable-pthreads \
+		--without-brotli \
 		--with-libssl-prefix=$(OPENSSL_PATH) \
 		--with-nghttp2=$(NGHTTP_PREFIX) \
 		--disable-ldaps && \

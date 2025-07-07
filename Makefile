@@ -84,6 +84,7 @@ LIBONIG_DEBIAN=libonig2
 LIBCURL_DEBIAN=libcurl3
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi6
+LIBPSL_DEBIAN=libpsl5
 else ifeq ($(shell lsb_release --codename | cut -f2),bionic)
 LIBICU=libicu60
 LIBMYSQLCLIENT=libmysqlclient20
@@ -94,6 +95,7 @@ LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi6
 LIBENCHANT_DEBIAN=libenchant1c2a
+LIBPSL_DEBIAN=libpsl5
 else ifeq ($(shell lsb_release --codename | cut -f2),focal)
 LIBICU=libicu66
 LIBMYSQLCLIENT=libmysqlclient21
@@ -104,6 +106,7 @@ LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip5
 LIBFFI_DEBIAN=libffi7
 LIBENCHANT_DEBIAN=libenchant1c2a
+LIBPSL_DEBIAN=libpsl5
 else ifeq ($(shell lsb_release --codename | cut -f2),jammy)
 LIBICU=libicu70
 LIBMYSQLCLIENT=libmysqlclient21
@@ -114,6 +117,7 @@ LIBCURL_DEBIAN=libcurl4
 LIBZIP_DEBIAN=libzip4
 LIBFFI_DEBIAN=libffi8
 LIBENCHANT_DEBIAN=libenchant-2-2
+LIBPSL_DEBIAN=libpsl5
 else ifeq ($(shell lsb_release --codename | cut -f2),noble)
 LIBICU=libicu74
 LIBMYSQLCLIENT=libmysqlclient21
@@ -124,6 +128,7 @@ LIBCURL_DEBIAN=libcurl4t64
 LIBZIP_DEBIAN=libzip4t64
 LIBFFI_DEBIAN=libffi8
 LIBENCHANT_DEBIAN=libenchant-2-2
+LIBPSL_DEBIAN=libpsl5t64
 endif
 
 ifneq ($(BUILD_OS),"Alpine")
@@ -161,7 +166,7 @@ endif
 ifeq ($(shell if [[ "$(TESTVERSION)" -ge "74" ]]; then echo 0; else echo 1; fi;), 0)
 PHP74ARGS=--enable-gd=shared --with-ffi=shared --with-freetype --with-jpeg --with-webp --with-xpm --with-libedit --with-openssl --with-curl --with-zip
 PHP74_APK_DEPENDS=--depends "libedit" --depends "libgpg-error" --depends "libgcrypt" --depends "oniguruma" --depends "libwebp" --depends "libxpm" --depends "libffi"
-PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "$(LIBFFI_DEBIAN) > 3.1"
+PHP74_DEB_DEPENDS=--depends "$(LIBONIG_DEBIAN)" --depends "libedit2" --depends "libgcrypt20" --depends "libgpg-error0" --depends "$(LIBWEBP_DEBIAN)" --depends "libxpm4" --depends "$(LIBCURL_DEBIAN)" --depends "$(LIBFFI_DEBIAN) > 3.1" --depends "$(LIBPSL_DEBIAN) > 0"
 PHP74_RPM_DEPENDS=--depends "oniguruma" --depends "libedit" --depends "libgcrypt" --depends "libgpg-error" --depends "libwebp" --depends "libXpm" --depends "libffi > 3.1"
 # Rconfigure PKG_CONFIG_PATH environment variable
 PKG_CONFIG_PATH_BASE=$(shell pkg-config --variable pc_path pkg-config)
@@ -170,10 +175,7 @@ else
 PHP74ARGS=--with-gd=shared --with-jpeg-dir --with-freetype-dir --with-png-dir --with-recode=shared --with-readline --with-openssl=$(OPENSSL_PATH) --with-curl=$(CURL_PREFIX) --enable-zip=shared --enable-opcache-file --enable-mbregex-backtrack --with-pcre-regex --enable-hash
 endif
 
-ifeq ($(shell if [[ "$(TESTVERSION)" -ge "84" ]]; then echo 0; else echo 1; fi;), 0)
 PHP84_APK_DEPENDS=--depends "libpsl"
-PHP84_DEB_DEPENDS=--depends "libpsl5t64"
-endif
 ifeq ($(ENABLE_MAINTAINER_MODE), true)
 MAINTAINER_FLAGS=--enable-debug --enable-maintainer-zts
 else
@@ -728,6 +730,7 @@ fpm_debian: pre_package pre_package_ext
 		--depends "libfreetype6 > 0" \
 		--depends "$(LIBPNG) > 0" \
 		--depends "$(LIBENCHANT_DEBIAN) > 0" \
+		--depends "$(LIBPSL_DEBIAN) > 0" \
 		--depends "aspell-en > 0" \
 		--depends "librecode0 > 0" \
 		--depends "libxslt1.1 > 0" \

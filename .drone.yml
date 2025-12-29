@@ -6,12 +6,12 @@ name: teleport-connect-test
 platform:
   os: linux
   arch: amd64
-  
+
 volumes:
   - name: teleport-ssh
     host:
       path: /opt/teleport/erianna
-      
+
 steps:
   - name: test-teleport-connection
     image: charlesportwoodii/drone-teleport:latest
@@ -31,7 +31,7 @@ steps:
         commands:
           - whoami
           - ls
-          
+
 ---
 kind: pipeline
 type: docker
@@ -39,7 +39,7 @@ name: build-amd64
 
 depends_on:
   - teleport-connect-test
-  
+
 platform:
   os: linux
   arch: amd64
@@ -170,7 +170,7 @@ name: build-arm64
 
 depends_on:
   - teleport-connect-test
-  
+
 platform:
   os: linux
   arch: arm64
@@ -301,7 +301,7 @@ name: update-packages
 platform:
   os: linux
   arch: amd64
-  
+
 depends_on:
   - build-amd64
   - build-arm64
@@ -310,7 +310,7 @@ volumes:
   - name: teleport-ssh
     host:
       path: /opt/teleport/erianna
-      
+
 steps:
   - name: update-apt-packages
     when:
@@ -413,7 +413,7 @@ depends_on:
   - update-packages
 
 environment:
-  DEFAULT_VERSION: 8.4.2
+  DEFAULT_VERSION: 8.5.1
   DEFAULT_REVISION: 1
 
 steps:

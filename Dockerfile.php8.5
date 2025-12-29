@@ -2,10 +2,10 @@ FROM charlesportwoodii/alpine:3.14-base
 LABEL reference="https://github.com/charlesportwoodii/docker-images"
 LABEL repository="https://github.com/charlesportwoodii/php-fpm-build"
 LABEL maintainer="Charles R. Portwood II <charlesportwoodii@erianna.com>"
-LABEL description="An PHP 8.4 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
+LABEL description="An PHP 8.5 Docker image with XDebug, Composer, Libsodium, Argon2, and other common extensions pre-installed"
 
-ENV XDEBUG_VERSION 3.4.0
-ENV PHP_VERSION 8.4
+ENV XDEBUG_VERSION 3.5.0
+ENV PHP_VERSION 8.5
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_NO_INTERACTION 1
@@ -15,7 +15,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 RUN apk update && \
     apk add --no-cache git binutils ca-certificates openssl alpine-sdk linux-headers make automake gcc g++ autoconf libzip libffi libintl || true 2>/dev/null
 
-RUN apk add --no-cache php8.4-common php8.4-fpm php8.4-bz2 php8.4-dev php8.4-gd php8.4-gmp php8.4-intl php8.4-ldap php8.4-mbstring php8.4-mysql php8.4-opcache php8.4-pgsql php8.4-pspell php8.4-redis php8.4-soap php8.4-sodium php8.4-sqlite3 php8.4-xml php8.4-xsl php8.4-igbinary || true 2>/dev/null && \
+RUN apk add --no-cache php8.5-common php8.5-fpm php8.5-bz2 php8.5-dev php8.5-gd php8.5-gmp php8.5-intl php8.5-ldap php8.5-mbstring php8.5-mysql php8.5-opcache php8.5-pgsql php8.5-pspell php8.5-redis php8.5-soap php8.5-sodium php8.5-sqlite3 php8.5-xml php8.5-xsl php8.5-igbinary || true 2>/dev/null && \
     rm -rf /etc/php/${PHP_VERSION}/mods-available/mods-available && \
     mkdir -p /etc/php/${PHP_VERSION}/conf.d /etc/php/${PHP_VERSION}/php-fpm.d /etc/php/${PHP_VERSION}/mods-available /var/run/php/ /var/log/php/ && \
     for i in $(ls /etc/php/${PHP_VERSION}/mods-available); do ln -s /etc/php/${PHP_VERSION}/mods-available/$i /etc/php/${PHP_VERSION}/conf.d/$i; done && \
@@ -24,7 +24,7 @@ RUN apk add --no-cache php8.4-common php8.4-fpm php8.4-bz2 php8.4-dev php8.4-gd 
     ln -s /usr/bin/php-config${PHP_VERSION} /usr/bin/php-config && \
     ln -s /usr/bin/php${PHP_VERSION} /usr/bin/php && \
     strip --strip-all /usr/bin/php && \
-    strip --strip-all /usr/sbin/php-fpm8.4
+    strip --strip-all /usr/sbin/php-fpm8.5
 
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.d/pool.conf /etc/php/${PHP_VERSION}/php-fpm.d/pool.conf
 COPY ./conf/etc/php/${PHP_VERSION}/php-fpm.conf /etc/php/${PHP_VERSION}/php-fpm.conf
@@ -55,12 +55,12 @@ RUN apk del alpine-sdk linux-headers make automake gcc g++ autoconf binutils && 
 RUN grep -qF "extension=pdo_mysql.so" "/etc/php/${PHP_VERSION}/conf.d/mysql.ini" || echo "extension=pdo_mysql.so" >> "/etc/php/${PHP_VERSION}/conf.d/mysql.ini"
 
 # Define mountable directories.
-VOLUME ["/etc/php/8.4/", "/var/www"]
+VOLUME ["/etc/php/8.5/", "/var/www"]
 
 # Define working directory.
-WORKDIR /etc/php/8.4
+WORKDIR /etc/php/8.5
 
 EXPOSE 9084
 
-ENTRYPOINT ["/usr/sbin/php-fpm8.4", "-R", "--fpm-config", "/etc/php/8.4/php-fpm.conf"]
+ENTRYPOINT ["/usr/sbin/php-fpm8.5", "-R", "--fpm-config", "/etc/php/8.5/php-fpm.conf"]
 

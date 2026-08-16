@@ -301,6 +301,11 @@ jobs:
 
   docker-merge:
     needs: [setup, docker]
+    # Skip-propagation is transitive. The `docker` job opting out with
+    # !cancelled() only covers itself; this job still sees skipped build and
+    # publish upstream and would skip too. It has to opt out on its own and
+    # state what it actually requires: the image jobs succeeded.
+    if: ${{ !cancelled() && needs.setup.result == 'success' && needs.docker.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/download-artifact@v4

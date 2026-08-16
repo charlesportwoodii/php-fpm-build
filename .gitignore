@@ -4,3 +4,6 @@
 *.apk
 .envs
 libsodium-1.0.18-RELEASE/
+__pycache__/
+.pytest_cache/
+build/

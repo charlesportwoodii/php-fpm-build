@@ -12,6 +12,16 @@ on:
         required: false
         default: false
         type: boolean
+      images_only:
+        description: 'Skip compiling and publishing. Build and push Docker images for an already-released version.'
+        required: false
+        default: false
+        type: boolean
+      publish_timeout_minutes:
+        description: 'How long to wait for the Drone index refresh. It has been observed to take 36 minutes.'
+        required: false
+        default: 90
+        type: number
 permissions:
   contents: write
 
@@ -31,6 +41,8 @@ jobs:
       short_version: ${{ steps.emit.outputs.short_version }}
       s3_prefix: ${{ steps.emit.outputs.s3_prefix }}
       dry_run: ${{ steps.mode.outputs.dry_run }}
+      images_only: ${{ steps.mode.outputs.images_only }}
+      publish_timeout_seconds: ${{ steps.mode.outputs.publish_timeout_seconds }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,11 +64,23 @@ jobs:
           # PHP version.
           if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             echo "dry_run=true" >> "$GITHUB_OUTPUT"
+            echo "images_only=false" >> "$GITHUB_OUTPUT"
             echo "version=$(git tag --sort=-version:refname | head -n1)" >> "$GITHUB_OUTPUT"
           else
             echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+            echo "images_only=${{ inputs.images_only }}" >> "$GITHUB_OUTPUT"
             echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           fi
+
+          mins="${{ inputs.publish_timeout_minutes }}"
+          echo "publish_timeout_seconds=$(( ${mins:-90} * 60 ))" >> "$GITHUB_OUTPUT"
+
+      - name: Reject contradictory inputs
+        if: ${{ inputs.dry_run && inputs.images_only }}
+        run: |
+          echo "dry_run and images_only are mutually exclusive." >&2
+          echo "dry_run skips image builds entirely, so the combination does nothing." >&2
+          exit 1
 
       - name: Run unit tests
         run: python -m pytest tests/ -v
@@ -72,7 +96,9 @@ jobs:
             ${{ steps.mode.outputs.dry_run == 'true' && '--dry-run' || '' }}
 
       - name: Create tag and release
-        if: ${{ steps.mode.outputs.dry_run != 'true' }}
+        # images_only targets a version that is already released, so the tag
+        # exists and `gh release create` would fail on it.
+        if: ${{ steps.mode.outputs.dry_run != 'true' && steps.mode.outputs.images_only != 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -85,6 +111,7 @@ jobs:
 
   build:
     needs: setup
+    if: ${{ needs.setup.outputs.images_only != 'true' }}
     strategy:
       # Never fail-fast. Cancelling sibling distros on one failure would
       # recreate the exact problem this migration exists to fix.
@@ -189,7 +216,7 @@ jobs:
 
   publish:
     needs: [setup, build]
-    if: ${{ needs.setup.outputs.dry_run != 'true' }}
+    if: ${{ needs.setup.outputs.dry_run != 'true' && needs.setup.outputs.images_only != 'true' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -201,6 +228,7 @@ jobs:
           DRONE_REPO: ${{ github.repository }}
           # Follows the default-branch rename later without an edit.
           DRONE_BRANCH: ${{ github.ref_name }}
+          TIMEOUT_SECONDS: ${{ needs.setup.outputs.publish_timeout_seconds }}
         # Invoked via bash rather than ./: the file was authored on Windows,
         # so the executable bit is not reliably recorded in git.
         run: bash ci/trigger_drone.sh
@@ -210,7 +238,18 @@ jobs:
     # apk repositories (Dockerfile.php8.5:18), so the indexes must be
     # regenerated before an image build can see the new version.
     needs: [setup, build, publish]
-    if: ${{ needs.setup.outputs.has_dockerfile == 'true' }}
+    # A job whose `needs` are skipped is skipped too, unless the condition
+    # opts out of that with !cancelled(). images_only deliberately skips both
+    # build and publish, so this has to state the real requirement instead:
+    # in images_only mode neither is required; otherwise both must succeed.
+    # A *failed* publish still blocks images, which is what we want.
+    if: >-
+      ${{ !cancelled()
+      && needs.setup.result == 'success'
+      && needs.setup.outputs.has_dockerfile == 'true'
+      && needs.setup.outputs.dry_run != 'true'
+      && (needs.setup.outputs.images_only == 'true' || needs.build.result == 'success')
+      && (needs.setup.outputs.images_only == 'true' || needs.publish.result == 'success') }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.setup.outputs.docker_matrix) }}

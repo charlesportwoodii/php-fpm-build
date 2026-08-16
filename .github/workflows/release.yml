@@ -12,15 +12,6 @@ on:
         required: false
         default: false
         type: boolean
-  # TEMPORARY: workflow_dispatch only appears for workflows on the default
-  # branch, so this is the only way to exercise the pipeline before merging.
-  # Every push here starts a full dry-run build (long PHP compiles) - use a
-  # commit message containing [skip ci] to push without triggering one.
-  # Remove this trigger once the workflow is on the default branch.
-  push:
-    branches:
-      - feat/github-actions-migration
-
 permissions:
   contents: write
 

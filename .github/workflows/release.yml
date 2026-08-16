@@ -1,0 +1,308 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version, e.g. 8.5.10-1'
+        required: true
+        type: string
+      dry_run:
+        description: 'Build and upload to a staging prefix. No tag, no publish, no images.'
+        required: false
+        default: false
+        type: boolean
+  # TEMPORARY: workflow_dispatch only appears for workflows on the default
+  # branch, so this is the only way to exercise the pipeline before merging.
+  # Every push here starts a full dry-run build (long PHP compiles) - use a
+  # commit message containing [skip ci] to push without triggering one.
+  # Remove this trigger once the workflow is on the default branch.
+  push:
+    branches:
+      - feat/github-actions-migration
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.version || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.emit.outputs.matrix }}
+      docker_matrix: ${{ steps.emit.outputs.docker_matrix }}
+      has_dockerfile: ${{ steps.emit.outputs.has_dockerfile }}
+      version: ${{ steps.emit.outputs.version }}
+      releasever: ${{ steps.emit.outputs.releasever }}
+      short_version: ${{ steps.emit.outputs.short_version }}
+      s3_prefix: ${{ steps.emit.outputs.s3_prefix }}
+      dry_run: ${{ steps.mode.outputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tags are needed so a smoke run can resolve the newest version.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - run: pip install -r requirements-dev.txt
+
+      - name: Resolve run mode
+        id: mode
+        run: |
+          # A push-triggered run is always a dry run; only an explicit
+          # dispatch can create a tag or publish. The smoke run reuses the
+          # newest existing tag, so the matrix resolves against a real
+          # PHP version.
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "dry_run=true" >> "$GITHUB_OUTPUT"
+            echo "version=$(git tag --sort=-version:refname | head -n1)" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=${{ inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run unit tests
+        run: python -m pytest tests/ -v
+
+      - name: Emit build matrix
+        id: emit
+        run: |
+          # Run as a module: `python ci/emit_matrix.py` would put ci/ on
+          # sys.path instead of the repo root and the ci.build_matrix
+          # import would fail.
+          python -m ci.emit_matrix \
+            --version "${{ steps.mode.outputs.version }}" \
+            ${{ steps.mode.outputs.dry_run == 'true' && '--dry-run' || '' }}
+
+      - name: Create tag and release
+        if: ${{ steps.mode.outputs.dry_run != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # github.ref_name, not a literal branch: master becomes the
+          # default branch later and this must follow it unedited.
+          gh release create "${{ inputs.version }}" \
+            --target "${{ github.ref_name }}" \
+            --title "PHP ${{ steps.emit.outputs.version }}-${{ steps.emit.outputs.releasever }}" \
+            --generate-notes
+
+  build:
+    needs: setup
+    strategy:
+      # Never fail-fast. Cancelling sibling distros on one failure would
+      # recreate the exact problem this migration exists to fix.
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    name: build ${{ matrix.name }} ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Generate .envs
+        run: |
+          # Mandatory, not cosmetic: Makefile:3 is a hard `include .envs`
+          # followed by `export` on line 4, so make aborts if the file is
+          # missing. This is also where VERSION and RELEASEVER reach the
+          # build, which is why they are not passed as -e flags below.
+          #
+          # Written from the setup job's outputs rather than by re-running
+          # genenv, so the build runners need no Python, pip or semver.
+          # Line order is load-bearing: VERSION first, SHORT_VERSION last.
+          printf 'VERSION=%s\nRELEASEVER=%s\nSHORT_VERSION=%s\n' \
+            '${{ needs.setup.outputs.version }}' \
+            '${{ needs.setup.outputs.releasever }}' \
+            '${{ needs.setup.outputs.short_version }}' > .envs
+          cat .envs
+
+      - name: Compile and package
+        env:
+          BUILD_IMAGE: ${{ matrix.name }}
+          BUILD_OS: ${{ matrix.build_os }}
+          BUILD_OS_VERSION: ${{ matrix.build_os_version }}
+          EXTRA_APT_PACKAGES: ${{ matrix.extra_apt_packages }}
+          REMOVE_APT_PACKAGES: ${{ matrix.remove_apt_packages }}
+          ALPINE_VERSION: ${{ matrix.alpine_version }}
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ matrix.artifact_dir }}"
+
+          # docker run, not a job `container:`. GitHub injects a
+          # glibc-linked Node binary to execute JavaScript actions inside a
+          # job container, which fails on the musl-based Alpine build
+          # image. Running the image ourselves keeps actions/checkout on the
+          # host and treats Ubuntu and Alpine identically.
+          if [ "${{ matrix.packaging }}" = "alpine" ]; then
+            inner='apk add --no-cache linux-headers libffi-dev libpsl-dev; make build fpm_alpine'
+          else
+            inner='make build fpm_debian'
+          fi
+
+          docker run --rm \
+            -v "$PWD:/build" -w /build \
+            -e BUILD_IMAGE -e BUILD_OS -e BUILD_OS_VERSION \
+            -e EXTRA_APT_PACKAGES -e REMOVE_APT_PACKAGES -e ALPINE_VERSION \
+            "${{ matrix.image }}" \
+            bash -lc "$inner"
+
+      - name: Reclaim ownership of the build output
+        run: |
+          # The container runs as root, so everything it wrote into the
+          # bind mount is root-owned on the host. Later steps run as the
+          # unprivileged runner user and would fail on mv.
+          sudo chown -R "$(id -u):$(id -g)" .
+
+      - name: Collect artifacts
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.packaging }}" = "alpine" ]; then
+            mv ./*.apk "${{ matrix.artifact_dir }}/"
+          else
+            mv ./*"${{ matrix.name }}"*.deb "${{ matrix.artifact_dir }}/"
+          fi
+          ls -lh "${{ matrix.artifact_dir }}"
+
+      - name: Fail if nothing was produced
+        run: |
+          # Guards the failure mode behind the old `noble` data-loss bug:
+          # an empty directory uploading successfully and reporting green.
+          count=$(find "${{ matrix.artifact_dir }}" -type f | wc -l)
+          echo "produced $count artifact(s)"
+          test "$count" -gt 0
+
+      - name: Upload to Spaces
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BUCKET: ${{ secrets.AWS_BUCKET }}
+        run: |
+          set -euo pipefail
+          command -v aws >/dev/null 2>&1 || {
+            sudo apt-get update -qq && sudo apt-get install -y -qq awscli
+          }
+          aws s3 cp "${{ matrix.artifact_dir }}/" \
+            "s3://$BUCKET/${{ needs.setup.outputs.s3_prefix }}${{ matrix.s3_key }}/" \
+            --endpoint-url=https://nyc3.digitaloceanspaces.com \
+            --recursive
+
+  publish:
+    needs: [setup, build]
+    if: ${{ needs.setup.outputs.dry_run != 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refresh apt and Alpine indexes via Drone
+        env:
+          DRONE_SERVER: ${{ secrets.DRONE_SERVER }}
+          DRONE_TOKEN: ${{ secrets.DRONE_TOKEN }}
+          DRONE_REPO: ${{ github.repository }}
+          # Follows the default-branch rename later without an edit.
+          DRONE_BRANCH: ${{ github.ref_name }}
+        # Invoked via bash rather than ./: the file was authored on Windows,
+        # so the executable bit is not reliably recorded in git.
+        run: bash ci/trigger_drone.sh
+
+  docker:
+    # publish, not just build: the Dockerfiles install PHP from the apt and
+    # apk repositories (Dockerfile.php8.5:18), so the indexes must be
+    # regenerated before an image build can see the new version.
+    needs: [setup, build, publish]
+    if: ${{ needs.setup.outputs.has_dockerfile == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.setup.outputs.docker_matrix) }}
+    runs-on: ${{ matrix.runner }}
+    name: image ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.php${{ needs.setup.outputs.short_version }}
+          platforms: linux/${{ matrix.arch }}
+          # --squash and --compress have no BuildKit equivalent and are
+          # dropped. --no-cache is preserved from the Drone build.
+          no-cache: true
+          # Provenance attestations add extra manifests that confuse
+          # imagetools create when merging by digest.
+          provenance: false
+          build-args: |
+            VERSION=${{ needs.setup.outputs.version }}
+            RELEASEVER=${{ needs.setup.outputs.releasever }}
+            SHORT_VERSION=${{ needs.setup.outputs.short_version }}
+          outputs: type=image,name=charlesportwoodii/php,push-by-digest=true,name-canonical=true,oci-mediatypes=true,push=true
+
+      - name: Export the digest
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/digests
+          digest='${{ steps.build.outputs.digest }}'
+          test -n "$digest"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker-merge:
+    needs: [setup, docker]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create the multi-arch manifest
+        working-directory: /tmp/digests
+        run: |
+          set -euo pipefail
+          # Refuse to publish a single-arch manifest over a working
+          # multi-arch tag if one image job was skipped.
+          test "$(ls -1 | wc -l)" -eq 2
+          docker buildx imagetools create \
+            -t "charlesportwoodii/php:${{ needs.setup.outputs.version }}" \
+            -t "charlesportwoodii/php:${{ needs.setup.outputs.short_version }}" \
+            $(printf 'charlesportwoodii/php@sha256:%s ' *)
+
+      - name: Verify both platforms are present
+        run: |
+          set -euo pipefail
+          out=$(docker buildx imagetools inspect \
+            "charlesportwoodii/php:${{ needs.setup.outputs.version }}")
+          echo "$out"
+          echo "$out" | grep -q 'linux/amd64'
+          echo "$out" | grep -q 'linux/arm64'
